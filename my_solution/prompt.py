@@ -148,7 +148,7 @@ if _V == "M1":
     _M1_LIST = _m1_q.strip()
 
 
-# ---- Prompt D1 (MY_SOLUTION_PROMPT_VARIANT=D1, default off): the base prompt from prompt_d1.md (the user's OpenAI-assisted edit: both standard and jumbo versions with
+# ---- Prompt D1 (MY_SOLUTION_PROMPT_VARIANT=D1, default off): the base prompt from prompt_d1.md (an OpenAI-assisted edit: both standard and jumbo versions with
 # minimums in rules 5, 7 and the output format, and a "summarise the common schedule" sentence in rule 9). Intent blocks (hours etc.) are still appended.
 if _V == "D1":
     DEVELOPER_MESSAGE = (Path(__file__).resolve().parent / "prompt_d1.md").read_text().strip()
@@ -188,7 +188,7 @@ if _M1_LIST:
     INTENT_BLOCKS["list"] = INTENT_BLOCKS["eligibility"] = _M1_LIST
 if _O1_HOURS:
     INTENT_BLOCKS["hours"] = _O1_HOURS
-# List/eligibility block v2 from OpenAI (experiment switch MY_SOLUTION_LIST_BLOCK=o2, default off): second version, user's playground-tested text WITHOUT its diagnostic section. (The first version was tested and not adopted.) Replaces the block for the `list` and `eligibility` intents only.
+# List/eligibility block v2 from OpenAI (experiment switch MY_SOLUTION_LIST_BLOCK=o2, default off): second version, playground-tested text WITHOUT its diagnostic section. (The first version was tested and not adopted.) Replaces the block for the `list` and `eligibility` intents only.
 _LIST_O2 = """This question asks for a list, a set of options or eligibility conditions.
 - Identify every distinct item, option, condition and qualification relevant to the question.
 - Before finalising the answer, examine all supplied excerpts for information that defines, explains or narrows the scope of each identified condition, including information found in separate excerpts.
@@ -237,7 +237,7 @@ if _V == "G2" or re.fullmatch(r"H\d+", _V):
     INTENT_BLOCKS = {**INTENT_BLOCKS, "list": _QTG, "eligibility": _QTG}
 # ---- Prompt H1 (MY_SOLUTION_PROMPT_VARIANT=H1, default off): G2 with the text edits in prompt_h1_edits.json (task 5: let an answer carry
 # the conditions that belong to the value asked for, such as the minimum to earn it, tier boundaries, the APR beside a rate).
-if re.fullmatch(r"H\d+", _V):   # H1, H2, ...: one edits file per tuning round (tasks/openai_tests/task5_*)
+if re.fullmatch(r"H\d+", _V):   # H1, H2, ...: one edits file per tuning round (docs/prompt_tuning/task5_*)
     import json as _json
     for _e in _json.loads((Path(__file__).resolve().parent / f"prompt_{_V.lower()}_edits.json").read_text())["edits"]:
         assert DEVELOPER_MESSAGE.count(_e["find"].strip()) == 1, "prompt H1 edit anchor not found: " + _e["find"][:60]

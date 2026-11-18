@@ -13,8 +13,8 @@ default by itself.
   1. Test the baseline (and any variant) on the task's questions, each run judged:
        python my_solution/prompt_tune.py test --variant G2 --eval eval/subsets/task5_cases.jsonl
   2. Open the conversation: the task's ask, the rules, the baseline results and every case file; the reply is saved as H1:
-       python my_solution/prompt_tune.py ask --task tasks/openai_tests/task5_judge_too_short.md \\
-           --cases tasks/playground_current/judge --eval eval/subsets/task5_cases.jsonl --next H1 --new
+       python my_solution/prompt_tune.py ask --task docs/prompt_tuning/task5_judge_too_short.md \\
+           --cases docs/prompt_tuning/cases --eval eval/subsets/task5_cases.jsonl --next H1 --new
   3. Test the proposal, then send its results back and get the next one:
        python my_solution/prompt_tune.py test --variant H1 --eval eval/subsets/task5_cases.jsonl
        python my_solution/prompt_tune.py ask --task ... --cases ... --eval ... --tested H1 --next H2
@@ -23,7 +23,7 @@ default by itself.
 
 Inputs it expects:
   --task   a Markdown file with a "**Ask for OpenAI (copy this):**" block of "> " lines followed by a "## Acceptance" heading
-           (the layout of tasks/openai_tests/task*.md).
+           (the layout of docs/prompt_tuning/task*.md).
   --cases  a folder of case files (one .md per question id, with the system message, user message and expected answer); files
            in its guard/ subfolder are questions that pass today and must keep passing.
   --eval   a JSONL subset of the eval holding every question to test (cases, guards, should-refuse questions).

@@ -4,9 +4,9 @@ Score a saved conflicts() list against any number of hand-made gold lists, with 
 
     python my_solution/score_conflict_lists.py results/conflicts/base.json
     python my_solution/score_conflict_lists.py results/conflicts/new.json --compare results/conflicts/base.json -v
-    python my_solution/score_conflict_lists.py new.json --gold tasks/conflicts_gold_*.json other_list.json
+    python my_solution/score_conflict_lists.py new.json --gold docs/gold/conflicts_gold_*.json other_list.json
 
-Gold lists: every file matching tasks/conflicts_gold_*.json is used by default, so a new list is added by dropping a file with that
+Gold lists: every file matching docs/gold/conflicts_gold_*.json is used by default, so a new list is added by dropping a file with that
 name (same format as harness/selftest/conflicts_gold.json: id, topic_keywords, values, correct_value). No model calls, no cost.
 """
 import argparse
@@ -52,11 +52,11 @@ def pillar(r):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("conflicts", type=Path, help="JSON written by dump_conflicts.py")
-    ap.add_argument("--gold", nargs="*", help="gold files (default: tasks/conflicts_gold_*.json)")
+    ap.add_argument("--gold", nargs="*", help="gold files (default: docs/gold/conflicts_gold_*.json)")
     ap.add_argument("--compare", type=Path, help="an earlier dump to show the change against")
     ap.add_argument("-v", "--verbose", action="store_true", help="list misses and wrong winners per gold list")
     a = ap.parse_args()
-    files = sorted(f for pat in (a.gold or [str(ROOT / "tasks/conflicts_gold_*.json")]) for f in glob.glob(pat))
+    files = sorted(f for pat in (a.gold or [str(ROOT / "docs/gold/conflicts_gold_*.json")]) for f in glob.glob(pat))
     subs = load(a.conflicts)
     base = load(a.compare) if a.compare else None
     print(f"{a.conflicts}: {len(subs)} entries" + (f"   (compared with {a.compare}: {len(base)})" if base else ""))

@@ -2,7 +2,7 @@
 """
 Trace what the system sends to the AI for one or more questions. Run from the repo root:
 
-    python my_solution/trace.py --eval eval/subsets/failing.jsonl [--ids dup-088 dup-087]
+    python my_solution/trace.py --eval eval/public_eval.jsonl [--ids dup-088 dup-087]
     python my_solution/trace.py --question "How can I update my contact information?"
 
 Writes one Markdown file per question to results/traces/ (git-ignored) with: the query-understanding output,

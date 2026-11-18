@@ -1,4 +1,4 @@
-"""Draft search words per website section (from tasks/category_words_draft.md). Used only when MY_SOLUTION_QU_CATWORDS=1."""
+"""Draft search words per website section. Used only when MY_SOLUTION_QU_CATWORDS=1."""
 from __future__ import annotations
 
 from search import tokenize

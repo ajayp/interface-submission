@@ -6,7 +6,6 @@ These numbers sit in "about the credit union" boilerplate at the end of news rel
 count of its own day, so the site shows many values for one measure. Extraction is by fixed sentence patterns (no AI): only
 statements about the whole credit union are taken, never sub-counts ("9 branches in Dubuque") or other institutions ("100,000
 branches across the U.S."). Current value = the statement on the most recently published page (then the latest fetch).
-Scenario 34 in tasks/conflict_scenarios.md.
 """
 from __future__ import annotations
 

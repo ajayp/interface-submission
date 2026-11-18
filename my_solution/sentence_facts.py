@@ -1,7 +1,7 @@
 """
 Rate facts stated in sentences (outside tables), for conflicts(). One gpt-6-luna call per distinct rate sentence labels it
 (offer / example / education / other) and extracts product, rate type, term, tier, value, intro, expired and bound
-(exact / minimum / maximum / as low as / up to / range). Only exact "offer" values are compared (tasks/conflict_scenarios.md, 32).
+(exact / minimum / maximum / as low as / up to / range). Only exact "offer" values are compared.
 Measured in my_solution/sentence_poc.py.
 """
 from __future__ import annotations

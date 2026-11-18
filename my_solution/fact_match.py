@@ -8,7 +8,6 @@ Pipeline, following entity-matching practice (cheap rules shortlist candidate pa
   2. blocking: candidate pairs = different tables, same rate type and period, same term, same tier, overlapping model years,
      different numbers. The product name is NOT used here, so renamed products still become candidates;
   3. matchers (POC 2) decide which candidates are the same fact: rules / rules + AI yes-no / Google-style voting.
-Scenario list: tasks/conflict_scenarios.md
 """
 from __future__ import annotations
 
@@ -143,7 +142,7 @@ def _years_overlap(a: Optional[tuple], b: Optional[tuple]) -> bool:
 # A rate sentence that says nothing about a term or an introductory period is not a different fact from a sentence of the same
 # product that does: the reader cannot see what the page leaves out. With this switch on, two SENTENCE facts (never tables) with the
 # same rate type and tier still pair when one of them states no term and no intro. MY_SOLUTION_SENTENCE_UNSTATED=0 restores the
-# strict rule. Measured on the hand-made lists (tasks/andretodo.md).
+# strict rule. Measured on the hand-made lists (docs/gold).
 SENTENCE_UNSTATED = os.getenv("MY_SOLUTION_SENTENCE_UNSTATED", "1") == "1"
 
 
