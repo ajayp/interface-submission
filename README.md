@@ -4,13 +4,6 @@ Answers credit-union members' questions from five dated crawls of the Dupaco web
 
 Built for the hackathon described in `Knowledge-Hackathon-Assignment.pdf`.
 
-## Index
-
-- [Start here](#start-here)
-- [Run it](#run-it)
-- [What is in the repo](#what-is-in-the-repo)
-- [At a glance](#at-a-glance)
-
 ## Start here
 
 - [`NOTES.md`](NOTES.md): how it works, how "current" is decided, the key decisions, the results and the known limits.
