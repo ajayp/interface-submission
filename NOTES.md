@@ -29,7 +29,7 @@ Three flows, each drawn in `workflow.md`:
 
 1. **Loading** ([diagram](workflow.md#1-loading-the-snapshots-ingest-once-per-snapshot-untimed)). Each page is split by heading, with one piece per table row. Every website copy gets a keyword index, and every rate table is read once by the model into structured facts (product, term, tier, value, source, dates).
 2. **Answering** ([diagram](workflow.md#2-answering-one-question-answer-timed)). In order:
-   - **Understand the question** with one LLM call to the Decisions API (see below).
+   - **Understand the question** with one LLM call to the Decisions API ([Query understanding](#query-understanding-llm-decisions-api)).
    - **Pick the website copy:** the newest by default, or the latest one on or before a date that is asked.
    - **A count question** ("how many branches") is answered by code, with no LLM call.
    - **A rate or fee question** goes to the extracted facts, keeping only the winning value per product and tier. **LLM call 1** answers from those facts. If it cannot answer, or no fact matched, the system **falls back to a text search and makes LLM call 2** over the best page pieces. In our check, this second call found a real number in 10 of 25 such cases.
