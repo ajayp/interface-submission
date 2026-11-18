@@ -35,9 +35,9 @@ Three flows, each drawn in `workflow.md`:
 | Rate and fee answers come from extracted facts, not raw pages | Stale values never reach the model: 0 stale values in every run | Facts cover rate tables only; hours and other prose use text search |
 | A value that changed between copies, with no stale copy left in the newest one, is history, not a conflict | It is not a contradiction on the site today | Past changes are not listed by `conflicts()` |
 | A fact that exists only on a page missing from the newest copy is not answered for a current question, but is answered for a dated one | The brief says to answer from the newest copy; an old PDF should not answer a should-refuse question | One lost-card fee on the tiny selftest fixture is "I don't know" on purpose |
-| Every stale mortgage and auto-loan row is listed separately in `conflicts()` | We do not know the organizers' granularity; folding rows would lose recall if their list is row-level | Precision 0.29 against our own hand list, which folds them |
-| The members count winner is the newest news release (179,000), not a later PDF figure (182,627) | Counts are read from releases and posts by fixed patterns | One disagreement with our hand list |
-| Rate or fee questions the tables do not answer get a second call that searches page text | It found a real number in 10 of 25 such cases across 141 of our questions | About 1.4 s extra on those questions |
+| Every stale mortgage and auto-loan row is listed separately in `conflicts()` | The organizers' granularity is unknown; folding rows would lose recall if their list is row-level | Precision 0.29 against the hand-made list, which folds them |
+| The members count winner is the newest news release (179,000), not a later PDF figure (182,627) | Counts are read from releases and posts by fixed patterns | One disagreement with the hand-made list |
+| Rate or fee questions the tables do not answer get a second call that searches page text | It found a real number in 10 of 25 such cases across 141 questions from five sets | About 1.4 s extra on those questions |
 | Ask for the faster service tier on answer calls, with a retry on the default tier | The answer call is about 90% of the time; p50 went from about 2.25 s to about 1.9 s | About 2x the price per answer call |
 | Question labels come from the Decisions API, not a full model call | About 0.3 s instead of about 1.75 s, with equal accuracy | The section label is right about 78% of the time, so it only steers the search and the answer |
 | General rules only, nothing typed in for a practice question | The hidden set rewords questions | Some practice misses are accepted (section 8) |
@@ -62,15 +62,15 @@ Real answers from the public set:
 ## 6. Evaluation, including the LLM judge
 
 - **Public set:** the organizers' scorer matches required values, zeroes an answer that contains a stale value, and gives credit for citing the right page.
-- **LLM judge:** the organizers' scorer has an optional judge (`--judge`). We kept a stand-in, `my_solution/judge_eval.py`, which re-scores a finished run with an OpenAI judge (`gpt-6.1-sol`): same question wording, same 1 / 0.5 / 0 scale and the same 50/50 blend as the scorer. We use it to compare two versions and to read why an answer was marked down. It is a development tool and is never used at answer time.
+- **LLM judge:** the organizers' scorer has an optional judge (`--judge`). A stand-in, `my_solution/judge_eval.py`, re-scores a finished run with an OpenAI judge (`gpt-6.1-sol`): same question wording, same 1 / 0.5 / 0 scale and the same 50/50 blend as the scorer. It is used to compare two versions and to read why an answer was marked down. It is a development tool and is never used at answer time.
 
   ```bash
   python harness/run_eval.py --submission my_solution --eval eval/public_eval.jsonl --out results/run1
   python my_solution/judge_eval.py --results results/run1/per_question.jsonl --eval eval/public_eval.jsonl
   ```
 
-  The judged accuracy is about 0.81 to 0.82, against 0.85 for keyword matching. Our answers are short on purpose, and the judge sometimes wants extra detail such as a minimum deposit. We tried to close that gap with a prompt-tuning loop (`my_solution/prompt_tune.py`, results in `docs/prompt_tuning/`). No change helped reliably without costing a refusal, so the current prompt stayed.
-- **Our own question sets** (`eval/subsets/`, written by us, with expected answers): held-out (22), dated (21 and 17), what changed (14), year-less months (14), typos (48).
+  The judged accuracy is about 0.81 to 0.82, against 0.85 for keyword matching. The answers are short on purpose, and the judge sometimes wants extra detail such as a minimum deposit. A prompt-tuning loop tried to close that gap (`my_solution/prompt_tune.py`, results in `docs/prompt_tuning/`). No change helped reliably without costing a refusal, so the current prompt stayed.
+- **Question sets** (`eval/subsets/`, with expected answers): held-out (22), dated (21 and 17), what changed (14), year-less months (14), typos (48).
 - **Conflicts:** two hand-made answer sheets in `docs/gold/`, scored with `my_solution/dump_conflicts.py` and `my_solution/score_conflict_lists.py`.
 - **Other tools:** `trace.py` shows exactly what is sent to the model for a question; `regress.py` compares versions across all sets (example config in `docs/regress_example.json`).
 
@@ -92,5 +92,5 @@ Real answers from the public set:
 - The 2 s full-marks speed line is not met. The answer call is about 90% of the time. One run had a single 8.3 s answer (probably a timed-out call that was retried). A timeout becomes "I don't know" for that question.
 - Accepted misses on the public set: dup-049, dup-008, dup-088 (two readings of the question), dup-104 (the lobby-hours piece misses the answer window) and dup-005 (a range instead of every rate).
 - Hours, awards and similar facts are not in the fact table, so they depend on text search.
-- On the tiny selftest fixture, a reworded certificate question is sometimes refused. We did not see this with "current" wordings on the real data.
+- On the tiny selftest fixture, a reworded certificate question is sometimes refused. This was not seen with "current" wordings on the real data.
 - Window search needs the committed vectors in `my_solution/.embed_cache`. If a snapshot changes, they must be rebuilt, and until then that snapshot silently falls back to keyword search.

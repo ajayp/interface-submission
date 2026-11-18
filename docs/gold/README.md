@@ -1,14 +1,14 @@
 # Conflict gold lists
 
-Two answer sheets for `conflicts()`, because the organizers' own list is not part of the kit. They check what we list and which value we pick.
+Two answer sheets for `conflicts()`, because the organizers' own list is not part of the kit. They check what `conflicts()` lists and which value it picks.
 
 | File | Entries | How it was made |
 |---|---|---|
-| `conflicts_gold_hand.json` | 12 | Read by hand from the newest website copy with plain text search, **without** our extraction code, so it does not depend on what `conflicts()` can see. Table below. |
-| `conflicts_gold_table_key.json` | 35 | Every stale-versus-current rate table row, built with our own table reader (so partly circular). |
+| `conflicts_gold_hand.json` | 12 | Read by hand from the newest website copy with plain text search, **without** the extraction code, so it does not depend on what `conflicts()` can see. Table below. |
+| `conflicts_gold_table_key.json` | 35 | Every stale-versus-current rate table row, built with the project's own table reader (so partly circular). |
 
 Both use the same format as `harness/selftest/conflicts_gold.json`. A conflict counts as found when it names both gold values, or one value plus a topic
-keyword (`harness/scoring.py`); the winner counts when our `resolution` contains `correct_value`.
+keyword (`harness/scoring.py`); the winner counts when the submitted `resolution` contains `correct_value`.
 
 ## Score the current system against them
 
@@ -18,8 +18,8 @@ python my_solution/score_conflict_lists.py results/conflicts/now.json -v     # n
 ```
 
 Latest result (42 entries listed): hand list found 12 of 12, right winner on 11, precision 0.29; table key found 35 of 35. Precision is low against the hand
-list only because it folds each stale mortgage table into one headline row (m1 to m3) while `conflicts()` lists every row separately. We kept the rows
-separate because the organizers' granularity is unknown. The one disagreement on winners is the members count (c4): we pick the newest news release
+list only because it folds each stale mortgage table into one headline row (m1 to m3) while `conflicts()` lists every row separately. The rows are kept
+separate because the organizers' granularity is unknown. The one disagreement on winners is the members count (c4): the system picks the newest news release
 (179,000), the hand list picks a later PDF figure (182,627).
 
 ## Rates (high confidence)

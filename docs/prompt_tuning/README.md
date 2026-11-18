@@ -1,6 +1,6 @@
 # Prompt tuning with an LLM
 
-How we tried to improve the answer prompt without guessing: give an OpenAI model the exact system message, user message and expected answer of the
+How the answer prompt is tuned without guessing: give an OpenAI model the exact system message, user message and expected answer of the
 questions that fail, let it propose a change, test the change through the real pipeline with the LLM judge, and hand the results back for the next round.
 
 **Outcome: the current prompt stayed.** Three rounds on one problem (a correct answer that the judge marks down as too short) gave no change that helped
@@ -13,8 +13,8 @@ improve (judged accuracy up, no stale value, no lost refusal).
 |---|---|
 | `task5_judge_too_short.md` | The problem, the rules every proposal must follow, and the results of proposal 1 |
 | `task5_proposal1.md` | Proposal 1 (variant H1) |
-| `task5_round1_*`, `task5_round2_*`, `task5_round3_*` | The three API rounds: our message and the model's reply (proposals H2 and H3, then the final evaluation) |
-| `cases/` | One file per question: expected answer, our answer, system message, user message. `cases/guard/` holds questions that pass today and must keep passing |
+| `task5_round1_*`, `task5_round2_*`, `task5_round3_*` | The three API rounds: the message sent and the model's reply (proposals H2 and H3, then the final evaluation) |
+| `cases/` | One file per question: expected answer, the system's answer, system message, user message. `cases/guard/` holds questions that pass today and must keep passing |
 | `../../my_solution/prompt_h1_edits.json` to `prompt_h3_edits.json` | The proposals as exact text edits, switched on with `MY_SOLUTION_PROMPT_VARIANT=H1` etc. |
 
 ## Rules every proposal had to follow

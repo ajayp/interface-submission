@@ -28,7 +28,7 @@ python harness/run_eval.py --submission my_solution --eval eval/public_eval.json
 ```
 my_solution/        the submission: solution.py with build(), plus a few development tools (see NOTES.md, section 6)
 harness/            the organizers' scorer and a tiny selftest fixture
-eval/               the 40 public questions, and our own question sets in eval/subsets/
+eval/               the 40 public questions, and further question sets in eval/subsets/
 docs/gold/          hand-made answer sheets for conflicts(), and how to score them
 docs/prompt_tuning/ the LLM-assisted prompt-tuning rounds and what came out of them
 starter/            the organizers' naive baseline
