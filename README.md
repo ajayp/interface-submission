@@ -7,7 +7,9 @@ Built for the hackathon described in `Knowledge-Hackathon-Assignment.pdf`.
 ## Start here
 
 - [`NOTES.md`](NOTES.md): how it works, how "current" is decided, the key decisions, the results and the known limits.
-- [`workflow.md`](workflow.md): three diagrams (loading, answering one question, listing contradictions).
+- [`workflow.md`](workflow.md): diagrams of loading, answering one question, and listing contradictions.
+- [`NOTES.md`, section 6](NOTES.md#6-evaluation-including-the-llm-judge): how answers are evaluated, including the LLM judge (`my_solution/judge_eval.py`), a stand-in for the scorer's optional judge.
+- [`judge-workflow.md`](judge-workflow.md): the LLM-as-a-judge workflow as diagrams, kept separate from the answering flow.
 
 ## Run it
 

@@ -1,6 +1,6 @@
 # Workflow
 
-How the submission in `my_solution/` works, as three diagrams that follow the code: loading the snapshots (`ingest`),
+How the submission in `my_solution/` works, as diagrams that follow the code: loading the snapshots (`ingest`),
 answering one question (`answer`), and listing contradictions (`conflicts`). The written description is in `NOTES.md`.
 
 ## 1. Loading the snapshots (`ingest`, once per snapshot, untimed)
@@ -31,52 +31,63 @@ website copies. If the snapshots change, they must be rebuilt (the build script 
 
 ## 2. Answering one question (`answer`, timed)
 
-Boxes with double edges are calls to OpenAI. Answer calls ask for OpenAI's faster service tier and are retried once on the default tier if the account refuses it. A normal question makes three: the labels, the question's embedding (sent at the same
-time as the labels) and one answer call. A rate or fee question the rate tables don't answer makes a fourth, when it falls back to
-text search. A count question ("how many branches") is answered by code, with no answer call. The question's embedding is sent for every
-question but is only used when windows are searched (not for a rate or fee question, and not when the vectors are missing).
+Boxes with double edges are calls to OpenAI. Answer calls ask for OpenAI's faster service tier and are retried once on the default tier if the account refuses it. A normal question makes three calls: the labels, the question's embedding (sent at the same time as the labels) and one answer call. A rate or fee question the rate tables don't answer makes a fourth, when it falls back to text search. A count question ("how many branches") is answered by code, with no answer call. The embedding is only used when windows are searched, so not for a rate or fee question, and not when the vectors are missing.
+
+### 2a. Which website copy answers
 
 ```mermaid
 flowchart TD
-    Q([Question, optional as_of date]) --> LAB[[Decisions API: labels<br/>section, rate type, past date?, change?, question type]]
-    Q -.same time.-> QE[[Embed the question]]
-    LAB --> CHG{About a change?<br/>label says so AND the question has a<br/>change word: changed, before, since...}
-
-    CHG -- yes --> HIST[Same search in every snapshot<br/>cut off at as_of if given; a date in the question text does not cut it off<br/>each value tagged with the snapshot dates it was seen in<br/>for page text, not rates or fees, each copy also adds its meaning-search windows]
-    HIST --> HANS[[gpt-6-luna answers with the history<br/>e.g. 3.90% in May-Aug, 4.00% in Sep]]
+    Q([Question, optional as_of date]) --> LAB[[Decisions API: labels<br/>section, rate type, date?, change?, question type]]
+    LAB --> CHG{About a change?}
+    CHG -- yes --> HIST[Same search in every snapshot<br/>each value tagged with the dates it was seen]
+    HIST --> HANS[[Model answers with the history<br/>e.g. 3.90% in May-Aug, 4.00% in Sep]]
     HANS --> HOK{Confident?}
-    HOK -- yes --> OUT
+    HOK -- yes --> OUT([Answer: text, sources, confident flag])
     HOK -- no --> DATE
+    CHG -- no --> DATE{Is a date asked?}
+    DATE -- before 2026-05-12 --> IDK1([I don't know: no snapshot that old])
+    DATE -- yes --> PAST[Latest snapshot on or before that date<br/>answer starts 'As of date,']
+    DATE -- no --> NEW[Newest snapshot, 2026-09-28]
+    PAST --> NEXT([Continue with 2b])
+    NEW --> NEXT
+```
 
-    CHG -- no --> DATE{Which snapshot?}
-    DATE -- date before 2026-05-12 --> IDK1([I don't know: no snapshot that old])
-    DATE -- "as_of, or a date in the text AND (the label says<br/>it is about the website on that date, or the words say so:<br/>'as of / back in / at the end of', or a past-tense question on any topic)<br/>a month with no year = the latest such month not after the newest copy<br/>a rate or fee question with a month and no year counts without a past-tense verb unless it looks forward (will / if I / next)" --> PAST[Latest snapshot taken on or before that date]
-    DATE -- no date --> NEW[Newest snapshot 2026-09-28]
-    PAST --> SD[Answer starts 'As of date,' and says when the year was assumed<br/>not on a what-changed question]
-    SD --> CACHE
-    NEW --> CACHE{Asked before in this run?}
+- **A change question** is one where the label says so and the question has a change word such as changed, before or since. The search is cut off at `as_of` if one is given; a date written in the question does not cut it off. For page text, not rates or fees, each copy also adds its meaning-search windows.
+- **A date is asked** when `as_of` is given, or when the question contains a date and either the label says it is about the website on that date or the words say so ("as of", "back in", "at the end of", or a past-tense question on any topic).
+- **A month with no year** means the latest such month not after the newest copy. A rate or fee question with a month and no year counts as dated even without a past-tense verb, unless it looks forward (will, if I, next).
+- **A dated answer** starts "As of <date>," and says when the year was assumed. A change question does not get that start, because its date is the start of a comparison.
+
+### 2b. How the answer is produced
+
+```mermaid
+flowchart TD
+    START([Question and chosen snapshot]) --> CACHE{Asked before in this run?}
     CACHE -- yes --> SAME([Same answer as before])
-    CACHE -- no --> CNT{How-many question<br/>about Dupaco?}
-    CNT -- yes --> CNTA([Count from the most recently<br/>published statement, no model call])
+    CACHE -- no --> CNT{How-many question about Dupaco?}
+    CNT -- yes --> CNTA([Count from the most recently published statement, no model call])
     CNT -- no --> VAL{Rate or fee question?}
 
     VAL -- yes --> FH[Search the fact index<br/>keep only the winning value per product and tier]
     FH -- no fact found --> TXT
-    FH --> FANS[[gpt-6-luna answers from the facts<br/>same checks as the text answer]]
-    FANS --> FOK{Confident?<br/>not confident also when a check fails}
+    FH --> FANS[[Model answers from the facts]]
+    FANS --> FOK{Confident?}
     FOK -- yes --> OUT
-    FOK -- "no (fallback)" --> TXT
+    FOK -- no, fall back --> TXT
 
-    VAL -- no --> TXT[Text search: 8 keyword pieces<br/>2 slots kept for lower-trust pages<br/>+ meaning-search windows: 3 for most questions,<br/>6 for list, eligibility and fact-about-Dupaco, none for rate or fee]
-    QE -.vector.-> TXT
-    SP[Spelling help: a typed word the site does not use<br/>adds the site word one edit away to the search text only] -.-> TXT
+    VAL -- no --> TXT[Text search<br/>8 keyword pieces plus meaning-search windows]
+    EMB[[Embed the question]] -.vector.-> TXT
+    SP[Spelling help<br/>adds the site word one edit away] -.-> TXT
     SP -.-> FH
-    TXT --> TANS[[gpt-6-luna answers from the pieces<br/>prompt G2: one value, right tier, or I don't know]]
-    TANS --> CHECK{Checks:<br/>model says none or not confident?<br/>value asked but no new number?}
-    CHECK -- fails --> IDK2([I don't know, please contact Dupaco])
-    CHECK -- passes --> CITE[Cite the pages used,<br/>plus other pages stating the same value]
+    TXT --> TANS[[Model answers from the pieces<br/>one value, right tier, or I don't know]]
+    TANS --> CHECK{Checks pass?}
+    CHECK -- no --> IDK2([I don't know, please contact Dupaco])
+    CHECK -- yes --> CITE[Cite the pages used<br/>plus other pages stating the same value]
     CITE --> OUT([Answer: text, sources, confident flag])
 ```
+
+- **Text search** keeps 8 keyword pieces, with 2 slots reserved for lower-trust pages, and adds meaning-search windows: 3 for most questions, 6 for list, eligibility and fact-about-Dupaco questions, none for rate or fee questions.
+- **Spelling help:** a typed word the site does not use adds the site word one edit away, to the search text only. The model still sees the question as typed.
+- **The checks** turn the answer into the standard refusal when the model says it cannot answer, or when a value was asked for and the answer has no new number. On the facts path, a failed check also counts as "not confident", so the text search runs.
 
 ## 3. Listing contradictions (`conflicts`, once at the end)
 
