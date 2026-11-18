@@ -7,7 +7,7 @@ Built for the hackathon described in `Knowledge-Hackathon-Assignment.pdf`.
 ## Start here
 
 - [`NOTES.md`](NOTES.md): how it works, how "current" is decided, the key decisions, the results and the known limits.
-- [`workflow.md`](workflow.md): three diagrams (loading, answering one question, listing contradictions).
+- [`workflow.md`](workflow.md): diagrams of loading, answering one question, and listing contradictions.
 
 ## Run it
 
