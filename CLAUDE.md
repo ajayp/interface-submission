@@ -54,5 +54,5 @@ The harness calls `build()`, then `ingest(Snapshot)` per crawl (oldest to newest
 - Question text is passed to the LLM as data, not instructions.
 - Embedding windows use committed vectors in `my_solution/.embed_cache/`; if snapshot content changes they must be rebuilt, otherwise that snapshot silently falls back to keyword search.
 - `my_solution/` imports `contract` from the nearest parent `harness/` (see top of `solution.py`); keep it runnable when copied elsewhere.
-- Answer-time calls ask for the faster service tier and retry once on the default tier if refused.
+- Answer-time calls use the default service tier. A faster tier (`service_tier="priority"`) is tested and commented out in `llm.py`; the retry on refusal is kept.
 - Prompt variants (`prompt_*.md`, `prompt_*_edits.json`) and `docs/prompt_tuning/` come from the prompt-tuning loop (`prompt_tune.py`); no tried change helped reliably, so the current prompt stayed.

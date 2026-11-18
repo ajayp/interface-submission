@@ -36,7 +36,7 @@ The submission is `my_solution/` (entry point `solution.py`, `build()`). Diagram
 - Python 3.11 and `pip install -r my_solution/requirements.txt`.
 - **Needs `OPENAI_API_KEY`** (paid OpenAI API) with access to `gpt-6-luna` (answers and fact extraction), the Decisions API `/v1/decisions` (question labels) and `text-embedding-3-small` (one question embedding per answer).
 - **Cost:** loading the five snapshots is untimed, takes about 3 minutes and costs about $0.10 (one model call per distinct rate table). Each answer makes about three small calls. A full 40-question run costs a few cents. `conflicts()` makes about 77 small calls once.
-- **Faster tier:** answer-time calls ask OpenAI for its faster service tier (about 2x the price per answer call; not confirmed for every account). If the account refuses that option, the call is retried once on the default tier.
+- **Service tier:** all calls use OpenAI's default service tier. A faster tier was tested and left off (see section 4).
 - Without a key the system still runs on search alone, but it cannot refuse and scores about 0.34 on the public set.
 
 ## 2. How it works
@@ -103,7 +103,7 @@ Before any search, an LLM reads the question, so the rest of the system knows wh
 | Every stale mortgage and auto-loan row is listed separately in `conflicts()` | The organizers' granularity is unknown; folding rows would lose recall if their list is row-level | Precision 0.29 against the hand-made list, which folds them |
 | The members count winner is the newest news release (179,000), not a later PDF figure (182,627) | Counts are read from releases and posts by fixed patterns | One disagreement with the hand-made list |
 | Rate or fee questions the tables do not answer get a second call that searches page text | It found a real number in 10 of 25 such cases across 141 questions from five sets | About 1.4 s extra on those questions |
-| Ask for the faster service tier on answer calls, with a retry on the default tier | The answer call is about 90% of the time; p50 went from about 2.25 s to about 1.9 s | About 2x the price per answer call |
+| Leave answer calls on the default service tier | A faster tier cut p50 from about 2.25 s to about 1.9 s, but the answer call is still about 90% of the time and the 2 s line was not reached | The speed pillar stays lower; the faster tier costs about 2x per answer call (not confirmed) |
 | Question labels come from the Decisions API, not a full model call | About 0.3 s instead of about 1.75 s, with equal accuracy | The section label is right about 78% of the time, so it only steers the search and the answer |
 | General rules only, nothing typed in for a practice question | The hidden set rewords questions | Some practice misses are accepted (section 8) |
 
@@ -147,7 +147,7 @@ Real answers from the public set:
 | Public set, final score (no conflicts pillar locally) | 0.834 to 0.859 |
 | Consistency, stale values, errors | 1.0, 0, 0 in every run |
 | Speed, default tier | p50 2.25 to 2.53 s, p95 3.4 to 4.1 s |
-| Speed, faster tier | p50 1.83 to 1.90 s, p95 2.9 to 3.2 s |
+| Speed, with the faster tier tested and left off | p50 1.83 to 1.90 s, p95 2.9 to 3.2 s |
 | Held-out / dated sets | 1.0 / 0.993 |
 | `conflicts()` | 42 entries. Hand list (12): found 12, right winner 11, precision 0.29. Table key (35): found 35 |
 | Loading | about 3 minutes and $0.10 cold |
