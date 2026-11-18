@@ -130,6 +130,14 @@ def _expansion_for(question: str, qu: Optional[dict], qu_mode: str):
 
 
 REFUSAL = "I don't know. That isn't listed on Dupaco's website, so please contact Dupaco directly."
+# A failed model call (timeout, API down, bad reply) must not look like an honest "I don't know". Its text says what happened, and
+# conflict_note names the error so the evaluation output shows it. answer() returns it with confident=True: the scorer counts
+# confident=False as a refusal, which would credit a should-refuse question with a refusal the system never made.
+FAILED_PREFIX = "LLM call failed: "
+TIMEOUT_TEXT = ("The language model did not respond in time, so no answer was produced. This was a system timeout and says nothing "
+                "about what the website lists. Please try again.")
+ERROR_TEXT = ("The language model call failed, so no answer was produced. This was a system error and says nothing "
+              "about what the website lists. Please try again.")
 # A question about a date earlier than our oldest website copy: say so instead of answering from the oldest copy. No digits in the text
 # (the scorer treats numbers outside the question as an answer). MY_SOLUTION_REFUSE_BEFORE_FIRST=0 rolls back.
 REFUSE_BEFORE_FIRST = os.getenv("MY_SOLUTION_REFUSE_BEFORE_FIRST", "1") == "1"
@@ -418,6 +426,12 @@ class Knowledge:
         return added
 
     def answer(self, question: str, as_of: Optional[str] = None) -> Answer:
+        ans = self._answer(question, as_of)
+        if (ans.conflict_note or "").startswith(FAILED_PREFIX):
+            return Answer(text=ans.text, sources=[], confident=True, conflict_note=ans.conflict_note)
+        return ans
+
+    def _answer(self, question: str, as_of: Optional[str] = None) -> Answer:
         if EMBED_PREFETCH and HYBRID and self.llm.available():
             from embed_index import prefetch_query
             prefetch_query(question)   # embedding runs while the query-understanding call is in flight
@@ -457,7 +471,8 @@ class Knowledge:
         if not hits:
             return Answer(text=REFUSAL, confident=False)
         ans = self._llm_answer(question, hits, taken_on, qu, self._asked_note(question, as_of, qu)) if self.use_llm else self._top_chunk(hits)
-        self._cache[key] = ans
+        if not (ans.conflict_note or "").startswith(FAILED_PREFIX):   # a failure is not remembered: asking again retries the call
+            self._cache[key] = ans
         return ans
 
     def _history_hits(self, question: str, as_of: Optional[str], qu: dict):
@@ -622,7 +637,9 @@ class Knowledge:
                                effort=HOURS_EFFORT if intent == "hours" else None)
         except Exception as e:  # API down, timeout, bad JSON: decline rather than crash
             print(f"[my_solution] LLM call failed: {type(e).__name__}: {e}", file=sys.stderr)
-            return Answer(text=REFUSAL, confident=False)
+            # confident=False here lets the facts path fall back to text search; answer() turns a final failure into a visible one
+            return Answer(text=TIMEOUT_TEXT if "timeout" in type(e).__name__.lower() else ERROR_TEXT, confident=False,
+                          conflict_note=f"{FAILED_PREFIX}{type(e).__name__}")
         # Prompt O1 labels each answer complete / partial / none: complete and partial answers are kept, only "none" is refused.
         atype = out.get("answer_type")
         if atype == "none" or (atype not in ("complete", "partial") and not out.get("confident")):

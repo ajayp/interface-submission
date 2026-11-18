@@ -154,7 +154,7 @@ Real answers from the public set:
 
 ## 8. Known limits
 
-- The 2 s full-marks speed line is not met. The answer call is about 90% of the time. One run had a single 8.3 s answer (probably a timed-out call that was retried). A timeout becomes "I don't know" for that question.
+- The 2 s full-marks speed line is not met. The answer call is about 90% of the time. One run had a single 8.3 s answer (probably a timed-out call that was retried). A failed answer call (such as a timeout after the 6 s limit and one retry) is not turned into "I don't know": the answer says the model did not respond, `conflict_note` names the error, and it is not cached. In one 3-pass test, 2 of 120 answers timed out, both on hours questions, which have the longest answers.
 - Accepted misses on the public set: dup-049, dup-008, dup-088 (two readings of the question), dup-104 (the lobby-hours piece misses the answer window) and dup-005 (a range instead of every rate).
 - Hours, awards and similar facts are not in the fact table, so they depend on text search.
 - On the tiny selftest fixture, a reworded certificate question is sometimes refused. This was not seen with "current" wordings on the real data.
