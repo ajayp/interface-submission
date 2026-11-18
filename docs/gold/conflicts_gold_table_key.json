@@ -1,0 +1,681 @@
+[
+ {
+  "id": "auto loan||APR|None|60|None|(2024, 2027)",
+  "topic_keywords": [
+   "auto loan"
+  ],
+  "values": [
+   "5.34%",
+   "5.39%"
+  ],
+  "correct_value": "5.39%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/calculators/vehicle-affordability = 5.34%",
+   "https://www.dupaco.com/personal/loans/auto-loans/ = 5.39%",
+   "https://www.dupaco.com/personal/loans/auto-motorcycle-loans = 5.39%",
+   "https://www.dupaco.com/rates = 5.39%",
+   "https://www.dupaco.com/switch-and-earn = 5.34%"
+  ]
+ },
+ {
+  "id": "auto loan||APR|None|72|None|(2024, 2027)",
+  "topic_keywords": [
+   "auto loan"
+  ],
+  "values": [
+   "5.44%",
+   "5.49%"
+  ],
+  "correct_value": "5.49%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/calculators/vehicle-affordability = 5.44%",
+   "https://www.dupaco.com/personal/loans/auto-loans/ = 5.49%",
+   "https://www.dupaco.com/personal/loans/auto-motorcycle-loans = 5.49%",
+   "https://www.dupaco.com/rates = 5.49%",
+   "https://www.dupaco.com/switch-and-earn = 5.44%"
+  ]
+ },
+ {
+  "id": "auto loan||APR|None|84|None|(2024, 2027)",
+  "topic_keywords": [
+   "auto loan"
+  ],
+  "values": [
+   "5.54%",
+   "5.59%"
+  ],
+  "correct_value": "5.59%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/calculators/vehicle-affordability = 5.54%",
+   "https://www.dupaco.com/personal/loans/auto-loans/ = 5.59%",
+   "https://www.dupaco.com/personal/loans/auto-motorcycle-loans = 5.59%",
+   "https://www.dupaco.com/rates = 5.59%",
+   "https://www.dupaco.com/switch-and-earn = 5.54%"
+  ]
+ },
+ {
+  "id": "auto loan||APR|None|60|None|(2021, 2023)",
+  "topic_keywords": [
+   "auto loan"
+  ],
+  "values": [
+   "5.59%",
+   "5.64%"
+  ],
+  "correct_value": "5.64%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/calculators/vehicle-affordability = 5.59%",
+   "https://www.dupaco.com/personal/loans/auto-loans/ = 5.64%",
+   "https://www.dupaco.com/personal/loans/auto-motorcycle-loans = 5.64%",
+   "https://www.dupaco.com/rates = 5.64%",
+   "https://www.dupaco.com/switch-and-earn = 5.59%"
+  ]
+ },
+ {
+  "id": "auto loan||APR|None|72|None|(2021, 2023)",
+  "topic_keywords": [
+   "auto loan"
+  ],
+  "values": [
+   "5.74%",
+   "5.79%"
+  ],
+  "correct_value": "5.79%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/calculators/vehicle-affordability = 5.74%",
+   "https://www.dupaco.com/personal/loans/auto-loans/ = 5.79%",
+   "https://www.dupaco.com/personal/loans/auto-motorcycle-loans = 5.79%",
+   "https://www.dupaco.com/rates = 5.79%",
+   "https://www.dupaco.com/switch-and-earn = 5.74%"
+  ]
+ },
+ {
+  "id": "auto loan||APR|None|84|None|(2021, 2023)",
+  "topic_keywords": [
+   "auto loan"
+  ],
+  "values": [
+   "5.99%",
+   "6.04%"
+  ],
+  "correct_value": "6.04%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/calculators/vehicle-affordability = 5.99%",
+   "https://www.dupaco.com/personal/loans/auto-loans/ = 6.04%",
+   "https://www.dupaco.com/personal/loans/auto-motorcycle-loans = 6.04%",
+   "https://www.dupaco.com/rates = 6.04%",
+   "https://www.dupaco.com/switch-and-earn = 5.99%"
+  ]
+ },
+ {
+  "id": "auto loan||APR|None|60|None|(2017, 2020)",
+  "topic_keywords": [
+   "auto loan"
+  ],
+  "values": [
+   "6.29%",
+   "6.34%"
+  ],
+  "correct_value": "6.34%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/calculators/vehicle-affordability = 6.29%",
+   "https://www.dupaco.com/personal/loans/auto-loans/ = 6.34%",
+   "https://www.dupaco.com/personal/loans/auto-motorcycle-loans = 6.34%",
+   "https://www.dupaco.com/rates = 6.34%",
+   "https://www.dupaco.com/switch-and-earn = 6.29%"
+  ]
+ },
+ {
+  "id": "auto loan||APR|None|72|None|(2017, 2020)",
+  "topic_keywords": [
+   "auto loan"
+  ],
+  "values": [
+   "6.44%",
+   "6.49%"
+  ],
+  "correct_value": "6.49%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/calculators/vehicle-affordability = 6.44%",
+   "https://www.dupaco.com/personal/loans/auto-loans/ = 6.49%",
+   "https://www.dupaco.com/personal/loans/auto-motorcycle-loans = 6.49%",
+   "https://www.dupaco.com/rates = 6.49%",
+   "https://www.dupaco.com/switch-and-earn = 6.44%"
+  ]
+ },
+ {
+  "id": "auto loan||APR|None|48|None|(0, 2016)",
+  "topic_keywords": [
+   "auto loan"
+  ],
+  "values": [
+   "8.54%",
+   "8.59%"
+  ],
+  "correct_value": "8.59%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/calculators/vehicle-affordability = 8.54%",
+   "https://www.dupaco.com/personal/loans/auto-loans/ = 8.59%",
+   "https://www.dupaco.com/personal/loans/auto-motorcycle-loans = 8.59%",
+   "https://www.dupaco.com/rates = 8.59%",
+   "https://www.dupaco.com/switch-and-earn = 8.54%"
+  ]
+ },
+ {
+  "id": "1st rate checking||dividend rate|None|None|(5000.0, 24999.99)|None",
+  "topic_keywords": [
+   "1st rate checking"
+  ],
+  "values": [
+   "2.47%",
+   "2.96%"
+  ],
+  "correct_value": "2.47%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/checking = 2.47%",
+   "https://www.dupaco.com/checking-offer-lp = 2.96%",
+   "https://www.dupaco.com/newcard-balancetransfer-lp = 2.96%",
+   "https://www.dupaco.com/personal/checking-accounts = 2.47%",
+   "https://www.dupaco.com/rates = 2.47%",
+   "https://www.dupaco.com/tax-checking-offer-lp = 2.96%"
+  ]
+ },
+ {
+  "id": "1st rate checking||APY|None|None|(5000.0, 24999.99)|None",
+  "topic_keywords": [
+   "1st rate checking"
+  ],
+  "values": [
+   "2.5%",
+   "3%"
+  ],
+  "correct_value": "2.5%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/checking = 2.5%",
+   "https://www.dupaco.com/checking-offer-lp = 3%",
+   "https://www.dupaco.com/newcard-balancetransfer-lp = 3%",
+   "https://www.dupaco.com/personal/checking-accounts = 2.5%",
+   "https://www.dupaco.com/rates = 2.5%",
+   "https://www.dupaco.com/tax-checking-offer-lp = 3%"
+  ]
+ },
+ {
+  "id": "purchase: 30-year fixed conventional $832750 or less||rate|None|360|(0.0, 832750.0)|None",
+  "topic_keywords": [
+   "purchase: 30-year fixed conventional $832750 or less"
+  ],
+  "values": [
+   "6%",
+   "7.25%"
+  ],
+  "correct_value": "7.25%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 6%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.25%",
+   "https://www.dupaco.com/rates = 7.25%"
+  ]
+ },
+ {
+  "id": "purchase: 30-year fixed conventional $832750 or less||APR|None|360|(0.0, 832750.0)|None",
+  "topic_keywords": [
+   "purchase: 30-year fixed conventional $832750 or less"
+  ],
+  "values": [
+   "6.037%",
+   "7.29%"
+  ],
+  "correct_value": "7.29%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 6.037%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.29%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.29%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.29%",
+   "https://www.dupaco.com/rates = 7.29%"
+  ]
+ },
+ {
+  "id": "purchase: 30-year fixed conventional $300000 or less||rate|None|360|(0.0, 300000.0)|None",
+  "topic_keywords": [
+   "purchase: 30-year fixed conventional $300000 or less"
+  ],
+  "values": [
+   "6%",
+   "7.25%"
+  ],
+  "correct_value": "7.25%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 6%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.25%",
+   "https://www.dupaco.com/rates = 7.25%"
+  ]
+ },
+ {
+  "id": "purchase: 30-year fixed conventional $300000 or less||APR|None|360|(0.0, 300000.0)|None",
+  "topic_keywords": [
+   "purchase: 30-year fixed conventional $300000 or less"
+  ],
+  "values": [
+   "6.061%",
+   "7.32%"
+  ],
+  "correct_value": "7.32%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 6.061%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.32%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.32%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.32%",
+   "https://www.dupaco.com/rates = 7.32%"
+  ]
+ },
+ {
+  "id": "purchase: 30-year fixed conventional $200000 or less||rate|None|360|(0.0, 200000.0)|None",
+  "topic_keywords": [
+   "purchase: 30-year fixed conventional $200000 or less"
+  ],
+  "values": [
+   "5.875%",
+   "7.25%"
+  ],
+  "correct_value": "7.25%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 5.875%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.25%",
+   "https://www.dupaco.com/rates = 7.25%"
+  ]
+ },
+ {
+  "id": "purchase: 30-year fixed conventional $200000 or less||APR|None|360|(0.0, 200000.0)|None",
+  "topic_keywords": [
+   "purchase: 30-year fixed conventional $200000 or less"
+  ],
+  "values": [
+   "5.954%",
+   "7.34%"
+  ],
+  "correct_value": "7.34%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 5.954%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.34%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.34%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.34%",
+   "https://www.dupaco.com/rates = 7.34%"
+  ]
+ },
+ {
+  "id": "purchase: 30-year fixed conventional $100000 or less||rate|None|360|(0.0, 100000.0)|None",
+  "topic_keywords": [
+   "purchase: 30-year fixed conventional $100000 or less"
+  ],
+  "values": [
+   "5.75%",
+   "7.13%"
+  ],
+  "correct_value": "7.13%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 5.75%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.13%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.13%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.13%",
+   "https://www.dupaco.com/rates = 7.13%"
+  ]
+ },
+ {
+  "id": "purchase: 30-year fixed conventional $100000 or less||APR|None|360|(0.0, 100000.0)|None",
+  "topic_keywords": [
+   "purchase: 30-year fixed conventional $100000 or less"
+  ],
+  "values": [
+   "5.884%",
+   "7.27%"
+  ],
+  "correct_value": "7.27%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 5.884%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.27%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.27%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.27%",
+   "https://www.dupaco.com/rates = 7.27%"
+  ]
+ },
+ {
+  "id": "purchase: 20-year fixed conventional||rate|None|240|None|None",
+  "topic_keywords": [
+   "purchase: 20-year fixed conventional"
+  ],
+  "values": [
+   "5.875%",
+   "7.13%"
+  ],
+  "correct_value": "7.13%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 5.875%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.13%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.13%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.13%",
+   "https://www.dupaco.com/rates = 7.13%"
+  ]
+ },
+ {
+  "id": "purchase: 20-year fixed conventional||APR|None|240|None|None",
+  "topic_keywords": [
+   "purchase: 20-year fixed conventional"
+  ],
+  "values": [
+   "6.005%",
+   "7.26%"
+  ],
+  "correct_value": "7.26%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 6.005%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.26%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.26%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.26%",
+   "https://www.dupaco.com/rates = 7.26%"
+  ]
+ },
+ {
+  "id": "purchase: 15-year fixed conventional||rate|None|180|None|None",
+  "topic_keywords": [
+   "purchase: 15-year fixed conventional"
+  ],
+  "values": [
+   "5.5%",
+   "6.75%"
+  ],
+  "correct_value": "6.75%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 5.5%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 6.75%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 6.75%",
+   "https://www.dupaco.com/personal/loans/home-loans = 6.75%",
+   "https://www.dupaco.com/rates = 6.75%"
+  ]
+ },
+ {
+  "id": "purchase: 15-year fixed conventional||APR|None|180|None|None",
+  "topic_keywords": [
+   "purchase: 15-year fixed conventional"
+  ],
+  "values": [
+   "5.623%",
+   "6.88%"
+  ],
+  "correct_value": "6.88%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/homebuying-guidance = 5.623%",
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 6.88%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 6.88%",
+   "https://www.dupaco.com/personal/loans/home-loans = 6.88%",
+   "https://www.dupaco.com/rates = 6.88%"
+  ]
+ },
+ {
+  "id": "refinance: 30-year fixed conventional $832750 or less||rate|None|360|(0.0, 832750.0)|None",
+  "topic_keywords": [
+   "refinance: 30-year fixed conventional $832750 or less"
+  ],
+  "values": [
+   "6%",
+   "7.25%"
+  ],
+  "correct_value": "7.25%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.25%",
+   "https://www.dupaco.com/mortgage-refi = 6%",
+   "https://www.dupaco.com/personal/loans/home-equity = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.25%",
+   "https://www.dupaco.com/rates = 7.25%"
+  ]
+ },
+ {
+  "id": "refinance: 30-year fixed conventional $832750 or less||APR|None|360|(0.0, 832750.0)|None",
+  "topic_keywords": [
+   "refinance: 30-year fixed conventional $832750 or less"
+  ],
+  "values": [
+   "6.049%",
+   "7.3%"
+  ],
+  "correct_value": "7.3%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.3%",
+   "https://www.dupaco.com/mortgage-refi = 6.049%",
+   "https://www.dupaco.com/personal/loans/home-equity = 7.3%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.3%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.3%",
+   "https://www.dupaco.com/rates = 7.3%"
+  ]
+ },
+ {
+  "id": "refinance: 30-year fixed conventional $300000 or less||rate|None|360|(0.0, 300000.0)|None",
+  "topic_keywords": [
+   "refinance: 30-year fixed conventional $300000 or less"
+  ],
+  "values": [
+   "6%",
+   "7.25%"
+  ],
+  "correct_value": "7.25%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.25%",
+   "https://www.dupaco.com/mortgage-refi = 6%",
+   "https://www.dupaco.com/personal/loans/home-equity = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.25%",
+   "https://www.dupaco.com/rates = 7.25%"
+  ]
+ },
+ {
+  "id": "refinance: 30-year fixed conventional $300000 or less||APR|None|360|(0.0, 300000.0)|None",
+  "topic_keywords": [
+   "refinance: 30-year fixed conventional $300000 or less"
+  ],
+  "values": [
+   "6.072%",
+   "7.33%"
+  ],
+  "correct_value": "7.33%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.33%",
+   "https://www.dupaco.com/mortgage-refi = 6.072%",
+   "https://www.dupaco.com/personal/loans/home-equity = 7.33%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.33%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.33%",
+   "https://www.dupaco.com/rates = 7.33%"
+  ]
+ },
+ {
+  "id": "refinance: 30-year fixed conventional $200000 or less||rate|None|360|(0.0, 200000.0)|None",
+  "topic_keywords": [
+   "refinance: 30-year fixed conventional $200000 or less"
+  ],
+  "values": [
+   "5.875%",
+   "7.25%"
+  ],
+  "correct_value": "7.25%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.25%",
+   "https://www.dupaco.com/mortgage-refi = 5.875%",
+   "https://www.dupaco.com/personal/loans/home-equity = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.25%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.25%",
+   "https://www.dupaco.com/rates = 7.25%"
+  ]
+ },
+ {
+  "id": "refinance: 30-year fixed conventional $200000 or less||APR|None|360|(0.0, 200000.0)|None",
+  "topic_keywords": [
+   "refinance: 30-year fixed conventional $200000 or less"
+  ],
+  "values": [
+   "5.966%",
+   "7.35%"
+  ],
+  "correct_value": "7.35%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.35%",
+   "https://www.dupaco.com/mortgage-refi = 5.966%",
+   "https://www.dupaco.com/personal/loans/home-equity = 7.35%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.35%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.35%",
+   "https://www.dupaco.com/rates = 7.35%"
+  ]
+ },
+ {
+  "id": "refinance: 30-year fixed conventional $100000 or less||rate|None|360|(0.0, 100000.0)|None",
+  "topic_keywords": [
+   "refinance: 30-year fixed conventional $100000 or less"
+  ],
+  "values": [
+   "5.75%",
+   "7.13%"
+  ],
+  "correct_value": "7.13%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.13%",
+   "https://www.dupaco.com/mortgage-refi = 5.75%",
+   "https://www.dupaco.com/personal/loans/home-equity = 7.13%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.13%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.13%",
+   "https://www.dupaco.com/rates = 7.13%"
+  ]
+ },
+ {
+  "id": "refinance: 30-year fixed conventional $100000 or less||APR|None|360|(0.0, 100000.0)|None",
+  "topic_keywords": [
+   "refinance: 30-year fixed conventional $100000 or less"
+  ],
+  "values": [
+   "5.896%",
+   "7.28%"
+  ],
+  "correct_value": "7.28%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.28%",
+   "https://www.dupaco.com/mortgage-refi = 5.896%",
+   "https://www.dupaco.com/personal/loans/home-equity = 7.28%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.28%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.28%",
+   "https://www.dupaco.com/rates = 7.28%"
+  ]
+ },
+ {
+  "id": "refinance: 20-year fixed conventional||rate|None|240|None|None",
+  "topic_keywords": [
+   "refinance: 20-year fixed conventional"
+  ],
+  "values": [
+   "5.875%",
+   "7.13%"
+  ],
+  "correct_value": "7.13%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.13%",
+   "https://www.dupaco.com/mortgage-refi = 5.875%",
+   "https://www.dupaco.com/personal/loans/home-equity = 7.13%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.13%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.13%",
+   "https://www.dupaco.com/rates = 7.13%"
+  ]
+ },
+ {
+  "id": "refinance: 20-year fixed conventional||APR|None|240|None|None",
+  "topic_keywords": [
+   "refinance: 20-year fixed conventional"
+  ],
+  "values": [
+   "6.021%",
+   "7.28%"
+  ],
+  "correct_value": "7.28%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 7.28%",
+   "https://www.dupaco.com/mortgage-refi = 6.021%",
+   "https://www.dupaco.com/personal/loans/home-equity = 7.28%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 7.28%",
+   "https://www.dupaco.com/personal/loans/home-loans = 7.28%",
+   "https://www.dupaco.com/rates = 7.28%"
+  ]
+ },
+ {
+  "id": "refinance: 15-year fixed conventional||rate|None|180|None|None",
+  "topic_keywords": [
+   "refinance: 15-year fixed conventional"
+  ],
+  "values": [
+   "5.5%",
+   "6.75%"
+  ],
+  "correct_value": "6.75%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 6.75%",
+   "https://www.dupaco.com/mortgage-refi = 5.5%",
+   "https://www.dupaco.com/personal/loans/home-equity = 6.75%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 6.75%",
+   "https://www.dupaco.com/personal/loans/home-loans = 6.75%",
+   "https://www.dupaco.com/rates = 6.75%"
+  ]
+ },
+ {
+  "id": "refinance: 15-year fixed conventional||APR|None|180|None|None",
+  "topic_keywords": [
+   "refinance: 15-year fixed conventional"
+  ],
+  "values": [
+   "5.623%",
+   "6.88%"
+  ],
+  "correct_value": "6.88%",
+  "winner_page": "https://www.dupaco.com/rates",
+  "pages": [
+   "https://www.dupaco.com/learn/master-your-money/homeownership/ = 6.88%",
+   "https://www.dupaco.com/mortgage-refi = 5.623%",
+   "https://www.dupaco.com/personal/loans/home-equity = 6.88%",
+   "https://www.dupaco.com/personal/loans/home-improvement-loan/ = 6.88%",
+   "https://www.dupaco.com/personal/loans/home-loans = 6.88%",
+   "https://www.dupaco.com/rates = 6.88%"
+  ]
+ }
+]

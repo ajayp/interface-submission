@@ -1,0 +1,14 @@
+[
+ {"id": "r1", "topic_keywords": ["achieve", "money market"], "values": ["3.25%", "3.66%"], "correct_value": "3.66%"},
+ {"id": "r2", "topic_keywords": ["auto", "60-month", "60 month"], "values": ["5.34%", "5.39%"], "correct_value": "5.39%"},
+ {"id": "r3", "topic_keywords": ["1st rate checking"], "values": ["3.00%", "2.50%"], "correct_value": "2.50%"},
+ {"id": "r4", "topic_keywords": ["mortgage rate relief", "rate relief"], "values": ["5.196%", "5.210%", "4.967%"], "correct_value": "5.196%"},
+ {"id": "m1", "topic_keywords": ["30-year fixed", "30 year fixed"], "values": ["6.000%", "7.25%"], "correct_value": "7.25%"},
+ {"id": "m2", "topic_keywords": ["30-year fixed", "30 year fixed"], "values": ["6.037%", "7.29%"], "correct_value": "7.29%"},
+ {"id": "m3", "topic_keywords": ["refinance", "30-year fixed"], "values": ["6.049%", "7.30%"], "correct_value": "7.30%"},
+ {"id": "c1", "topic_keywords": ["assets"], "values": ["$3.6 billion", "$3.2 billion"], "correct_value": "$3.6 billion"},
+ {"id": "c2", "topic_keywords": ["employees"], "values": ["600", "700"], "correct_value": "600"},
+ {"id": "c3", "topic_keywords": ["branch"], "values": ["22", "23"], "correct_value": "22"},
+ {"id": "c4", "topic_keywords": ["members", "membership"], "values": ["182,627", "170,000"], "correct_value": "182,627"},
+ {"id": "c5", "topic_keywords": ["counties"], "values": ["118", "112", "108"], "correct_value": "118"}
+]

@@ -1,0 +1,21 @@
+{
+ "source": "task 5 conversation round 1 (tasks/openai_tests/task5_round1_reply.md)",
+ "edits": [
+  {
+   "find": "When the question names no tier and a product's rate varies by tier (loan amount, balance, credit), always give that product's full range from its lowest to its highest value, and say what it depends on; that range counts as the product's one value under rule 7.",
+   "replace": "When the question names no tier and the requested rate varies by tier, give the applicable range with its endpoint tiers; if a range would hide a distinct intermediate rate or a reversal across tiers, give the applicable tier-to-rate mappings instead. Keep any companion measures paired with their respective rows. Preserve stated boundaries; do not convert overlapping quoted examples into inferred nonoverlapping tiers."
+  },
+  {
+   "find": "Never list old, alternative or other-tier values in `answer`.",
+   "replace": "Never list superseded or out-of-scope values in `answer`. Applicable ranges, tier mappings and separately labeled companion measures within the requested scope are not conflicting alternatives; they do not authorize values for an unrequested offering, tier, term or promotion."
+  },
+  {
+   "find": "Apply the following distinction before deciding that information is insufficient.",
+   "replace": "First check whether the excerpts explicitly state the requested value or an applicable range at the requested specificity. If a question requests a specific numeric value and that check fails, use the exact standard refusal below with no number, even if descriptions, conditions, adjustment limits or related values are available; partial-information and qualifier rules do not override this requirement. For other questions, apply the following distinction before deciding that information is insufficient."
+  },
+  {
+   "find": "Besides the values asked for, include only the tier they apply to: no effective dates, minimum deposits, payment examples or other figures unless the question asks for them.",
+   "replace": "Alongside each requested value, include the conditions needed to identify who earns or qualifies for it, including applicable tier boundaries, minimum to earn, and any distinct minimum to open required for that value. Preserve stated qualifiers such as variable or as low as. For a requested interest rate, include its corresponding APR when stated; for a deposit question asking for the rate or dividend rate, include both the dividend rate and APY when stated. Resolve scope and source conflicts before adding details, using matching rows and directly applicable disclosures; do not borrow companion values or conditions from superseded records. Omit effective dates, payment examples and unrelated figures unless requested."
+  }
+ ]
+}

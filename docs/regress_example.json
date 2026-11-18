@@ -1,0 +1,17 @@
+{
+  "repo": ".",
+  "runs": 3,
+  "workers": 3,
+  "fact_cache": "results/heldout/fact_cache.json",
+  "arms": {
+    "base": {"env": {}},
+    "new": {"env": {"MY_SOLUTION_EXAMPLE_SWITCH": "1"}}
+  },
+  "sets": [
+    {"name": "public", "eval": "eval/public_eval.jsonl"},
+    {"name": "heldout", "eval": "eval/subsets/heldout.jsonl"},
+    {"name": "temporal", "eval": "eval/subsets/heldout_temporal.jsonl", "repeat_sample": 0},
+    {"name": "dates", "eval": "eval/subsets/standin_dates.jsonl", "repeat_sample": 0},
+    {"name": "hist", "eval": "eval/subsets/history_slice.jsonl", "repeat_sample": 0}
+  ]
+}

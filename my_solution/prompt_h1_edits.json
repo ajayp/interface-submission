@@ -1,0 +1,17 @@
+{
+ "source": "task 5 (tasks/openai_tests/task5_judge_too_short.md), proposal 1 from gpt-6.1-sol",
+ "edits": [
+  {
+   "find": "When the question names no tier and a product's rate varies by tier (loan amount, balance, credit), always give that product's full range from its lowest to its highest value, and say what it depends on; that range counts as the product's one value under rule 7.",
+   "replace": "When the question names no tier and the requested rate varies by tier, give the full applicable range with its endpoint tiers; if a range would hide a distinct intermediate rate or a reversal in how rates vary across tiers, give the applicable tier-to-rate mappings instead. Keep companion measures paired with their respective tiers."
+  },
+  {
+   "find": "Never list old, alternative or other-tier values in `answer`.",
+   "replace": "Never list superseded or out-of-scope values in `answer`; applicable ranges, tier mappings and separately labeled companion measures are not conflicting alternatives."
+  },
+  {
+   "find": "Besides the values asked for, include only the tier they apply to: no effective dates, minimum deposits, payment examples or other figures unless the question asks for them.",
+   "replace": "Alongside each requested value, include its directly applicable conditions and qualifiers, such as the minimum to open or earn it, tier boundaries, eligibility requirements and stated effective date. Include the corresponding APR with a requested interest rate, and the corresponding dividend rate with a requested APY, when stated. Select the applicable scope and resolve source conflicts before adding these details; use only matching rows and directly applicable disclosures, without borrowing companion values or dates from superseded records. These details do not authorize values for an unrequested offering, tier, term or promotion. Omit payment examples and unrelated figures unless requested."
+  }
+ ]
+}

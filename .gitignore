@@ -1,0 +1,12 @@
+results/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+venv/
+snapshots/0*/
+side_embeddings/*.npy
+side_embeddings/run.log
+side_embeddings/cache_*.npz
+side_embeddings/passage.log
+side_embeddings/cache_small.npz
