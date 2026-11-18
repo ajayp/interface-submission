@@ -40,7 +40,7 @@ Three flows, each drawn in `workflow.md`:
 
 ### Query understanding (LLM, Decisions API)
 
-Before any search, an LLM reads the question, so the rest of the system knows what is being asked. This uses OpenAI's Decisions API (`POST /v1/decisions`), which runs `gpt-6-luna` but returns only labels and their probabilities, with no generated text. That makes it fast: about 0.3 s, against about 1.75 s for a full model call, with equal accuracy on the public set. One request asks 29 questions about the member's question and gets all the labels back.
+Before any search, an LLM reads the question, so the rest of the system knows what is being asked. This uses OpenAI's Decisions API (`POST /v1/decisions`), which runs `gpt-6-luna` but returns only labels and their probabilities, with no generated text. That makes it fast: about 0.3 s. One request asks 29 questions about the member's question and gets all the labels back.
 
 **What it labels**
 
