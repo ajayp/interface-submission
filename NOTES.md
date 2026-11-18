@@ -2,6 +2,8 @@
 
 ## Contents
 
+- [Concepts at a glance](#concepts-at-a-glance)
+
 1. [Setup, keys and cost](#1-setup-keys-and-cost)
 2. [How it works](#2-how-it-works)
 3. [How "current" is decided](#3-how-current-is-decided)
@@ -14,6 +16,20 @@
 A question-answering system over five dated crawls of a credit union's website. It answers with the **current**, correctly-tiered value, a source, and an honest "I don't know" when the site does not say. It also lists where the website contradicts itself.
 
 The submission is `my_solution/` (entry point `solution.py`, `build()`). Diagrams of the three flows are in [`workflow.md`](workflow.md).
+
+## Concepts at a glance
+
+| Concept | What it is here | Where |
+|---|---|---|
+| LLM query understanding | One Decisions call labels each question (section, rate type, date, change) and steers the search | [section 2](#2-how-it-works), [section 4](#4-key-decisions) |
+| Structured fact extraction | Each rate table is read once by the model into facts; rate and fee questions are answered from the winning fact | [section 2](#2-how-it-works) |
+| Hybrid search | Keyword search plus meaning search over short text windows | [section 2](#2-how-it-works), [`workflow.md`](workflow.md) |
+| Source trust and recency | Rate sheet over product page over promotion over everything else, then the later effective date | [section 3](#3-how-current-is-decided) |
+| Time-aware answers | Dated questions are answered from the right website copy; "what changed" questions compare copies | [section 3](#3-how-current-is-decided), [`workflow.md`](workflow.md) |
+| Grounded answers and refusals | The model sees only the evidence, and the answer becomes "I don't know" when the site does not say | [section 5](#5-how-an-answer-is-produced-and-checked) |
+| Conflict detection | `conflicts()` finds where the site contradicts itself, and picks the value to believe | [section 2](#2-how-it-works), [`docs/gold/`](docs/gold/README.md) |
+| LLM-as-a-judge | A stand-in judge re-scores finished runs, for comparing versions | [section 6](#6-evaluation-including-the-llm-judge), [`judge-workflow.md`](judge-workflow.md) |
+| Prompt tuning with an LLM | An OpenAI model proposes prompt edits, tested with the judge | [`judge-workflow.md`](judge-workflow.md), [`docs/prompt_tuning/`](docs/prompt_tuning/README.md) |
 
 ## 1. Setup, keys and cost
 
