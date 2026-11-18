@@ -7,8 +7,7 @@ conflicts() v2: contradictions in the newest website copy, found without guessin
    the product words (personal vs business, purchase vs refinance, IRA, jumbo, special must agree) (fact_match.py).
 4. The winner: rate sheet > product page > promo page > other, then the later "effective" date, then the later fetch date;
    a value the page itself says has ended always loses. Copies of a stale table on several pages never outvote the rate sheet.
-Measured against a hand-checked answer key (tasks/conflicts_answer_key.md): 35/35 table conflicts, 0 false.
-Scenarios: tasks/conflict_scenarios.md.
+Measured against a hand-checked answer key (docs/gold/conflicts_gold_table_key.json): 35/35 table conflicts, 0 false.
 """
 from __future__ import annotations
 

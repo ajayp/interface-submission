@@ -2,8 +2,8 @@
 """
 One resumable regression run: every eval set against every arm (a set of environment switches), N runs each, scored with the judge.
 
-    python my_solution/regress.py --config tasks/regress_example.json --out results/regress          # run what is missing, then the table
-    python my_solution/regress.py --config tasks/regress_example.json --out results/regress --table  # only read finished runs
+    python my_solution/regress.py --config docs/regress_example.json --out results/regress          # run what is missing, then the table
+    python my_solution/regress.py --config docs/regress_example.json --out results/regress --table  # only read finished runs
 
 A run is finished when <out>/<set>_<arm><n>/judged.jsonl exists, so a restart of the machine loses at most the runs in progress:
 start the same command again and it skips everything done. Arms are interleaved (run 1 of each arm, then run 2 ...) so API drift

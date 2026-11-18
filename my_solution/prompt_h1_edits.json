@@ -1,5 +1,5 @@
 {
- "source": "task 5 (tasks/openai_tests/task5_judge_too_short.md), proposal 1 from gpt-6.1-sol",
+ "source": "task 5 (docs/prompt_tuning/task5_judge_too_short.md), proposal 1 from gpt-6.1-sol",
  "edits": [
   {
    "find": "When the question names no tier and a product's rate varies by tier (loan amount, balance, credit), always give that product's full range from its lowest to its highest value, and say what it depends on; that range counts as the product's one value under rule 7.",

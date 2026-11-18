@@ -53,7 +53,7 @@ FACT_K = 12
 BOILERPLATE_MIN_PAGES = 10**9   # off: removing repeated paragraphs also removed real facts (Hy-Vee closure, join link)
 _RANK_ORDER = {"rate_sheet": 0, "product": 1, "promo": 2, "secondary": 3}
 # Query understanding (gpt-6-luna turns the question into search parameters). Values are the defaults
-# until the slice-1/2 measurements in tasks/todo.md choose them.
+# until slice measurements choose them.
 # "synonyms" = hand-written synonym list, no LLM call at question time (the default: ~2 s faster).
 # "none" | "keywords" | "categories" | "both" use the LLM query-understanding call instead.
 QU_MODE = "both"
@@ -64,7 +64,7 @@ CAT_BOOST = 10.0
 QUAL_BOOST = 0.0
 VALUE_INTENTS = ("rate", "fee")
 VALUE_QUESTION_RE = re.compile(r"\b(rates?|apr|apy|dividend|interest|fees?|costs?|charges?|price)\b", re.I)
-# Spelling help (spellfix.py, default on since 2026-11-17, results in tasks/casual_todo.md; MY_SOLUTION_SPELLFIX=0 rolls back):
+# Spelling help (spellfix.py, default on since 2026-11-17; MY_SOLUTION_SPELLFIX=0 rolls back):
 # question words the site does not use are matched to a site word one edit away and ADDED to the search text and the synonym lookup.
 SPELLFIX = os.getenv("MY_SOLUTION_SPELLFIX", "1") != "0"
 # Search cleanup (experiment switch, default off until the 40-question regression says otherwise):
@@ -726,7 +726,7 @@ class Knowledge:
 # "What changed" questions (did it change, what was it before, is it higher than in June): the same search is run in every website
 # copy and the answer model gets each piece with the dates of the copies it was seen in. Only when the Decisions label says the question
 # is about change AND the question contains a change word (decisions_understanding.py). Default on since the Step 3 test
-# (tasks/todo-fable.md): change questions 0.28 -> 1.00 on eval/subsets/history_slice.jsonl, no practice question takes this path. 0 rolls back.
+# change questions 0.28 -> 1.00 on eval/subsets/history_slice.jsonl, no practice question takes this path. 0 rolls back.
 HISTORY = os.getenv("MY_SOLUTION_HISTORY", "1") == "1"
 HISTORY_FACTS_PER_COPY, HISTORY_FACT_LINES = 6, 16
 HISTORY_PIECES_PER_COPY, HISTORY_PIECES = 4, 8

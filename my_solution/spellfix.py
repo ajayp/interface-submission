@@ -11,7 +11,7 @@ Decisions call, the embedding search and the answer model still get the question
 Guards (each one stops a wrong correction): a word is left alone if it is a stop word, shorter than 5 letters, or the site uses
 it 3 or more times; a candidate must share the first letter, be at least 10 times as common on the site as the typed word
 (and appear 5 or more times), and be 1 edit away (2 edits for words of 9 or more letters; a swap of neighbours counts as 1).
-Numbers are never touched. Measured on a scratch copy: tasks/casual_todo.md.
+Numbers are never touched.
 """
 from __future__ import annotations
 

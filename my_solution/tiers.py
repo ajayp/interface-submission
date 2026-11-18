@@ -1,5 +1,5 @@
 """
-Source tiers (see CLAUDE.md "Decisions so far"; to be written up in NOTES.md).
+Source tiers (written up in NOTES.md, section 3).
 
 Tier 1 = authoritative: rate sheets first, then product/service pages, promo/landing pages last.
 Tier 2 = everything else: newsroom, blog, business/resources articles, dated paths, calculators,

@@ -14,7 +14,6 @@ Form tables (loan applications) are skipped by an explicit test; the reason is r
 
 Run from the repo root for a summary of all five website copies:
     python my_solution/table_parse.py            (writes results/experiments/tables/cells.jsonl and summary.json)
-Scenario list this must handle: tasks/conflict_scenarios.md
 """
 from __future__ import annotations
 

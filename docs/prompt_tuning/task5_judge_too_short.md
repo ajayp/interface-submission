@@ -1,8 +1,8 @@
 # Task 5: the answer is correct, but the judge marks it down as too short
 
-Cases (in `../playground_current/judge/`): **dup-001** 17-month special certificate APY; **dup-052** checking account rates;
+Cases (in `cases/`): **dup-001** 17-month special certificate APY; **dup-052** checking account rates;
 **dup-009** 30-year mortgage rate; **dup-050** Bright Savings rate; **dup-040** credit card rates.
-Guards (in `../playground_current/judge/guard/`, must keep passing): **dup-016**, **dup-017** (stale value on another page),
+Guards (in `cases/guard/`, must keep passing): **dup-016**, **dup-017** (stale value on another page),
 **dup-045** (balance tier), **dup-035** (standard vs promotional card rate).
 
 ## What we know
@@ -71,7 +71,7 @@ Proposal 1 (`task5_proposal1.md`, variant H1), judge = `gpt-6.1-sol` stand-in. N
 | guards (4) | all correct, no forbidden value; each answer longer | 1.0 -> 1.0 | pass |
 | 40 questions x 3 | accuracy 0.854 = 0.854; judged 0.806 -> 0.813; 0 stale values | | dup-147 (should refuse) failed in 1 of 3 runs |
 
-Not adopted. See `tasks/todo-fable.md`, "Step 4, part 2".
+Not adopted.
 
 ## Conversation through the API (3 rounds, gpt-6.1-sol): outcome = keep the current prompt
 

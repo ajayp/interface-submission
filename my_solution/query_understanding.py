@@ -2,7 +2,7 @@
 Query understanding: one gpt-6-luna call turns a member question into search parameters.
 
 Pattern from the cheat-at-search "Query Categories" notebooks (categories only from a fixed list, with a
-"none" option), plus fields from the user's earlier solution-v5.py (product, term, rate metric, tier),
+"none" option), plus fields from an earlier solution (product, term, rate metric, tier),
 now filled by the LLM instead of keyword rules. Prompt layout follows ajayp/feature-skill
 models/openai-prompt-guide.md; the developer message is identical on every call so it is cached.
 """

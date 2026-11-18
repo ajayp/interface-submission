@@ -18,7 +18,7 @@ When we combined these snapshots, our system **gave members wrong or out-of-date
 
 ## Our solution (read this before running it)
 
-Our submission is `my_solution/` (see `my_solution/NOTES.md` for how it works). Things that are easy to trip over:
+Our submission is `my_solution/`. **Start with `NOTES.md`** (how it works, the decisions, the results) and `workflow.md` (three diagrams: loading, answering, listing contradictions). Things that are easy to trip over:
 
 - **Python 3.11** and `pip install -r my_solution/requirements.txt` (the pinned `openai` package is needed; older ones lack the Decisions API). The scorer itself runs on 3.9+, our folder does not promise that.
 - **It needs `OPENAI_API_KEY`** in the environment (never in the repo). Without it the system still runs, but it can only return raw page text, so scores are far lower. Check the warning printed while loading.
@@ -29,11 +29,21 @@ Our submission is `my_solution/` (see `my_solution/NOTES.md` for how it works). 
 ## What's in the box
 
 ```
-snapshots_zip/           the five website downloads, one zip per date (oldest first)
+snapshots_zip/           the five website downloads, one zip per date (not included in this repo: the data is for this event only)
 snapshots/README.md      what each download is and what changed between them
 eval/public_eval.jsonl   40 practice questions with expected answers
 starter/solution.py      a working (but naive) solution to copy from
 harness/                 the scorer we will use (same one you can run)
+```
+
+Added by us:
+
+```
+my_solution/             the submission (solution.py, build()); its dev tools are listed in NOTES.md
+NOTES.md, workflow.md    how it works, decisions and results; the three diagrams
+eval/subsets/            our own question sets with expected answers (held-out, dated, history, typos)
+docs/gold/               hand-made answer sheets for conflicts() and how to score them
+docs/prompt_tuning/      the LLM-assisted prompt-tuning rounds and their outcome
 ```
 
 **You don't need to unzip anything.** The first time you run the scorer (below), it unpacks the zips into `snapshots/`, with one folder per download, each holding a `manifest.json` (url, title, date) and the pages as `pages/*.md`. After that the folders are there to browse. If you'd rather look first, unzip them yourself into `snapshots/`; the scorer leaves existing folders alone.
