@@ -89,6 +89,14 @@ WINDOW_WARMUP = os.getenv("MY_SOLUTION_WINDOW_WARMUP", "1") == "1"   # build eac
 HYBRID_EXTRA = 3
 WINDOW_EXTRA_BY_INTENT = {"eligibility": 6, "list": 6, "fact_about_dupaco": 6, "rate": 0, "fee": 0}
 WINDOW_EXTRA_DEFAULT = 3
+# "Are the hours the same at every branch?" (experiment switch MY_SOLUTION_HOURS_SCHEDULES, default on; set 0 to turn off). The keyword top 8 fill up with branch-finder
+# cards and the pages that state a second schedule rank around 30th, so the answer AI sees one schedule only. For an hours question that asks about
+# sameness or difference, up to HOURS_SCHEDULE_EXTRA more pieces that carry a lobby/drive-up schedule are appended (nothing else changes).
+HOURS_SCHEDULES = os.getenv("MY_SOLUTION_HOURS_SCHEDULES", "1") == "1"
+HOURS_SCHEDULE_EXTRA = 5
+SAMENESS_RE = re.compile(r"\b(same|differ\w*|vary|varies|varying|uniform|consistent|identical)\b", re.I)
+_SCHED_TIME_RE = re.compile(r"\d{1,2}(?::\d\d)?\s*(?:a\.?m\.?|p\.?m\.?)", re.I)
+_SCHED_DAY_RE = re.compile(r"\b(mon|tue|wed|thu|fri|sat|sun)", re.I)
 # Reasoning effort for hours questions only (experiment switch MY_SOLUTION_HOURS_EFFORT = none | low | medium; default none = unchanged).
 HOURS_EFFORT = os.getenv("MY_SOLUTION_HOURS_EFFORT") or None
 
@@ -306,6 +314,35 @@ class Knowledge:
             out = out + self._window_extras(question, out, as_of, qu)
         if SECOND_PASS and k == TOP_K and (qu or {}).get("answer_terms"):
             out = out + self._second_pass(question, out, as_of, qu)
+        if HOURS_SCHEDULES and k == TOP_K and (qu or {}).get("intent") == "hours" and SAMENESS_RE.search(question):
+            out = out + self._schedule_extras(question, out, as_of, qu)
+        return out
+
+    def _schedule_extras(self, question: str, first, as_of, qu):
+        """Up to HOURS_SCHEDULE_EXTRA best-ranked pieces (not already in `first`) whose text states a lobby or drive-up schedule:
+        the word lobby/drive plus at least two clock times and a weekday. Branch-finder pages are skipped (addresses only)."""
+        seen = {" ".join(c.text.split()).lower() for _, c, _ in first}
+        seen_sched: set = set()
+        out = []
+        for score, c in self.index_for(question, as_of, qu).search(search_text(question, qu, True), k=3000, boost=self.boost):
+            t = c.text
+            if c.url.rstrip("/").endswith("/contact"):
+                continue
+            # the times must follow the word right away ("Lobby Monday-Friday: 9 a.m.-5 p.m."), not sit elsewhere in an article that mentions the lobby
+            windows = [t[m.end():m.end() + 160] for m in re.finditer(r"\b(lobby|drive-?\s?(?:up|through|thru))", t, re.I)]
+            windows = [w for w in windows if len(_SCHED_TIME_RE.findall(w)) >= 2 and _SCHED_DAY_RE.search(w)]
+            if not windows:
+                continue
+            # one piece per distinct schedule: the same hours repeated across articles would use up the slots
+            sched = re.sub(r"[^a-z0-9]", "", windows[0].lower())[:70]
+            key = " ".join(t.split()).lower()
+            if key in seen or sched in seen_sched:
+                continue
+            seen.add(key)
+            seen_sched.add(sched)
+            out.append((score, c, [c.url]))
+            if len(out) == HOURS_SCHEDULE_EXTRA:
+                break
         return out
 
     def _hybrid(self, question: str, as_of, qu, hits):
@@ -447,7 +484,7 @@ class Knowledge:
         if REFUSE_BEFORE_FIRST and self._before_first_snapshot(question, as_of, qu):
             return Answer(text=BEFORE_FIRST_REFUSAL, confident=False)
         taken_on, snapshot_id, _ = self._snapshot_for(question, as_of, qu)
-        key = (" ".join(question.lower().split()), snapshot_id)
+        key = (" ".join(question.lower().split()), snapshot_id, as_of)   # as_of shapes the "Question date" note, so it is part of the key
         if key in self._cache:
             return self._cache[key]
         measure = count_question(question, (qu or {}).get("website_date") or as_of) if COUNT_ANSWERS else None

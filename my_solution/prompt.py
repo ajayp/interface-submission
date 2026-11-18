@@ -254,6 +254,23 @@ if os.getenv("MY_SOLUTION_OTHER_BLOCK", "1") == "1":
     INTENT_BLOCKS["other"] = _OTHER
 
 
+# "Same for all branches?" (experiment switch MY_SOLUTION_HOURS_SAME, default on; set 0 to turn off): replaces one bullet of the hours block (no gate, no extra
+# bullet). Text proposed by ChatGPT after the gated-bullet and replacement-block experiments failed. Other hours questions keep the old meaning.
+HOURS_SAME = os.getenv("MY_SOLUTION_HOURS_SAME", "1") == "1"
+_SAME_OLD = "- If multiple branches have different schedules, identify the relevant schedules separately. Do not merge them into a single universal schedule or invent a typical schedule."
+_SAME_NEW = ("- If the question asks whether lobby hours are the same across all branches, locations or other applicable entities, two or more explicitly "
+             "documented, different lobby schedules associated with distinct named branches or locations are sufficient to establish that the schedules are "
+             "not all the same. Answer \"No\". Then give every distinct lobby schedule that appears in the excerpts, each with its branch or location name "
+             "and its complete days, opening times, closing times and closure conditions. Do not leave a documented "
+             "schedule out and do not merge schedules. Treat these as distinct entity-specific facts, not competing values for the same entity, so do not "
+             "suppress any of them under Rules 3 or 7 and do not hedge. Do not require evidence about every branch. Keep it compact: one clause per "
+             "schedule, no other commentary. End by asking which branch the member is interested in. Apply this instruction only when the question asks "
+             "about sameness or differences across entities and the excerpts explicitly establish at least two different schedules. For other hours "
+             "questions, identify different branch schedules separately without merging them into a universal schedule or inventing a typical schedule.")
+if HOURS_SAME and _SAME_OLD in INTENT_BLOCKS.get("hours", ""):
+    INTENT_BLOCKS["hours"] = INTENT_BLOCKS["hours"].replace(_SAME_OLD, _SAME_NEW)
+
+
 def intent_block_name(question: str, intent: Optional[str]) -> Optional[str]:
     """Which block applies: the question's wording wins over the label for counts ("how many")."""
     if _HOW_MANY.search(question or ""):
