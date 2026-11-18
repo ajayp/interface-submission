@@ -4,23 +4,12 @@ Answers credit-union members' questions from five dated crawls of the Dupaco web
 
 Built for the hackathon described in `Knowledge-Hackathon-Assignment.pdf`.
 
-## At a glance
+## Index
 
-```mermaid
-flowchart TD
-    S[(Five dated crawls of the website)] --> L[Load once<br/>structured facts from rate tables,<br/>search indexes]
-    Q([Member question]) --> U[[LLM reads the question<br/>labels: topic, rate type, date, change]]
-    L --> E[Evidence from the right website copy]
-    U --> E
-    E --> A[[LLM answers from the evidence<br/>one value, the right tier, sources]]
-    A --> C{Checks}
-    C -- passes --> R([Answer and source])
-    C -- the site does not say --> N([I don't know])
-    L --> X[conflicts<br/>where the site contradicts itself,<br/>and which value to believe]
-    R -.-> J[[LLM judge, development only<br/>re-scores finished runs]]
-```
-
-Boxes with double edges are calls to an LLM. The details are in [`NOTES.md`](NOTES.md), [`workflow.md`](workflow.md) and [`judge-workflow.md`](judge-workflow.md).
+- [Start here](#start-here)
+- [Run it](#run-it)
+- [What is in the repo](#what-is-in-the-repo)
+- [At a glance](#at-a-glance)
 
 ## Start here
 
@@ -53,3 +42,21 @@ docs/gold/          hand-made answer sheets for conflicts(), and how to score th
 docs/prompt_tuning/ the LLM-assisted prompt-tuning rounds and what came out of them
 starter/            the organizers' naive baseline
 ```
+
+## At a glance
+
+```mermaid
+flowchart TD
+    S[(Five dated crawls of the website)] --> L[Load once<br/>structured facts from rate tables,<br/>search indexes]
+    Q([Member question]) --> U[[LLM reads the question<br/>labels: topic, rate type, date, change]]
+    L --> E[Evidence from the right website copy]
+    U --> E
+    E --> A[[LLM answers from the evidence<br/>one value, the right tier, sources]]
+    A --> C{Checks}
+    C -- passes --> R([Answer and source])
+    C -- the site does not say --> N([I don't know])
+    L --> X[conflicts<br/>where the site contradicts itself,<br/>and which value to believe]
+    R -.-> J[[LLM judge, development only<br/>re-scores finished runs]]
+```
+
+Boxes with double edges are calls to an LLM. The details are in [`NOTES.md`](NOTES.md), [`workflow.md`](workflow.md) and [`judge-workflow.md`](judge-workflow.md).
