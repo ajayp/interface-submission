@@ -1,5 +1,16 @@
 # NOTES
 
+## Contents
+
+1. [Setup, keys and cost](#1-setup-keys-and-cost)
+2. [How it works](#2-how-it-works)
+3. [How "current" is decided](#3-how-current-is-decided)
+4. [Key decisions](#4-key-decisions)
+5. [How an answer is produced and checked](#5-how-an-answer-is-produced-and-checked)
+6. [Evaluation, including the LLM judge](#6-evaluation-including-the-llm-judge)
+7. [Results](#7-results)
+8. [Known limits](#8-known-limits)
+
 A question-answering system over five dated crawls of a credit union's website. It answers with the **current**, correctly-tiered value, a source, and an honest "I don't know" when the site does not say. It also lists where the website contradicts itself.
 
 The submission is `my_solution/` (entry point `solution.py`, `build()`). Diagrams of the three flows are in [`workflow.md`](workflow.md).
