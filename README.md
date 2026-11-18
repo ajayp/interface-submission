@@ -1,105 +1,35 @@
-# Hackathon: Build a Knowledge System That Knows What's True *Now*
+# Dupaco knowledge system
 
-## The problem in one minute
+Answers credit-union members' questions from five dated crawls of the Dupaco website. Each answer gives the **current**, correctly-tiered value, a source, and an honest "I don't know" when the site does not say. It also lists the places where the website contradicts itself.
 
-Our assistant answers credit-union members' questions ("What's the 6-month certificate rate?", "How much is a lost debit card?") using the credit union's own website.
+Built for the hackathon described in `Knowledge-Hackathon-Assignment.pdf`.
 
-We download (crawl) that website again and again over time. Each download is a **snapshot**. Websites are messy:
+## Start here
 
-- A rate changes, but an old page or PDF still shows the old number.
-- A promotion ends, but its page is never taken down.
-- One page lists the **rate**, another the **APY**, and they look like they disagree.
-- A table has tiers (by balance, by term). Read it carelessly and every tier looks like a conflict.
-- Old newsletters and press releases describe offers from years ago.
+- [`NOTES.md`](NOTES.md): how it works, how "current" is decided, the key decisions, the results and the known limits.
+- [`workflow.md`](workflow.md): three diagrams (loading, answering one question, listing contradictions).
 
-When we combined these snapshots, our system **gave members wrong or out-of-date answers**. Every eval question in this kit comes from a real problem like that.
+## Run it
 
-**Your mission:** build a system that reads the snapshots in date order and answers questions the way a careful human expert would: with the **current** value, the **right** tier, a **source**, and an honest "I don't know" when the site doesn't say.
-
-## Our solution (read this before running it)
-
-Our submission is `my_solution/`. **Start with `NOTES.md`** (how it works, the decisions, the results) and `workflow.md` (three diagrams: loading, answering, listing contradictions). Things that are easy to trip over:
-
-- **Python 3.11** and `pip install -r my_solution/requirements.txt` (the pinned `openai` package is needed; older ones lack the Decisions API). The scorer itself runs on 3.9+, our folder does not promise that.
-- **It needs `OPENAI_API_KEY`** in the environment (never in the repo). Without it the system still runs, but it can only return raw page text, so scores are far lower. Check the warning printed while loading.
-- **Loading takes about 3 minutes and about $0.10** (one model call per rate table); each full run of 40 answers costs a few cents.
-- Run it with `python harness/run_eval.py --submission my_solution --eval eval/public_eval.jsonl`. Score changes need several runs: single runs sit inside the model's run-to-run noise.
-- The `snapshots/` data is for this event only; do not redistribute it.
-
-## What's in the box
-
-```
-snapshots_zip/           the five website downloads, one zip per date (not included in this repo: the data is for this event only)
-snapshots/README.md      what each download is and what changed between them
-eval/public_eval.jsonl   40 practice questions with expected answers
-starter/solution.py      a working (but naive) solution to copy from
-harness/                 the scorer we will use (same one you can run)
-```
-
-Added by us:
-
-```
-my_solution/             the submission (solution.py, build()); its dev tools are listed in NOTES.md
-NOTES.md, workflow.md    how it works, decisions and results; the three diagrams
-eval/subsets/            our own question sets with expected answers (held-out, dated, history, typos)
-docs/gold/               hand-made answer sheets for conflicts() and how to score them
-docs/prompt_tuning/      the LLM-assisted prompt-tuning rounds and their outcome
-```
-
-**You don't need to unzip anything.** The first time you run the scorer (below), it unpacks the zips into `snapshots/`, with one folder per download, each holding a `manifest.json` (url, title, date) and the pages as `pages/*.md`. After that the folders are there to browse. If you'd rather look first, unzip them yourself into `snapshots/`; the scorer leaves existing folders alone.
-
-## What you must hand in
-
-A folder with a file called `solution.py`, containing a `build()` function that returns an object with **three methods**:
-
-| Method | What it does |
-|---|---|
-| `ingest(snapshot)` | We call it once per snapshot, oldest first. Learn from it. |
-| `answer(question, as_of=None)` | Answer a member's question. Without `as_of`, answer from the newest snapshot. With a date, answer as the website stood on that day. |
-| `conflicts()` | List every place where the website contradicts itself, which value you believe is right, and why. |
-
-The exact shapes are defined in `harness/contract.py`; `starter/solution.py` already follows them. **Don't rename anything.** We plug your folder straight into our scorer.
-
-You can use any tools you like inside: search, embeddings, a graph, an LLM, plain rules. Add a `requirements.txt` if you need packages, and say in a short `NOTES.md` which API keys (if any) you need.
-
-## How to check your work
-
-From the top folder of this kit, run:
+Python 3.11 and an OpenAI API key (see `NOTES.md`, section 1, for the models and the cost).
 
 ```bash
-python harness/run_eval.py --submission starter --eval eval/public_eval.jsonl
+pip install -r my_solution/requirements.txt
+export OPENAI_API_KEY=<your key>
+python harness/run_eval.py --submission my_solution --eval eval/public_eval.jsonl
 ```
 
-The first run takes a few extra seconds while it unpacks the snapshots. Then it loads all five downloads into the starter, asks the 40 practice questions, and prints your score. To test your own solution, point `--submission` at your folder.
+- The harness unpacks the website crawls from `snapshots_zip/` on the first run. That folder is not in this repo, because the data is for the hackathon only. Put the five zips there first. `snapshots/README.md` describes each crawl.
+- Loading takes about 3 minutes and about $0.10. A full run of the 40 public questions then costs a few cents.
+- A single run sits inside the model's run-to-run noise, so compare changes over three runs.
 
-The starter scores low on purpose. Watch your score go up as you improve. Needs Python 3.9 or newer.
+## What is in the repo
 
-## How you will be scored
-
-We run a **larger, hidden question set** with the same format and the same scorer. Four things count:
-
-| | Weight | What we look for |
-|---|---|---|
-| **Accuracy** | 55% | The current, correctly-tiered value is in your answer. Repeating an old or wrong value scores **zero** for that question, even if the right value is also there, so hedging by listing every number doesn't pay. Citing the right page earns a little extra. When the site doesn't say, the right answer is "I don't know". |
-| **Conflicts** | 15% | How many real contradictions you list in `conflicts()`, and whether you picked the right winner. |
-| **Consistency** | 15% | The same question asked in different words gets the same answer, and asking twice gives the same answer. |
-| **Speed** | 15% | How quickly you answer. Most answers in 2 seconds or less earns full marks; it drops to zero at 20 seconds. |
-
-Speed and consistency are **multiplied by your accuracy**: a fast or consistent system that's wrong doesn't earn those points. Ingest (loading the snapshots) isn't timed for scoring, but must finish within 30 minutes.
-
-Hidden questions include re-worded versions of the public ones, "as of" date questions, and questions about things that *changed* between snapshots.
-
-## A simple way to approach it
-
-1. **Read the snapshots yourself first.** (Run the scorer once to unpack them, or unzip `snapshots_zip/`.) Pick five topics (a rate, a fee, branch hours) and follow them across the dates. You'll quickly see the kinds of mess.
-2. **Keep history, not just the latest copy.** Remember *when* you saw each fact and *where*.
-3. **Decide what "current" means.** Is the newer page right? Does an official rate sheet beat a blog post? What about an expired promotion? Write your rules down.
-4. **Respect qualifiers.** "6-month" vs "12-month", "rate" vs "APY", "Prime Checking" vs "Prime Business Checking". These are different facts, not conflicts.
-5. **Be honest.** If the website doesn't say, don't guess.
-6. **Run the public eval often.** Read the questions you miss, not just the score.
-
-## Rules
-
-- Use only the snapshots provided to answer questions. No live website calls.
-- Each `answer` call must finish within 60 seconds.
-- The data is a real credit union's public website, shared for this event only. Don't redistribute it.
+```
+my_solution/        the submission: solution.py with build(), plus a few development tools (see NOTES.md, section 6)
+harness/            the organizers' scorer and a tiny selftest fixture
+eval/               the 40 public questions, and our own question sets in eval/subsets/
+docs/gold/          hand-made answer sheets for conflicts(), and how to score them
+docs/prompt_tuning/ the LLM-assisted prompt-tuning rounds and what came out of them
+starter/            the organizers' naive baseline
+```
