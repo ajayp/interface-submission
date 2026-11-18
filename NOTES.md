@@ -28,7 +28,13 @@ The submission is `my_solution/` (entry point `solution.py`, `build()`). Diagram
 Three flows, each drawn in `workflow.md`:
 
 1. **Loading** ([diagram](workflow.md#1-loading-the-snapshots-ingest-once-per-snapshot-untimed)). Each page is split by heading, with one piece per table row. Every website copy gets a keyword index, and every rate table is read once by the model into structured facts (product, term, tier, value, source, dates).
-2. **Answering** ([diagram](workflow.md#2-answering-one-question-answer-timed)). One Decisions call labels the question (section, rate type, is a date or a change asked). A Decisions call is an OpenAI call that returns labels with their probabilities and no generated text, which is why it takes about 0.3 s. The labels only steer the search and the answer. Rate and fee questions are answered from the facts, with only the winning value per product and tier shown to the model. Other questions use the best keyword pieces plus a few meaning-search pieces. The model returns one value with its sources.
+2. **Answering** ([diagram](workflow.md#2-answering-one-question-answer-timed)). In order:
+   - **Read the question.** One Decisions call (an OpenAI call that returns labels with probabilities and no generated text, about 0.3 s) labels it: section, rate type, is a date or a change asked.
+   - **Pick the website copy.** The newest by default, or the latest one on or before a date that is asked.
+   - **Gather evidence.** Rate and fee questions use the extracted facts, keeping only the winning value per product and tier. Other questions use the best keyword pieces plus a few meaning-search pieces. A count question ("how many branches") is answered by code, with no model call.
+   - **Answer.** The model sees only that evidence and returns one value, the right tier, its sources and a confidence flag.
+   - **Check.** If the model says it cannot answer, or a value was asked for and the answer has no new number, the answer becomes "I don't know". A rate question the facts do not settle falls back to a text search.
+   - **Return** the answer with the pages it came from.
 3. **Contradictions** ([diagram](workflow.md#3-listing-contradictions-conflicts-once-at-the-end)). Only the newest copy is read. Rate tables are read by code, rate sentences by one small model call each, and counts about the credit union (branches, employees, members, assets, counties) by fixed patterns.
 
 ## 3. How "current" is decided
