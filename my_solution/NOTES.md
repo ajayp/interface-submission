@@ -62,7 +62,7 @@ Real answers from the public set:
 ## 6. Evaluation, including the LLM judge
 
 - **Public set:** the organizers' scorer matches required values, zeroes an answer that contains a stale value, and gives credit for citing the right page.
-- **LLM judge:** the organizers' scorer has an optional judge (`--judge`). A stand-in, `my_solution/judge_eval.py`, re-scores a finished run with an OpenAI judge (`gpt-6.1-sol`): same question wording, same 1 / 0.5 / 0 scale and the same 50/50 blend as the scorer. It is used to compare two versions and to read why an answer was marked down. It is a development tool and is never used at answer time.
+- **LLM judge:** the organizers' scorer has an optional judge (`--judge`). A stand-in, `my_solution/judge_eval.py`, re-scores a finished run with an OpenAI judge (`gpt-6.1-sol`): same question wording, same 1 / 0.5 / 0 scale and the same 50/50 blend as the scorer. It is used to compare two versions and to read why an answer was marked down. It is a development tool and is never used at answer time. The workflow is drawn in [`judge-workflow.md`](../judge-workflow.md).
 
   ```bash
   python harness/run_eval.py --submission my_solution --eval eval/public_eval.jsonl --out results/run1
