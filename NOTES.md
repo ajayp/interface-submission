@@ -81,6 +81,8 @@ Before any search, an LLM reads the question, so the rest of the system knows wh
 
 - **Code checks back up the labels.** A date counts only if the label or the wording says so ("as of", "back in", a past-tense rate question) and the question contains a date. A change counts only if the label says so and the question has a change word, and it does not apply to "what was it before <date>". A "dividend rate" label becomes APY unless the question says "dividend".
 - **The question is passed as data**, not as instructions.
+- **Spelling help adds words, it never rewrites the question.** A typed word the site does not use gets the site word one edit away added to the search text (`spellfix.py`, no model call, `MY_SOLUTION_SPELLFIX=0` turns it off). It also merges split words and splits run-together ones. Guards stop wrong corrections: words under 5 letters or used 3 or more times on the site are left alone, and a correction must be at least 10 times as common on the site as the typed word. The model and the labels call still see the question as typed. Details in [`workflow.md`](workflow.md).
+- **Synonyms come from a hand-written list, not a model** (`synonyms.py`, general credit-union vocabulary such as CD and certificate). When any phrase of a group is in the question, the group's other phrases are added to the keyword search at half weight (`SYNONYM_WEIGHT = 0.5`), so the member's own words still count most. It applies to both the text search and the fact search, and words added by spelling help get their synonyms too. The list travels with the labels result, so if the labels call fails there is no synonym expansion. Details in [`workflow.md`](workflow.md).
 - **Some things stay in code.** Terms and amounts are read by pattern, search synonyms come from a hand-written list, and dates are parsed by code.
 - **If the call fails** (3 s timeout, one retry), the search runs on the plain question without labels.
 - **Known limit:** the section label is right about 78% of the time on my check, so it only steers the search and the answer.
@@ -110,9 +112,9 @@ Before any search, an LLM reads the question, so the rest of the system knows wh
 
 ## 5. How an answer is produced and checked
 
-The model sees only the evidence pieces, with their page type and dates, and must return one value, the sources it used, and a confidence flag. Then the code checks the reply:
+The model sees only the evidence pieces, with their page type and dates, and must return one value, the sources it used, and an answer type (`complete`, `partial` or `none`). Then the code checks the reply:
 
-- If the model says it cannot answer, or a value was asked for but the answer contains no new number, the answer becomes the standard refusal: "I don't know. That isn't listed on Dupaco's website, so please contact Dupaco directly."
+- If the answer type is `none`, or a value was asked for but the answer contains no new number, the answer becomes the standard refusal: "I don't know. That isn't listed on Dupaco's website, so please contact Dupaco directly."
 - The sources are the pages the model used, plus other pages that state the same value.
 - A refusal never contains a number.
 

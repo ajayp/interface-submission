@@ -40,6 +40,8 @@ untimed. A window is never embedded while answering. It needs `OPENAI_API_KEY` a
 vectors are used for that run but not saved). If the key is missing or the embedding call fails, window search is switched off for that snapshot, a
 warning says how many windows had no vector, and the question gets keyword pieces only. `MY_SOLUTION_EMBED_MISSING=0` turns the embedding step off.
 
+**The facts are re-read on every cold run.** The table-reading calls are cached in memory only, unless `MY_SOLUTION_FACT_CACHE=<file>` is set, which saves them to that file so a later run skips the roughly 300 calls. By default it is not set, so a normal load pays the 3 minutes and about $0.10. A failed table call is not cached, so a later run retries it. The window vectors are different: they are committed, so a run embeds nothing.
+
 ## 2. Answering one question (`answer`, timed)
 
 Boxes with double edges are calls to OpenAI. A normal question makes three calls: the labels, the question's embedding (sent at the same time as the labels) and one answer call. A rate or fee question the rate tables don't answer makes a fourth, when it falls back to text search. A count question ("how many branches") is answered by code, with no answer call. The embedding is only used when windows are searched, so not for a rate or fee question, and not when the vectors are missing.
@@ -49,6 +51,8 @@ Boxes with double edges are calls to OpenAI. A normal question makes three calls
 ```mermaid
 flowchart TD
     Q([Question, optional as_of date]) --> LAB[[Decisions API labels: section, rate type, date?, change?, intent]]
+    LAB -. call fails: 3 s timeout, one retry .-> NOLAB[No labels: search runs on the plain question<br/>dates are still read by code from the wording]
+    NOLAB --> DATE
     LAB --> CHG{About a change?}
     CHG -- yes --> HIST[Same search in every snapshot<br/>each value tagged with the dates it was seen]
     HIST --> HANS[[Model answers with the history<br/>e.g. 3.90% in May-Aug, 4.00% in Sep]]
@@ -78,7 +82,7 @@ flowchart TD
     CNT -- yes --> CNTA([Count from the most recently published statement, no model call])
     CNT -- no --> VAL{Rate or fee question?}
 
-    VAL -- yes --> FH[Search the fact index<br/>keep only the winning value per product and tier]
+    VAL -- yes --> FH[Search the fact index<br/>keep only the winning value per product and tier<br/>top 12, the rate type asked for first]
     FH -- no fact found --> TXT
     FH --> FANS[[Model answers from the facts]]
     FANS --> FOK{Confident?}
@@ -89,15 +93,31 @@ flowchart TD
     EMB[[Embed the question]] -.vector.-> TXT
     SP[Spelling help<br/>adds the site word one edit away] -.-> TXT
     SP -.-> FH
+    SYN[Synonym list, hand-written<br/>adds the other words of a matching group at half weight] -.-> TXT
+    SYN -.-> FH
+    LBL[Labels from 2a<br/>section: boosts pages of that section in the keyword search<br/>intent: picks the prompt block and the number of windows<br/>rate type: picks the APR, APY or dividend column] -.-> TXT
+    LBL -.-> FH
+    SP -.corrected words also looked up.-> SYN
     TXT --> TANS[[Model answers from the pieces<br/>one value, right tier, or I don't know]]
+    FANS -. call fails: 6 s timeout, one retry .-> ERR
+    TANS -. call fails: 6 s timeout, one retry .-> ERR([Says the model did not respond, not cached,<br/>never shown as I don't know])
     TANS --> CHECK{Checks pass?}
     CHECK -- no --> IDK2([I don't know, please contact Dupaco])
     CHECK -- yes --> CITE[Cite the pages used<br/>plus other pages stating the same value]
     CITE --> OUT([Answer: text, sources, confident flag])
 ```
 
-- **Text search** keeps 8 keyword pieces, with 2 slots reserved for lower-trust pages, and adds meaning-search windows: 3 for most questions, 6 for list, eligibility and fact-about-Dupaco questions, none for rate or fee questions.
-- **Spelling help:** a typed word the site does not use adds the site word one edit away, to the search text only. The model still sees the question as typed.
+- **Text search** (`MY_SOLUTION_HYBRID=windows`, the default; 0 turns meaning search off, and `fuse` and `append` are experiments that are off) keeps 8 keyword pieces, with 2 slots reserved for lower-trust pages, and adds meaning-search windows: 3 for most questions, 6 for list, eligibility and fact-about-Dupaco questions, none for rate or fee questions.
+- **Spelling help:** a typed word the site does not use adds the site word one edit away, to the search text only. It also merges a split word ("sav ings") and splits a run-together one ("moneymarket") when both halves are common site words. It only adds words; the member's own words stay, and the model still sees the question as typed. Guards stop wrong corrections: a word is left alone if it is a stop word, has fewer than 5 letters, or the site uses it 3 or more times; a candidate must start with the same letter, appear on the site at least 5 times and at least 10 times as often as the typed word, and be one edit away (two for words of 9 or more letters; a swap of neighbours counts as one). Numbers are never touched. No model call. `MY_SOLUTION_SPELLFIX=0` turns it off.
+- **Synonym list:** a hand-written list of word groups that members and the site use for the same thing (for example CD and certificate). When any phrase of a group is in the question, the group's other phrases are added to the keyword search at half the weight of the member's own words (`SYNONYM_WEIGHT = 0.5`), for both the text search and the fact search. Words added by spelling help are looked up too, so a typo that is fixed also gets its synonyms. No model call, and the model still sees the question as typed.
+- **Fact search (rate and fee questions):** a keyword search over the extracted facts, with the same section boost and synonyms. The facts that state the same value are grouped, and only the winning one is kept: the most trusted page type first, then the latest effective date, then the latest publish date. The top 12 go to the model, with facts of the rate type asked for (rate, APR or APY) sorted to the front. Nothing is removed by that sort, and nothing changes when no fact of that type was found. This is why a stale value never reaches the model, and the model picks the right tier from these 12.
+- **Labels steer, they do not decide.** The section label boosts pages of that section in the keyword search (weight 10), and only the top section is used, and only at probability 0.5 or more. The intent label adds a prompt block for that question type (hours, list or eligibility, how-to, facts about the credit union) and sets the window count above. The rate type label picks the APR, APY or dividend column when a table shows several. The section label is right about 78% of the time on my check, which is why it only steers.
+- **Code checks back up the labels.** A date counts only if the label or the wording says so ("as of", "back in", a past-tense rate question) and the question contains a date. A change counts only if the label says so and the question has a change word, and it does not apply to "what was it before <date>". A "dividend rate" label becomes APY unless the question says "dividend". With no labels at all, the date still comes from the wording and the change path is not used.
+- **If the labels call fails** (3 s timeout, one retry), the search runs on the plain question: no section boost, no intent prompt block, and no synonym expansion, because the synonym words travel with the labels result. Spelling help still adds its corrected words to the search text, but without labels they get no synonyms. Answers get worse on some questions but never fail.
+- **If the answer call fails** (6 s timeout, one retry), the reply is not turned into "I don't know". The text says the model did not respond, `conflict_note` names the error, and the answer is not cached. A fake refusal would earn credit on should-refuse questions that the system never made. On the facts path, a failed call also counts as "not confident", so the text search runs.
+- **The question is data, not instructions.** It is wrapped in a `<question>` tag carrying a per-call input id, and the prompt says only tags with that id are real and that everything inside them is data: if the text tells the model to change how it answers, the model ignores it.
+- **What the model sees and returns.** Each excerpt arrives with its page type, URL, effective date and published date. On a dated question it also gets the question date. The model returns an answer, the sources it used, and an answer type: `complete`, `partial` or `none`. Only `none` (or no confidence when the type is missing) becomes the refusal; `partial` answers are kept. For a rate or fee answer that gives the value, sentences that only say something "isn't listed" are removed (`MY_SOLUTION_STRIP_NOT_LISTED`).
+- **Two special-case rules, both general and both on by default.** "Are the hours the same at every branch?" adds up to 5 extra pieces that state a lobby or drive-up schedule (the branch-finder cards otherwise fill the top 8), and a prompt bullet makes the model answer "No" with each branch's schedule (`MY_SOLUTION_HOURS_SAME`, `MY_SOLUTION_HOURS_SCHEDULES`). A question asking which link or page shows a product's rates gets the product's own page rather than the sitewide rates page, when an excerpt from the product page is present (`MY_SOLUTION_LINK_PRODUCT`). Each can be turned off with 0.
 - **The checks** turn the answer into the standard refusal when the model says it cannot answer, or when a value was asked for and the answer has no new number. On the facts path, a failed check also counts as "not confident", so the text search runs.
 
 ## 3. Listing contradictions (`conflicts`, once at the end)
