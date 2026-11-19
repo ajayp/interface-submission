@@ -30,6 +30,8 @@ flowchart TD
 
 **What the saved vectors are.** A vector (an embedding) is a list of numbers that stands for the meaning of a piece of text. It is what lets the program find a window by meaning when the question uses different words from the page. One vector per window is kept in the `.npz` file, filed under a hash of the window's text. That has two effects: a paragraph that appears on all five website copies is embedded once, and when the site changes, only the windows whose text changed have no vector.
 
+**How pages are split.** Pages are split by heading with a re-implementation of LlamaIndex's `MarkdownNodeParser` (`split_sections` in `chunker.py`: same sections, no `llama-index` dependency). The table-row pieces and the meaning-search windows are custom.
+
 The windows are cut from the same pieces the keyword index uses, so a window can lose the heading that says what it is (the lobby-hours miss,
 dup-104).
 
