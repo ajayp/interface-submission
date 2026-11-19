@@ -59,8 +59,8 @@ Today BM25 and the embedding search run side by side and their results are only 
 
 ## Review (fill in after the run)
 
-Step 1 (retrieval only, 2026-11-19; 5 sets: public 40, slice1_reworded 10, heldout 22, typo 48, heldout_temporal 21). Caveat: run while the Luna API was
-down, so the Decisions labels were probably the code-side fallback (rerun when Luna is back; arms share the same labels, so the comparison is fair, the baseline may differ from normal).
+Step 1 (retrieval only, 2026-11-19; 5 sets: public 40, slice1_reworded 10, heldout 22, typo 48, heldout_temporal 21). Rerun 2026-11-19 with OpenAI back: identical numbers, 0 'decisions call failed' warnings, so the earlier
+suspicion of degraded labels was wrong (results/wormhole_step1d.json).
 Command: `python my_solution/wormhole_eval.py --eval <file> ... --arms "off|d2s|s2d|both|d2s:lift=8,minfg=6,terms=3"` (results/wormhole_step1*.json)
 
 - s2d (pooled BM25 vectors): worse on every set: public 35->31, typo 48->44, temporal 17->14 gold hits. Pooling the BM25 pieces only pulls toward what BM25 already ranked. Dropped.
@@ -70,4 +70,4 @@ Command: `python my_solution/wormhole_eval.py --eval <file> ... --arms "off|d2s|
 - Latency: no model call or API call is added (counting only), pieces sent change by -13%..+13% characters depending on set, so no latency gain either.
 - Gate (some slice gains, none gains trap): NOT passed cleanly. Step 2 not run; no money spent on it.
 
-Decision pending (user): stop here as a negative result, or rerun Step 1 with Luna back before deciding. Code stays in the repo, off by default (MY_SOLUTION_WORMHOLE).
+Conclusion: negative result. Retrieval is not the bottleneck (baseline has the gold fact in the pieces for 35/36 public, 48/48 typo), the site has little word ambiguity, rate/fee questions use the facts path. Step 2 skipped. Code stays in the repo, off by default (MY_SOLUTION_WORMHOLE).
