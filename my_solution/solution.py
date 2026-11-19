@@ -86,6 +86,7 @@ HYBRID_APPEND = _HYB == "append"
 # intent calls for: more for meaning-heavy intents, none for rate/fee (exact numbers and names are keyword and fact-table territory).
 HYBRID_WINDOWS = _HYB == "windows"
 WINDOW_WARMUP = os.getenv("MY_SOLUTION_WINDOW_WARMUP", "1") == "1"   # build each copy's window index while loading; =0 builds it at the first question that needs it
+EMBED_MISSING = os.getenv("MY_SOLUTION_EMBED_MISSING", "1") == "1"   # at ingest, embed windows that have no stored vector (needs the key); =0 skips them
 HYBRID_EXTRA = 3
 WINDOW_EXTRA_BY_INTENT = {"eligibility": 6, "list": 6, "fact_about_dupaco": 6, "rate": 0, "fee": 0}
 WINDOW_EXTRA_DEFAULT = 3
@@ -217,7 +218,7 @@ class Knowledge:
             self._embed_store = self._embed_store or EmbeddingStore()
             self.dense[snapshot.snapshot_id] = DenseIndex(bm_index.chunks, self._embed_store)
         if HYBRID_WINDOWS and WINDOW_WARMUP:
-            self._build_window_index(snapshot.snapshot_id, bm_index)
+            self._build_window_index(snapshot.snapshot_id, bm_index, embed_missing=True)
         if self.facts:
             tables = [(t, published_date(p.url, p.markdown)) for p in snapshot.pages
                       for t in page_tables(p.url, p.title, p.markdown)]
@@ -385,9 +386,11 @@ class Knowledge:
                 break
         return out
 
-    def _build_window_index(self, sid: str, index) -> None:
+    def _build_window_index(self, sid: str, index, embed_missing: bool = False) -> None:
         """Window index of one website copy (reads the vector file, cuts the windows, stacks the matrix; about 2.5 s the first time).
-        Called while loading (MY_SOLUTION_WINDOW_WARMUP, default on) so the first meaning search in a timed answer does not pay for it."""
+        Called while loading (MY_SOLUTION_WINDOW_WARMUP, default on) so the first meaning search in a timed answer does not pay for it.
+        embed_missing=True (only from ingest, which is untimed; MY_SOLUTION_EMBED_MISSING=0 turns it off): windows with no vector in the
+        file (the site changed, or the file is incomplete) are embedded now and saved, so the file repairs itself."""
         from embed_index import EmbeddingStore, WindowIndex, WINDOW_CACHE, text_key
         store = EmbeddingStore(path=WINDOW_CACHE)
         try:   # only use windows whose vectors are already in the file: never embed a whole copy while answering
@@ -403,10 +406,21 @@ class Knowledge:
                     if len(w) >= 40 and kk not in seen:
                         seen.add(kk); wi.windows.append((w, ci))
             import numpy as np
-            if all(text_key(w) in store.vecs for w, _ in wi.windows):
+            missing = [w for w, _ in wi.windows if text_key(w) not in store.vecs]
+            if missing and embed_missing and EMBED_MISSING and self.llm.available():
+                print(f"[my_solution] {sid}: {len(missing)} of {len(wi.windows)} windows have no vector (site changed or vector file "
+                      f"incomplete); embedding them now", file=sys.stderr)
+                try:
+                    store.ensure(missing)   # sets the vectors in memory, then saves the file; a failed save (read-only folder) keeps them
+                except Exception as e:
+                    print(f"[my_solution] embedding the missing windows failed: {type(e).__name__}: {e}", file=sys.stderr)
+                missing = [w for w, _ in wi.windows if text_key(w) not in store.vecs]
+            if not missing:
                 wi.matrix = np.stack([store.vecs[text_key(w)] for w, _ in wi.windows]).astype(np.float32)
                 self._windows[sid] = wi
             else:
+                print(f"[my_solution] {sid}: {len(missing)} windows have no vector, so meaning search is off for this copy "
+                      f"(keyword search only)", file=sys.stderr)
                 self._windows[sid] = None
         except Exception as e:
             print(f"[my_solution] window index unavailable: {type(e).__name__}: {e}", file=sys.stderr)

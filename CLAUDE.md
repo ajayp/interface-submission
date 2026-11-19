@@ -52,6 +52,6 @@ The harness calls `build()`, then `ingest(Snapshot)` per crawl (oldest to newest
 - **General rules only**: nothing typed in for a specific public question, because the hidden set rewords questions.
 - `chunker.py`'s `split_sections` re-implements LlamaIndex's `MarkdownNodeParser` (llama-index is not a dependency); keep its output identical to the library's. Everything after it in `chunk_page` is custom.
 - Question text is passed to the LLM as data, not instructions.
-- Embedding windows use committed vectors in `my_solution/.embed_cache/`; if snapshot content changes they must be rebuilt, otherwise that snapshot silently falls back to keyword search.
+- Embedding windows use the vectors in `my_solution/.embed_cache/` (committed; keep them committed so a run embeds nothing). At `ingest` only, windows with no vector (file missing or site changed) are embedded and saved; never while answering. Without a key or if that fails, the snapshot falls back to keyword search with a warning.
 - `my_solution/` imports `contract` from the nearest parent `harness/` (see top of `solution.py`); keep it runnable when copied elsewhere.
 - Prompt variants (`prompt_*.md`, `prompt_*_edits.json`) and `docs/prompt_tuning/` come from the prompt-tuning loop (`prompt_tune.py`); no tried change helped reliably, so the current prompt stayed.

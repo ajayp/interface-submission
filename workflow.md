@@ -19,15 +19,26 @@ flowchart TD
     FACTS --> FIDX[Fact index<br/>one per snapshot]
     S --> COUNTS[Counts about Dupaco<br/>branches, employees, members, assets, counties]
     SPLIT --> WIN[600-character windows cut from those pieces<br/>a new window every 400 characters]
-    WIN --> WIDX[Window index, one per snapshot<br/>built while loading, so no timed answer pays for it]
-    EMB[(Embedding vectors<br/>read from the committed my_solution/.embed_cache)] -.looked up, never computed.-> WIDX
+    CACHE[(Saved window vectors<br/>my_solution/.embed_cache/windows-text-embedding-3-small.npz<br/>one vector per window text)] -.read.-> CHK
+    WIN --> CHK{Does every window already<br/>have a saved vector?}
+    CHK -- yes --> WIDX[Window index, one per snapshot<br/>built while loading, so no timed answer pays for it]
+    CHK -- some are missing --> EMB[[text-embedding-3-small embeds only the missing windows<br/>and they are saved back to the file]]
+    EMB --> WIDX
+    EMB -.->|new vectors saved| CACHE
+    EMB -.->|no API key, or the call fails| OFF[Meaning search is off for this snapshot<br/>keyword pieces only, a warning is printed]
 ```
 
+**What the saved vectors are.** A vector (an embedding) is a list of numbers that stands for the meaning of a piece of text. It is what lets the program find a window by meaning when the question uses different words from the page. One vector per window is kept in the `.npz` file, filed under a hash of the window's text. That has two effects: a paragraph that appears on all five website copies is embedded once, and when the site changes, only the windows whose text changed have no vector.
+
 The windows are cut from the same pieces the keyword index uses, so a window can lose the heading that says what it is (the lobby-hours miss,
-dup-104). Nothing is embedded during `ingest` in the default mode: the vectors were built beforehand and are committed, and the window index
-is assembled from them while loading. A window whose vector is not in the file is never embedded while answering; if any window of a snapshot is
-missing, window search is switched off for that snapshot with no warning, and the question gets keyword pieces only. The vectors cover all five
-website copies. If the snapshots change, they must be rebuilt (the build script is not part of this hand-in).
+dup-104).
+
+The committed file already holds the vectors for all five website copies, so a normal run embeds nothing: `ingest` reads the file and builds the
+window index from it (about 2.5 s per snapshot). If the file is missing, or the site has changed so that some windows have no vector, `ingest` embeds
+just those windows with `text-embedding-3-small` and saves them to the file, so the next run skips them. This happens only in `ingest`, which is
+untimed. A window is never embedded while answering. It needs `OPENAI_API_KEY` and a writable `.embed_cache` folder (if the folder is read-only the
+vectors are used for that run but not saved). If the key is missing or the embedding call fails, window search is switched off for that snapshot, a
+warning says how many windows had no vector, and the question gets keyword pieces only. `MY_SOLUTION_EMBED_MISSING=0` turns the embedding step off.
 
 ## 2. Answering one question (`answer`, timed)
 
@@ -37,7 +48,7 @@ Boxes with double edges are calls to OpenAI. A normal question makes three calls
 
 ```mermaid
 flowchart TD
-    Q([Question, optional as_of date]) --> LAB[[Decisions API: labels<br/>section, rate type, date?, change?, question type]]
+    Q([Question, optional as_of date]) --> LAB[[Decisions API labels: section, rate type, date?, change?, intent]]
     LAB --> CHG{About a change?}
     CHG -- yes --> HIST[Same search in every snapshot<br/>each value tagged with the dates it was seen]
     HIST --> HANS[[Model answers with the history<br/>e.g. 3.90% in May-Aug, 4.00% in Sep]]
