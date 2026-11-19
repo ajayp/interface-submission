@@ -36,6 +36,7 @@ from decisions_understanding import DecisionsUnderstanding  # noqa: E402
 from query_understanding import ANSWER_TERMS, AnswerTerms, QueryUnderstanding, qualifier_patterns, search_text  # noqa: E402
 from synonyms import expansion  # noqa: E402
 from search import BM25Index  # noqa: E402
+import wormhole as _wh  # noqa: E402
 from spellfix import SpellFix  # noqa: E402
 from tiers import SECONDARY, page_rank  # noqa: E402
 
@@ -177,6 +178,7 @@ class Knowledge:
         self.dense: dict[str, object] = {}     # snapshot_id -> DenseIndex (hybrid switch only)
         self._windows: dict[str, object] = {}  # snapshot_id -> WindowIndex or None (windows mode; built lazily, only from vectors already in the file)
         self._embed_store = None
+        self.wormhole = _wh.MODE   # off | d2s | s2d | both (wormhole.py); an instance attribute so a test can switch it between runs
         self._cache: dict[tuple, Answer] = {}
         self.spell = SpellFix() if SPELLFIX else None   # the site's own vocabulary, learned while the snapshots load
         self.spellfix = SPELLFIX                         # an instance flag so a test run can switch it on and off
@@ -286,7 +288,7 @@ class Knowledge:
             search_text(question, qu, use_kw) + self._spell_extra(question), k=k * (50 if (HYBRID and not HYBRID_APPEND) else (30 if SEARCH_CLEANUP else 10)), boost=self.boost,
             categories=(qu or {}).get("categories", ()) if use_cat else (), cat_boost=self.cat_boost,
             qualifiers=qualifier_patterns(qu), qual_boost=self.qual_boost,
-            expansion_tokens=_expansion_for(question, qu, self.qu_mode),
+            expansion_tokens=list(_expansion_for(question, qu, self.qu_mode)) + (self._wormhole_terms(question, as_of, qu) if k == TOP_K else []),
             expansion_weight=SYNONYM_WEIGHT)
         if SEARCH_CLEANUP:
             hits = _clean_hits(hits)
@@ -412,6 +414,28 @@ class Knowledge:
             print(f"[my_solution] window index unavailable: {type(e).__name__}: {e}", file=sys.stderr)
             self._windows[sid] = None
 
+    def _wormhole_window_index(self, question: str, as_of, qu):
+        sid, index = self._snapshot_for(question, as_of, qu)[1], self.index_for(question, as_of, qu)
+        if sid not in self._windows:
+            self._build_window_index(sid, index)
+        return self._windows[sid], index
+
+    def _wormhole_terms(self, question: str, as_of, qu) -> list:
+        """d2s: words over-represented in the best embedding windows (wormhole.py); [] when off or the window index is missing."""
+        if self.wormhole not in ("d2s", "both"):
+            return []
+        try:
+            wi, index = self._wormhole_window_index(question, as_of, qu)
+            if wi is None:
+                return []
+            ids = _wh.foreground_chunk_ids(wi, question)
+            terms = _wh.skg_terms(index, ids, exclude=set(__import__("search").tokenize(question)))
+            self._last_wormhole_terms = terms
+            return [t for t, _ in terms]
+        except Exception as e:
+            print(f"[my_solution] wormhole terms failed: {type(e).__name__}: {e}", file=sys.stderr)
+            return []
+
     def _window_extras(self, question: str, first, as_of, qu):
         """Best overlapping windows by meaning that are not already in `first`; each is returned as a small piece carrying its parent's page, title and dates."""
         import dataclasses
@@ -424,7 +448,14 @@ class Knowledge:
         if wi is None or n == 0:
             return []
         try:
-            ranked = wi.search(question, k=40)
+            ranked = None
+            if self.wormhole in ("s2d", "both"):   # s2d: search by the average vector of the BM25 pieces instead of the question vector
+                pos = {id(c): i for i, c in enumerate(wi.chunks)}
+                vec = _wh.pooled_vector(wi, [pos[id(c)] for _, c, _ in first[:_wh.POOL_N] if id(c) in pos])
+                if vec is not None:
+                    ranked = _wh.search_vector(wi, vec, k=40)
+            if ranked is None:
+                ranked = wi.search(question, k=40)
         except Exception as e:
             print(f"[my_solution] embedding search failed: {type(e).__name__}: {e}", file=sys.stderr)
             return []
