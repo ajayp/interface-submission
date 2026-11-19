@@ -273,10 +273,11 @@ _SAME_NEW = ("- If the question asks whether lobby hours are the same across all
              "schedule out and do not merge schedules. Treat these as distinct entity-specific facts, not competing values for the same entity, so do not "
              "suppress any of them under Rules 3 or 7 and do not hedge. Do not require evidence about every branch. Keep it compact: one clause per "
              "schedule, no other commentary. End by asking which branch the member is interested in. Apply this instruction only when the question asks "
-             "about sameness or differences across entities and the excerpts explicitly establish at least two different schedules. For other hours "
-             "questions, identify different branch schedules separately without merging them into a universal schedule or inventing a typical schedule.")
+             "about sameness or differences across entities and the excerpts explicitly establish at least two different schedules.")
+# The old bullet stays right after the new one, so every other hours question keeps its original instructions word for word. (An earlier version
+# replaced the old bullet; "general lobby hours?" then asked which branch 2 times in 10 instead of 8 in 10.)
 if HOURS_SAME and _SAME_OLD in INTENT_BLOCKS.get("hours", ""):
-    INTENT_BLOCKS["hours"] = INTENT_BLOCKS["hours"].replace(_SAME_OLD, _SAME_NEW)
+    INTENT_BLOCKS["hours"] = INTENT_BLOCKS["hours"].replace(_SAME_OLD, _SAME_NEW + "\n" + _SAME_OLD)
 
 
 def intent_block_name(question: str, intent: Optional[str]) -> Optional[str]:
