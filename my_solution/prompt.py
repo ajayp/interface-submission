@@ -262,9 +262,9 @@ if os.getenv("MY_SOLUTION_LINK_PRODUCT", "1") == "1":
         INTENT_BLOCKS[_k] = INTENT_BLOCKS[_k] + "\n" + _LINK_RULE
 
 
-# "Same for all branches?" (experiment switch MY_SOLUTION_HOURS_SAME, default on; set 0 to turn off): replaces one bullet of the hours block (no gate, no extra
+# "Same for all branches?" (experiment switch MY_SOLUTION_HOURS_SAME, default off; set 1 to turn on): replaces one bullet of the hours block (no gate, no extra
 # bullet). Text proposed by ChatGPT after the gated-bullet and replacement-block experiments failed. Other hours questions keep the old meaning.
-HOURS_SAME = os.getenv("MY_SOLUTION_HOURS_SAME", "1") == "1"
+HOURS_SAME = os.getenv("MY_SOLUTION_HOURS_SAME", "0") == "1"
 _SAME_OLD = "- If multiple branches have different schedules, identify the relevant schedules separately. Do not merge them into a single universal schedule or invent a typical schedule."
 _SAME_NEW = ("- If the question asks whether lobby hours are the same across all branches, locations or other applicable entities, two or more explicitly "
              "documented, different lobby schedules associated with distinct named branches or locations are sufficient to establish that the schedules are "
