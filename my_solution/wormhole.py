@@ -29,8 +29,9 @@ MIN_LIFT = float(os.getenv("MY_SOLUTION_WORMHOLE_MIN_LIFT", "3"))   # ... and be
 POOL_N = int(os.getenv("MY_SOLUTION_WORMHOLE_POOL", "8"))           # BM25 pieces pooled for s2d
 
 
-def foreground_chunk_ids(wi, question: str, n: int = FOREGROUND_K) -> list[int]:
+def foreground_chunk_ids(wi, question: str, n: int | None = None) -> list[int]:
     """Parent piece ids of the best embedding windows, best first, each piece once."""
+    n = n or FOREGROUND_K
     seen, out = set(), []
     for _, ci, _ in wi.search(question, k=n * 6):
         if ci not in seen:
@@ -41,11 +42,12 @@ def foreground_chunk_ids(wi, question: str, n: int = FOREGROUND_K) -> list[int]:
     return out
 
 
-def skg_terms(index, chunk_ids: list[int], exclude=(), limit: int = TERM_LIMIT,
-              min_fg: int = MIN_FG, min_lift: float = MIN_LIFT) -> list[tuple[str, float]]:
+def skg_terms(index, chunk_ids: list[int], exclude=(), limit: int | None = None,
+              min_fg: int | None = None, min_lift: float | None = None) -> list[tuple[str, float]]:
     """Terms over-represented in the foreground pieces against the whole index: score = p_fg * ln(p_fg / p_bg) (their share of the
     divergence), kept when present in >= min_fg pieces and >= min_lift times as common as in the whole copy. Terms are the stemmed
     tokens BM25 uses; numbers and the question's own words are left out."""
+    limit, min_fg, min_lift = limit or TERM_LIMIT, min_fg or MIN_FG, min_lift or MIN_LIFT   # read at call time so a test can change them
     if len(chunk_ids) < min_fg:
         return []
     df = Counter()

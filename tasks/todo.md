@@ -59,4 +59,15 @@ Today BM25 and the embedding search run side by side and their results are only 
 
 ## Review (fill in after the run)
 
-_not started_
+Step 1 (retrieval only, 2026-11-19; 5 sets: public 40, slice1_reworded 10, heldout 22, typo 48, heldout_temporal 21). Caveat: run while the Luna API was
+down, so the Decisions labels were probably the code-side fallback (rerun when Luna is back; arms share the same labels, so the comparison is fair, the baseline may differ from normal).
+Command: `python my_solution/wormhole_eval.py --eval <file> ... --arms "off|d2s|s2d|both|d2s:lift=8,minfg=6,terms=3"` (results/wormhole_step1*.json)
+
+- s2d (pooled BM25 vectors): worse on every set: public 35->31, typo 48->44, temporal 17->14 gold hits. Pooling the BM25 pieces only pulls toward what BM25 already ranked. Dropped.
+- d2s default (lift 3, 3 pieces, 8 terms): no gain; added terms are topical (freddie, mac, fannie, mae), not synonyms for the member's wording.
+- d2s stricter (lift 6-8, min 5-6 foreground pieces, 3-4 terms): public 35->36 (dup-034 now hit), everything else equal. Cost: dup-011 (mortgage) gets a
+  must_not_include value into the pieces (public and its reworded twin), offset by dup-009-rw losing one. Net: +1 gold hit, +1 trap hit, on 168 items: inside noise.
+- Latency: no model call or API call is added (counting only), pieces sent change by -13%..+13% characters depending on set, so no latency gain either.
+- Gate (some slice gains, none gains trap): NOT passed cleanly. Step 2 not run; no money spent on it.
+
+Decision pending (user): stop here as a negative result, or rerun Step 1 with Luna back before deciding. Code stays in the repo, off by default (MY_SOLUTION_WORMHOLE).

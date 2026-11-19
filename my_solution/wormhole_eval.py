@@ -24,6 +24,23 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import scoring  # noqa: E402
 from run_eval import load_snapshots  # noqa: E402
 import solution  # noqa: E402
+import wormhole as wh  # noqa: E402
+
+KNOBS = {"fg": "FOREGROUND_K", "terms": "TERM_LIMIT", "minfg": "MIN_FG", "lift": "MIN_LIFT"}
+
+
+def set_arm(sol, arm: str) -> None:
+    """arm = mode or mode:knob=value,... e.g. d2s:lift=6,minfg=5,terms=4 (knobs: fg terms minfg lift; unlisted ones go back to the defaults)."""
+    mode, _, kv = arm.partition(":")
+    for k, name in KNOBS.items():
+        setattr(wh, name, DEFAULTS[name])
+    for part in filter(None, kv.split(",")):
+        k, v = part.split("=")
+        setattr(wh, KNOBS[k], float(v) if k == "lift" else int(v))
+    sol.wormhole = mode
+
+
+DEFAULTS = {n: getattr(wh, n) for n in KNOBS.values()}
 
 
 def main() -> None:
@@ -34,7 +51,7 @@ def main() -> None:
     ap.add_argument("--show", type=int, default=10, help="how many changed questions to print per arm")
     ap.add_argument("--out", type=Path)
     a = ap.parse_args()
-    arms = a.arms.split(",")
+    arms = a.arms.split("|") if "|" in a.arms else a.arms.split(",")
 
     sol = solution.Knowledge(use_facts=False)
     for snap in load_snapshots(Path(a.snapshots)):
@@ -49,7 +66,7 @@ def main() -> None:
         res = {arm: {} for arm in arms}
         terms = {}
         for arm in arms:
-            sol.wormhole = arm
+            set_arm(sol, arm)
             for it in items:
                 sol._last_wormhole_terms = []
                 hits = sol.retrieve(it["question"], it.get("as_of"), qu=qus[it["id"]])
@@ -61,7 +78,7 @@ def main() -> None:
                     "trap": any(scoring.contains(text, t) for t in not_),
                     "chars": len(text), "n": len(hits),
                 }
-                if arm in ("d2s", "both"):
+                if arm.split(":")[0] in ("d2s", "both"):
                     terms[it["id"]] = [t for t, _ in getattr(sol, "_last_wormhole_terms", [])]
         name = Path(path).stem
         print(f"\n=== {name}  ({len(items)} items)")
@@ -79,7 +96,7 @@ def main() -> None:
                   for it in items if (base[it["id"]]["full"], base[it["id"]]["trap"]) != (res[arm][it["id"]]["full"], res[arm][it["id"]]["trap"])]
             print(f"  {arm} vs {arms[0]}: {len(ch)} items differ (id, full {arms[0]}->{arm}, trap {arms[0]}->{arm})")
             for c in ch[:a.show]:
-                extra = f"  terms={terms.get(c[0])}" if arm in ("d2s", "both") else ""
+                extra = f"  terms={terms.get(c[0])}" if arm.split(":")[0] in ("d2s", "both") else ""
                 print("   ", c, extra)
         report[name] = {"res": res, "terms": terms}
     if a.out:
