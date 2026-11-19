@@ -1,0 +1,13 @@
+{
+ "source": "task 6 (docs/prompt_tuning/task6_same_hours_question.md), edit written with ChatGPT by the user; markdown repaired: its rule is its own numbered rule 11 (it was glued to the end of rule 9) and the exception is its own paragraph",
+ "edits": [
+  {
+   "find": "Only provide contact details explicitly stated in the excerpts.",
+   "replace": "Only provide contact details explicitly stated in the excerpts.\n11. For questions asking whether a fact is the same across all applicable entities, if the excerpts explicitly associate two or more different values with distinct entities, answer \"No\" and state each value in full, identifying the entity it applies to and including every explicitly stated component, period, condition and qualifier needed to represent that value completely. Do not omit parts of a value or summarize it when the excerpts provide its full details. Treat these as distinct applicable facts, not competing values, and do not suppress them under Rules 3 or 7. Apply this exception only to entities and values within the scope of the question; never include unrelated values. If the excerpts do not establish two or more different values, do not infer that values are the same or different."
+  },
+  {
+   "find": "unless the question asks for them.",
+   "replace": "unless the question asks for them.\n\nException: when answering a question asking whether a fact is the same across all applicable entities, provide each documented entity's complete value, including every explicitly stated component, day, time, condition and qualifier. Do not omit details merely to shorten the answer; keep the complete answer within the 1-to-3-sentence limit."
+  }
+ ]
+}

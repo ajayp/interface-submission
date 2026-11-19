@@ -106,6 +106,7 @@ Before any search, an LLM reads the question, so the rest of the system knows wh
 | Ask for the faster service tier on answer calls, with a retry on the default tier | The answer call is about 90% of the time; p50 went from about 2.25 s to about 1.9 s | About 2x the price per answer call |
 | Question labels come from the Decisions API, not a full model call | About 0.3 s instead of about 1.75 s, with equal accuracy | The section label is right about 78% of the time, so it only steers the search and the answer |
 | General rules only, nothing typed in for a practice question | The hidden set rewords questions | Some practice misses are accepted (section 8) |
+| "Are the lobby hours the same at every branch?" gets its own prompt bullet and up to 5 extra schedule excerpts (`MY_SOLUTION_HOURS_SAME`, `MY_SOLUTION_HOURS_SCHEDULES`, both on; 0 turns them off) | The branch-finder cards from `/contact` filled the keyword top 8 and the pages with a second schedule ranked about 30th, so the model saw one schedule and hedged. The bullet makes it answer "No" with each branch's schedule | dup-104 passes about 2 runs in 3 (the miss leaves out the Platteville schedule, the only one with "noon"). A "copy every day and time exactly" sentence was tried and dropped: it made dup-064 refuse in the pipeline (0 of 3) |
 
 ## 5. How an answer is produced and checked
 
@@ -155,7 +156,7 @@ Real answers from the public set:
 ## 8. Known limits
 
 - The 2 s full-marks speed line is not met. The answer call is about 90% of the time. One run had a single 8.3 s answer (probably a timed-out call that was retried). A failed answer call (such as a timeout after the 6 s limit and one retry) is not turned into "I don't know": the answer says the model did not respond, `conflict_note` names the error, and it is not cached. In one 3-pass test, 2 of 120 answers timed out, both on hours questions, which have the longest answers.
-- Accepted misses on the public set: dup-049, dup-008, dup-088 (two readings of the question), dup-104 (the lobby-hours piece misses the answer window) and dup-005 (a range instead of every rate).
+- Accepted misses on the public set: dup-049, dup-008, dup-088 (two readings of the question), dup-104 (partly fixed by the hours switches in section 4: about 2 runs in 3 now list every schedule; the stand-in judge still marks it down because the reference quotes Cedar Rapids and the answer leads with Cedar Falls) and dup-005 (a range instead of every rate).
 - Hours, awards and similar facts are not in the fact table, so they depend on text search.
 - On the tiny selftest fixture, a reworded certificate question is sometimes refused. This was not seen with "current" wordings on the real data.
 - Window search needs the committed vectors in `my_solution/.embed_cache`. If a snapshot changes, they must be rebuilt, and until then that snapshot silently falls back to keyword search.
