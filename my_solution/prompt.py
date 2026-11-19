@@ -253,6 +253,14 @@ _OTHER = """If this question asks what a program, product or service is, describ
 if os.getenv("MY_SOLUTION_OTHER_BLOCK", "1") == "1":
     INTENT_BLOCKS["other"] = _OTHER
 
+# Link to a product's rates (experiment switch MY_SOLUTION_LINK_PRODUCT, default on; set 0 to turn off). "Which link shows the certificate rates?"
+# was answered with the sitewide rate sheet because the base rules rank rate sheets first; the member is better served by the product's own page.
+_LINK_RULE = ("- If it asks which link or page to use to see a product's rates, give the address of that product's own page (the page that shows its rate table "
+              "together with its details or sign-up links) rather than a sitewide rates listing, when an excerpt from such a page is present. Give the address as written in the excerpts.")
+if os.getenv("MY_SOLUTION_LINK_PRODUCT", "1") == "1":
+    for _k in ("other", "how_to"):
+        INTENT_BLOCKS[_k] = INTENT_BLOCKS[_k] + "\n" + _LINK_RULE
+
 
 # "Same for all branches?" (experiment switch MY_SOLUTION_HOURS_SAME, default on; set 0 to turn off): replaces one bullet of the hours block (no gate, no extra
 # bullet). Text proposed by ChatGPT after the gated-bullet and replacement-block experiments failed. Other hours questions keep the old meaning.
