@@ -146,13 +146,11 @@ Real answers from the public set:
 
 | | Result |
 |---|---|
-| Latest full run (`results/final`, 40 public questions, after the dup-064 fix in `d08bd2e`) | Accuracy 0.9054, final score 0.8718 (no conflicts pillar locally), consistency 1.0, 0 stale values, 0 errors. Speed: p50 3.34 s, p95 5.79 s, max 6.18 s (speed pillar 0.7894) |
-| Latest run, by category | branch_info 0.95, conflict_resolution 0.67, current_value 1.00, entity_attribution 1.00, list_completeness 0.75, should_refuse 1.00, stale_trap 1.00, temporal_as_of 0.75, tier_disambiguation 1.00 |
-| Earlier runs, accuracy | 0.851 to 0.867 over 5 runs |
-| Earlier runs, final score (no conflicts pillar locally) | 0.834 to 0.859 |
-| Earlier runs, consistency, stale values, errors | 1.0, 0, 0 in every run |
-| Earlier runs, speed, default tier | p50 2.25 to 2.53 s, p95 3.4 to 4.1 s |
-| Earlier runs, speed, faster tier | p50 1.83 to 1.90 s, p95 2.9 to 3.2 s |
+| Public set, accuracy | 0.851 to 0.867 over 5 runs |
+| Public set, final score (no conflicts pillar locally) | 0.834 to 0.859 |
+| Consistency, stale values, errors | 1.0, 0, 0 in every run |
+| Speed, default tier | p50 2.25 to 2.53 s, p95 3.4 to 4.1 s |
+| Speed, faster tier | p50 1.83 to 1.90 s, p95 2.9 to 3.2 s |
 | Held-out / dated sets | 1.0 / 0.993 |
 | `conflicts()` | 42 entries. Hand list (12): found 12, right winner 11, precision 0.29. Table key (35): found 35 |
 | Loading | about 3 minutes and $0.10 cold |
@@ -172,7 +170,7 @@ These public questions score below full marks for reasons tied to `eval/public_e
 
 | Question | What the benchmark expects | What the website and our answer say | Cause | Effect on score | Why we left it |
 |---|---|---|---|---|---|
-| dup-064 general lobby hours | Sources: the homepage and `/contact` | The homepage has no hours. `/contact` gives only when staff reply to general questions (8:30 a.m.-5:30 p.m.), not lobby hours. The lobby schedule is in the branch articles, which we cite. Before `d08bd2e`, 3 of 5 verification runs said "I don't know" (score 0) and 2 gave the Cedar Rapids schedule (score 0.85). The refusals came from our own hours prompt change and are fixed: the commit records dup-064 asking which branch 10 of 10 times after the fix, and branch_info scores 0.95 in the latest run. When it answers, it cites a branch article, not the homepage or `/contact`, so the source check still fails | Reference for the source; the refusals were ours and are fixed | Source check: small (15% of the question). The refusals cost the whole question before the fix | Citing `/contact` for lobby hours would be wrong, and the prompt says not to treat reply hours as lobby hours |
+| dup-064 general lobby hours | Sources: the homepage and `/contact` | The homepage has no hours. `/contact` gives only when staff reply to general questions (8:30 a.m.-5:30 p.m.), not lobby hours. The lobby schedule is in the branch articles, which we cite. Before `d08bd2e`, 3 of 5 verification runs said "I don't know" (score 0) and 2 gave the Cedar Rapids schedule (score 0.85). The refusals came from our own hours prompt change and are fixed: the commit records dup-064 asking which branch 10 of 10 times after the fix,. When it answers, it cites a branch article, not the homepage or `/contact`, so the source check still fails | Reference for the source; the refusals were ours and are fixed | Source check: small (15% of the question). The refusals cost the whole question before the fix | Citing `/contact` for lobby hours would be wrong, and the prompt says not to treat reply hours as lobby hours |
 | dup-066 drive-up hours | Source: the Cedar Rapids article | Five branch articles (Cedar Rapids, Cedar Falls, Waukee, Grimes, Platteville) state the same Monday-Friday 8 a.m.-6 p.m. drive-up hours, so which one is cited is arbitrary (5 of 5 verification runs cited the Waukee article). Two Madison articles say 9 a.m.-5 p.m. | Reference | Small: the source check fails (15% of the question) | A rule that favours one named branch's article would be typed in for this question |
 | dup-005 certificate rate | The reference wants every certificate rate; `must_include` is empty | In 5 verification runs we gave a range four times (rule 5) and read back every regular-certificate term once; special, jumbo and IRA certificates were not listed in any run. The score was 0.0 in all five. Separately, `scoring.py` line 122 gives a keyword score of 0.0 for an empty list, whatever the answer says | Scorer, and partly ours (range, not every rate) | Large: the whole question without `--judge`; only the judge can score it | A rule change for certificates risks the tier questions that score 1.0 |
 | dup-049 "Do any savings tiers pay 0.35% APY?" | No: Share Savings tops out at 0.20% | We answered yes: Investor's Choice Money Market pays 0.35% APY, as `/rates` and the savings pages state (the Health Savings Account row says 0.35% too). Both 0.35% tiers are on `/rates` in all five copies | Reference reads "savings tiers" as Share Savings only | Large: the whole question | Fitting to that reading is question-specific |
