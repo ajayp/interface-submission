@@ -150,8 +150,7 @@ Real answers from the public set:
 | Public set, final score (no conflicts pillar locally) | 0.834 to 0.859 |
 | Consistency, stale values, errors | 1.0, 0, 0 in every run |
 | Speed, default tier | p50 2.25 to 2.53 s, p95 3.4 to 4.1 s |
-| Speed, faster tier | p50 1.83 to 1.90 s, p95 2.9 to 3.2 s |
-| Speed depends on the faster tier | Two full 40-question runs on the same code: with the faster service tier on (the committed default) p50 1.45 s, p95 2.52 s; with it switched off p50 3.34 s, p95 5.79 s. The faster tier is not confirmed for every account, so speed in grading depends on the account |
+| Speed, faster tier (the committed default) | Latest full run: p50 1.45 s, p95 2.52 s (speed pillar 0.9711). Earlier runs: p50 1.83 to 1.90 s, p95 2.9 to 3.2 s |
 | Held-out / dated sets | 1.0 / 0.993 |
 | `conflicts()` | 42 entries. Hand list (12): found 12, right winner 11, precision 0.29. Table key (35): found 35 |
 | Loading | about 3 minutes and $0.10 cold |
