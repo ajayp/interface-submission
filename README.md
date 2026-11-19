@@ -6,6 +6,7 @@ Built for the hackathon described in `Knowledge-Hackathon-Assignment.pdf`.
 
 ## Start here
 
+- [Run the project](#run-it): install dependencies and run the public evaluation.
 - [`NOTES.md`](NOTES.md): how it works, how "current" is decided, the key decisions, the results and the known limits.
 - [`workflow.md`](workflow.md): diagrams of loading, answering one question, and listing contradictions.
 - [NOTES.md - Section 6: Evaluation and the LLM judge](NOTES.md#6-evaluation-including-the-llm-judge): how answers are evaluated, including the LLM judge (`my_solution/judge_eval.py`), a stand-in for the scorer's optional judge.
