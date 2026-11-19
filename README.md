@@ -10,6 +10,7 @@ Built for the hackathon described in `Knowledge-Hackathon-Assignment.pdf`.
 - [`NOTES.md`](NOTES.md): how it works, how "current" is decided, the key decisions, the results and the known limits.
 - [`workflow.md`](workflow.md): diagrams of loading, answering one question, and listing contradictions.
 - [NOTES.md - Section 6: Evaluation and the LLM judge](NOTES.md#6-evaluation-including-the-llm-judge): how answers are evaluated, including the LLM judge (`my_solution/judge_eval.py`), a stand-in for the scorer's optional judge.
+- [NOTES.md - Section 9: Reference mismatches and scoring quirks](NOTES.md#9-reference-mismatches-and-scoring-quirks): public questions that score below full marks because the benchmark and the website disagree, or because of how the scorer works (for example, a question with no `must_include` facts scores 0.0 without the judge).
 - [`judge-workflow.md`](judge-workflow.md): the LLM-as-a-judge workflow as diagrams, kept separate from the answering flow.
 
 ## Run it
