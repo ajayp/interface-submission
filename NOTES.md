@@ -35,7 +35,7 @@ The submission is `my_solution/` (entry point `solution.py`, `build()`). Diagram
 ## 1. Setup, keys and cost
 
 - Python 3.11 and `pip install -r my_solution/requirements.txt`.
-- **Needs `OPENAI_API_KEY`** (paid OpenAI API) with access to `gpt-6-luna` (answers and fact extraction), the Decisions API `/v1/decisions` (question labels) and `text-embedding-3-small` (one question embedding per answer).
+- **Needs `OPENAI_API_KEY`** (paid OpenAI API) with access to `gpt-6-luna` (answers and fact extraction), the Decisions API `/v1/decisions` (question labels) and `text-embedding-3-small` (one question embedding per answer, and at load only the text windows that have no saved vector).
 - **Cost:** loading the five snapshots is untimed, takes about 3 minutes and costs about $0.10 (one model call per distinct rate table). Each answer makes about three small calls. A full 40-question run costs a few cents. `conflicts()` makes about 77 small calls once.
 - Without a key the system still runs on search alone, but it cannot refuse and scores about 0.34 on the public set.
 
@@ -158,7 +158,7 @@ Real answers from the public set:
 - Several public questions score below full marks because the benchmark's reference and the website disagree, or because of how the scorer works. Two of them (dup-005, dup-088) are also partly our own misses, and the dup-064 refusals were ours and are mostly gone (see section 9). They are listed in section 9.
 - Hours, awards and similar facts are not in the fact table, so they depend on text search.
 - On the tiny selftest fixture, a reworded certificate question is sometimes refused. This was not seen with "current" wordings on the real data.
-- Window search needs the committed vectors in `my_solution/.embed_cache`. If a snapshot changes, they must be rebuilt, and until then that snapshot silently falls back to keyword search.
+- Window search uses the saved vectors in `my_solution/.embed_cache`. If the file is missing or the site changed, `ingest` embeds only the windows that have no vector and saves them (needs `OPENAI_API_KEY` and a writable folder; `MY_SOLUTION_EMBED_MISSING=0` turns it off). Without the key, or if the call fails, that snapshot falls back to keyword search and a warning is printed. See [`workflow.md`](workflow.md#1-loading-the-snapshots-ingest-once-per-snapshot-untimed).
 
 ## 9. Reference mismatches and scoring quirks
 
