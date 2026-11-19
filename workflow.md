@@ -22,10 +22,10 @@ flowchart TD
     CACHE[(Saved window vectors<br/>my_solution/.embed_cache/windows-text-embedding-3-small.npz<br/>one vector per window text)] -.read.-> CHK
     WIN --> CHK{Does every window already<br/>have a saved vector?}
     CHK -- yes --> WIDX[Window index, one per snapshot<br/>built while loading, so no timed answer pays for it]
-    CHK -- some are missing --> EMB[[text-embedding-3-small embeds only the missing windows<br/>and they are saved back to the file]]
+    CHK -- missing --> EMB[[text-embedding-3-small embeds only the missing windows<br/>and they are saved back to the file]]
     EMB --> WIDX
-    EMB -.->|new vectors saved| CACHE
-    EMB -.->|no key or error| OFF[Meaning search is off for this snapshot<br/>no API key, or the embedding call failed<br/>keyword pieces only, a warning is printed]
+    EMB -.->|saved| CACHE
+    EMB -.->|fails| OFF[Meaning search is off for this snapshot<br/>no API key, or the embedding call failed<br/>keyword pieces only, a warning is printed]
 ```
 
 **What the saved vectors are.** A vector (an embedding) is a list of numbers that stands for the meaning of a piece of text. It is what lets the program find a window by meaning when the question uses different words from the page. One vector per window is kept in the `.npz` file, filed under a hash of the window's text. That has two effects: a paragraph that appears on all five website copies is embedded once, and when the site changes, only the windows whose text changed have no vector.
@@ -60,7 +60,7 @@ flowchart TD
     HOK -- yes --> OUT([Answer: text, sources, confident flag])
     HOK -- no --> DATE
     CHG -- no --> DATE{Is a date asked?}
-    DATE -- before 2026-05-12 --> IDK1([I don't know: no snapshot that old])
+    DATE -- too old --> IDK1([I don't know: before 2026-05-12,<br/>no snapshot that old])
     DATE -- yes --> PAST[Latest snapshot on or before that date<br/>answer starts 'As of date,']
     DATE -- no --> NEW[Newest snapshot, 2026-09-28]
     PAST --> NEXT([Continue with 2b])
@@ -83,11 +83,11 @@ flowchart TD
     CNT -- no --> VAL{Rate or fee question?}
 
     VAL -- yes --> FH[Search the fact index<br/>keep only the winning value per product and tier<br/>top 12, the rate type asked for first]
-    FH -- no fact found --> TXT
+    FH -- no fact --> TXT
     FH --> FANS[[Model answers from the facts]]
     FANS --> FOK{Confident?}
     FOK -- yes --> OUT
-    FOK -- no, fall back --> TXT
+    FOK -- no --> TXT
 
     VAL -- no --> TXT[Text search<br/>8 keyword pieces plus meaning-search windows]
     EMB[[Embed the question]] -.vector.-> TXT
@@ -133,7 +133,7 @@ flowchart TD
     N --> CT[Counts about Dupaco: branches, employees, members,<br/>assets, counties. Fixed sentence patterns]
     T --> MATCH{Same fact?<br/>rate type, term, tier, model years<br/>and product words agree<br/>never decided by the numbers}
     SL --> MATCH
-    MATCH -- two or more values --> WINR[Pick the winner:<br/>rate sheet > product page > promotion > other,<br/>then later effective date, then later fetch date;<br/>an offer the page says has ended always loses]
+    MATCH -- 2+ values --> WINR[Pick the winner:<br/>rate sheet > product page > promotion > other,<br/>then later effective date, then later fetch date;<br/>an offer the page says has ended always loses]
     CT --> LATEST[Most recently published count wins]
     WINR --> C([Conflict: topic, values, sources,<br/>resolution, reason])
     LATEST --> C
