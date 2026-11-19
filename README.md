@@ -49,7 +49,7 @@ flowchart TD
     E --> A[[LLM answers from the evidence<br/>one value, the right tier, sources]]
     A --> C{Checks}
     C -- passes --> R([Answer and source])
-    C -- the site does not say --> N([I don't know])
+    C -- not on the site --> N([I don't know])
     L --> X[conflicts<br/>where the site contradicts itself,<br/>and which value to believe]
     R -.-> J[[LLM judge, development only<br/>re-scores finished runs]]
 ```

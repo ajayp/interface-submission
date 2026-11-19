@@ -25,7 +25,7 @@ flowchart TD
     CHK -- some are missing --> EMB[[text-embedding-3-small embeds only the missing windows<br/>and they are saved back to the file]]
     EMB --> WIDX
     EMB -.->|new vectors saved| CACHE
-    EMB -.->|no API key, or the call fails| OFF[Meaning search is off for this snapshot<br/>keyword pieces only, a warning is printed]
+    EMB -.->|no key or error| OFF[Meaning search is off for this snapshot<br/>no API key, or the embedding call failed<br/>keyword pieces only, a warning is printed]
 ```
 
 **What the saved vectors are.** A vector (an embedding) is a list of numbers that stands for the meaning of a piece of text. It is what lets the program find a window by meaning when the question uses different words from the page. One vector per window is kept in the `.npz` file, filed under a hash of the window's text. That has two effects: a paragraph that appears on all five website copies is embedded once, and when the site changes, only the windows whose text changed have no vector.
@@ -51,7 +51,7 @@ Boxes with double edges are calls to OpenAI. A normal question makes three calls
 ```mermaid
 flowchart TD
     Q([Question, optional as_of date]) --> LAB[[Decisions API labels: section, rate type, date?, change?, intent]]
-    LAB -. call fails: 3 s timeout, one retry .-> NOLAB[No labels: search runs on the plain question<br/>dates are still read by code from the wording]
+    LAB -. fails .-> NOLAB[Labels call failed: 3 s timeout, one retry<br/>search runs on the plain question<br/>dates are still read by code from the wording]
     NOLAB --> DATE
     LAB --> CHG{About a change?}
     CHG -- yes --> HIST[Same search in every snapshot<br/>each value tagged with the dates it was seen]
@@ -97,10 +97,10 @@ flowchart TD
     SYN -.-> FH
     LBL[Labels from 2a<br/>section: boosts pages of that section in the keyword search<br/>intent: picks the prompt block and the number of windows<br/>rate type: picks the APR, APY or dividend column] -.-> TXT
     LBL -.-> FH
-    SP -.corrected words also looked up.-> SYN
+    SP -.looked up.-> SYN
     TXT --> TANS[[Model answers from the pieces<br/>one value, right tier, or I don't know]]
-    FANS -. call fails: 6 s timeout, one retry .-> ERR
-    TANS -. call fails: 6 s timeout, one retry .-> ERR([Says the model did not respond, not cached,<br/>never shown as I don't know])
+    FANS -. fails .-> ERR
+    TANS -. fails .-> ERR([Answer call failed: 6 s timeout, one retry<br/>says the model did not respond, not cached<br/>never shown as I don't know])
     TANS --> CHECK{Checks pass?}
     CHECK -- no --> IDK2([I don't know, please contact Dupaco])
     CHECK -- yes --> CITE[Cite the pages used<br/>plus other pages stating the same value]
