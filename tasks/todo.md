@@ -77,6 +77,10 @@ Open item: re-run baseline with the judge to find the real per-question misses (
 - Priority tier in `my_solution/llm.py` is OFF while testing (`MY_SOLUTION_PRIORITY=1` turns it back on). **Re-enable and re-measure speed before final submission.**
 - Interest ranking: Chen propositions (most), Contextual Retrieval, multi-vector indexing. Test all three as A/B arms.
 
+- Retrieval integration: ADD enrichment candidates to the existing BM25 + window candidates (union, then fuse and rank); do not replace the current order. Every candidate carries provenance (retriever + field) written to the trace, so we can ablate which field found the winning chunk.
+- Arm E tests top-k of 3-4 parents (smaller prompt), accepting a possible few extra refusals as the measured cost.
+- Budget: user is adding $10 of OpenAI credit. Plan to spend <= $3.50; check in before going above that. $10 is the hard ceiling.
+
 ## A/B arms (regress.py)
 - A: baseline (enrichment off)
 - B: context line only (Contextual Retrieval)
