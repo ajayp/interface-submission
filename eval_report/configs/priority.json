@@ -1,0 +1,4 @@
+{"runs": 3, "repeat_sample": 0,
+ "note": "controlled on/off test of the OpenAI priority service tier for the answer calls (llm.py MY_SOLUTION_PRIORITY); baseline otherwise",
+ "sets": {"public": "eval/public_eval.jsonl"},
+ "arms": {"p_off": {"MY_SOLUTION_PRIORITY": "0"}, "p_on": {"MY_SOLUTION_PRIORITY": "1"}}}
