@@ -102,5 +102,19 @@ which shrinks the user message and stabilises answers. Same guardrails: numbers 
 ## Check-in
 Waiting for go-ahead to start steps 1-3 (all free except the 50-chunk pilot).
 
-## Review
-(to be filled in after implementation and measurement)
+## Review (first A/B, public set, 1 run per arm, judged; priority tier off)
+Built: `my_solution/enrich.py` (one combined gpt-6-luna call per chunk, number guard, committed cache), hooks in `solution.py`/`chunker.py`, all OFF unless `MY_SOLUTION_ENRICH` is set. Cache: 1,452 chunks from the newest copy (645k in / 249k out tokens, 0 errors, 3 items dropped by the guard). Enrichment embeddings cost about 0.3M embedding tokens.
+
+| Arm | Accuracy | Judged | p95 s | vs base |
+|---|---|---|---|---|
+| A base | 0.905 | 0.830 | 2.8 | - |
+| B ctx (context line in BM25) | 0.905 | 0.839 | 2.9 | +0.000 |
+| C prop+emb | 0.905 | 0.840 | 3.1 | +0.000 |
+| D q+emb | 0.840 | 0.778 | 2.9 | -0.065 |
+| E all | 0.858 | 0.795 | 3.3 | -0.047 |
+| F all + top-k 4 | 0.886 | 0.816 | 3.0 | -0.019 |
+
+Moved questions: D lost dup-064 (0.85 to 0.00), dup-065 (1.00 to 0.00), dup-104 (1.00 to 0.50); E lost dup-034, dup-087, dup-104; F lost dup-008, dup-104. 0 stale, 0 errors in every arm.
+
+Reading (one run each; model noise is about 0.02): no arm beat the baseline. B and C tie it on accuracy with a judged score about +0.01 (noise). Hypothetical questions (D, E) hurt, mostly on hours questions; my untested hypothesis is that "what are the lobby hours" questions attach to many near-identical branch chunks and push the right schedules out. A smaller prompt (top-k 4) did not lower p95 here and cost accuracy.
+Decision for now: ship nothing; keep enrichment off. Possible follow-up: 3 runs of A/B/C on the public, held-out, dated and typo sets to see whether B or C help beyond noise; check the provenance log (`MY_SOLUTION_PROV`) for D's hours misses; consider widening B/C to news and older copies only if they win.
