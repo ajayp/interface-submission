@@ -177,3 +177,13 @@ Next:
 - [ ] If a size arm holds accuracy: repeat 3x on held-out, dated, typo sets; check 0 stale; then measure latency with MY_SOLUTION_PRIORITY=1
 - [ ] Otherwise: write the negative result into NOTES.md, turn priority tier back on, stop
 Not planned (low expected gain): contextual embeddings, reranking, cards, widening enrichment, shorter system message.
+
+## Chunk size, answer level (public set, 3 runs per arm, judged; priority tier off), 2026-11-20
+| Arm | Accuracy (3 runs) | Judged | p50 s | p95 s | Stale |
+|---|---|---|---|---|---|
+| A base (3000) | 0.879 [0.879, 0.879, 0.879] | 0.823 | 1.65 | 2.63 | 0 |
+| S800 | 0.880 [0.905, 0.882, 0.853] | 0.804 | 1.69 | 2.82 | 0 |
+| S600 | 0.866 [0.868, 0.845, 0.884] | 0.819 | 1.81 | 2.78 | 0 |
+| S800 + keyword 10 | 0.872 [0.882, 0.867, 0.867] | 0.795 | 1.68 | 2.70 | 0 |
+Reading: accuracy is unchanged within noise (about 0.02) for every size; judged scores are 0.004-0.028 lower. 0 stale, 0 errors. Moved questions are the hours/branch ones (dup-064, 065, 066, 104) plus dup-080, which flip between runs in every arm, so they are noise-prone, not caused by chunk size. The ~43% smaller evidence (retrieval check) did NOT lower latency: p50 1.65 vs 1.69 s. With the priority tier off, answer time is not driven by input size here.
+Conclusion: no arm beats the baseline. Chunk size is neutral on accuracy and gives no speed gain, so do not change the default (3000). Together with the enrichment results, no ingest change tested so far improves accuracy or latency.
