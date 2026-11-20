@@ -51,7 +51,9 @@ Open item: re-run baseline with the judge to find the real per-question misses (
 
 ## Checklist
 - [ ] 0. Check in with user on this plan (approve scope, model, budget)
-- [ ] 1. Free: count prose chunks per page type across the 5 snapshots, and distinct hashes after dedupe
+- [x] 1. Free: count prose chunks per page type across the 5 snapshots, and distinct hashes after dedupe
+  - Result: 15,465 distinct chunks (12,867 sections + 2,598 table rows). Sections by URL type: blog 5,428, other 4,143, news 2,595, calculator 389, rates 272, contact 40. About 1.99M tokens of section text (1.92M tokens in the 10,641 sections of 200+ chars). Per-snapshot chunk counts are 7,078-7,931.
+  - Implication: enriching everything is too broad for the budget. Start with the newest snapshot (the default for answers) and the 'other' + contact pages (hours, branches, eligibility, how-to), then widen only if it helps.
 - [ ] 2. Free: read `chunker.py`, `search.py`, `embed_index.py`, `solution.py` to find the insertion point for extra index fields
 - [ ] 3. Measure cost on a 50-chunk pilot, and extrapolate; stop if projected total > $3.50
 - [ ] 4. Run baseline (3 runs via regress.py) and record per-question misses
