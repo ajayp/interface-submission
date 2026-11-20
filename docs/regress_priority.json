@@ -1,0 +1,13 @@
+{
+  "repo": ".",
+  "runs": 3,
+  "workers": 2,
+  "fact_cache": "results/fact_cache.json",
+  "arms": {
+    "P_off": {"env": {"MY_SOLUTION_PRIORITY": "0"}},
+    "P_on": {"env": {"MY_SOLUTION_PRIORITY": "1"}}
+  },
+  "sets": [
+    {"name": "public", "eval": "eval/public_eval.jsonl", "repeat_sample": 0}
+  ]
+}
