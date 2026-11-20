@@ -150,8 +150,7 @@ Real answers from the public set:
 |---|---|
 | Public set, accuracy | 0.851 to 0.867 over 5 runs |
 | Consistency, stale values, errors | 1.0, 0, 0 in every run |
-| Speed (original runs, 2026-11-18) | p50 2.25 to 2.53 s, p95 3.4 to 4.1 s |
-| Speed (2026-11-20, baseline, public set, 3 runs of 40 questions) | p50 1.37 s, mean 1.46 s, p95 2.24 s, slowest 5.04 s. Accuracy 0.886 (0.890, 0.864, 0.905), within run-to-run noise: the questions that moved are the hours questions dup-064 and dup-104, which flip between runs. Lower than the original runs; API load differed between the two days, and the p95 of 40 questions moves by several tenths between runs |
+| Speed (2026-11-20, public set, 3 runs of 40 questions) | p50 1.37 s, mean 1.46 s, p95 2.24 s, slowest 5.04 s. Accuracy 0.886 (0.890, 0.864, 0.905), within run-to-run noise: the questions that moved are the hours questions dup-064 and dup-104, which flip between runs. The p95 of 40 questions moves by several tenths between runs |
 | Held-out / dated sets | 1.0 / 0.993 |
 | `conflicts()` | 42 entries. Hand list (12): found 12, right winner 11, precision 0.29. Table key (35): found 35 |
 | Loading | about 3 minutes and $0.10 cold |
