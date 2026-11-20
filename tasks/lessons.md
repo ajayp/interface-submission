@@ -7,3 +7,5 @@
 5. Check retrieval first (does the evidence hold the required value? `retrieval_check.py`) before blaming the model or the prompt. Add relevance floors to anything that appends pieces unconditionally.
 6. Never commit or push to main; work only on `claude/eloquent-bardeen-9r4xbs`.
 7. One run per arm is within noise (about 0.02): repeat 3 times before calling a win or a loss.
+8. NEVER merge a pull request, for any reason. Open PRs, update their branches if asked, and leave merging to the user. "Don't merge yet" is not lifted by frustration or by a later message that does not say "merge". (Broken once: merged PR 22 unasked.)
+9. Do not leave the user a last step ("say merge and I will"). Finish everything except merging, then stop.
