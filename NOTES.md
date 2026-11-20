@@ -150,7 +150,8 @@ Real answers from the public set:
 |---|---|
 | Public set, accuracy | 0.851 to 0.867 over 5 runs |
 | Consistency, stale values, errors | 1.0, 0, 0 in every run |
-| Speed | p50 2.25 to 2.53 s, p95 3.4 to 4.1 s |
+| Speed (original runs, 2026-11-18; priority tier on, hardcoded at that time) | p50 2.25 to 2.53 s, p95 3.4 to 4.1 s |
+| Speed (2026-11-20 baseline runs, priority tier **off**, public set, 40 questions) | p50 1.65 s, p95 2.6 to 3.4 s (three baseline batches, 3 runs pooled each: 2.8, 3.4 and 2.7 s; the p95 of 40 questions moves by several tenths between runs). Lower than the original runs. These were not a controlled on/off test of the switch: network and API load differed between the two sets of runs |
 | Held-out / dated sets | 1.0 / 0.993 |
 | `conflicts()` | 42 entries. Hand list (12): found 12, right winner 11, precision 0.29. Table key (35): found 35 |
 | Loading | about 3 minutes and $0.10 cold |
@@ -182,7 +183,7 @@ How to read this: a source check that fails costs 15% of that question's score, 
 
 ## 10. Ingest experiments that did not help
 
-Goal: improve what is indexed at load time ("garbage in, garbage out") so the model gets better evidence, ideally in a smaller prompt. All of it is behind switches and **off by default**; the submitted behavior is unchanged. Plan and full numbers: `tasks/todo.md`. Priority tier was off for these runs (`MY_SOLUTION_PRIORITY=1` turns it on), so latency is only comparable between arms.
+Goal: improve what is indexed at load time ("garbage in, garbage out") so the model gets better evidence, ideally in a smaller prompt. All of it is behind switches and **off by default**; the submitted behavior is unchanged. Plan and full numbers: `tasks/todo.md`. The OpenAI priority tier was off for these runs (`MY_SOLUTION_PRIORITY=1` turns it on); their latency (p50 about 1.7 s, p95 2.6 to 3.4 s) is lower than the original priority-on figures in section 7, and arms are compared with each other only.
 
 **Enrichment (`enrich.py`, `MY_SOLUTION_ENRICH=ctx,q,prop,emb`).** One `gpt-6-luna` call per chunk writes a context line, propositions and hypothetical questions (Contextual Retrieval, Chen et al. propositions, doc2query-style questions). They are search-only: the model still receives the original chunk, and every number in a generated item must appear in the source. Cache: 1,452 chunks of the newest copy (non-blog, non-news, non-rate pages), about 0.65M input and 0.25M output tokens, committed in `.enrich_cache/` and `.embed_cache/`. Query-time HyDE was rejected (an extra LLM call per answer).
 
