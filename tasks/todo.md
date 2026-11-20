@@ -156,3 +156,24 @@ Baseline pieces; any retrieved piece with enrichment and over 300 chars is repla
 | 3 | 0.952 | 8,083 (-7%) | 1.72 |
 | 5 | 0.952 | 8,304 (-4%) | 1.72 |
 Lost by compacting: dup-082 (all M). The saving is small because only about 1.7 of about 10 pieces per question have enrichment (cache covers only the newest copy's non-blog/news/rate section chunks); the rest of the prompt (tables, news, contact, windows) is untouched. Qualifiers (tier, branch, dates) can also be lost in a short proposition. Not worth an answer-level run as is. Wider coverage (news, blog, older copies) would cost another LLM pass and has no evidence yet that it would help.
+
+## Status summary (2026-11-20) - what is tried, what is next
+Tried, no gain (enrichment, i.e. HyDE-style ingest): context line (B), propositions (C), hypothetical questions (D), all (E/F), swapping chunks for propositions. Keep OFF.
+Tried, bad: sending fewer pieces (keyword 6 / window 2): answer accuracy 0.799 vs 0.897 baseline in 3 of 3 runs, one stale value. Do not ship.
+
+Chunk size (NEW lever, not in the original plan; no LLM at ingest; switch `MY_SOLUTION_SPLIT_CHARS`, default 3000). Retrieval-only check, 124 questions, no rate-limit warnings:
+| Chunk limit | Recall | Avg chars |
+|---|---|---|
+| 3000 (baseline) | 0.960 | 8,689 |
+| 1500 | 0.927 | 6,434 |
+| 800 | 0.935 | 4,963 |
+| 600 | 0.935 | 4,407 |
+| 400 | 0.903 | 3,565 |
+| 800 + keyword 10 | 0.952 | 5,728 |
+(Earlier 600 and 800+k10 runs were invalid: embedding rate limit when run in parallel; reruns one at a time are the numbers above. Run embedding-heavy checks one at a time.)
+
+Next:
+- [ ] Answer-level test of chunk size: 3 runs each of baseline, 800, 600, 800 + keyword 10 on the public set (needs go-ahead; config to be written as docs/regress_chunksize.json)
+- [ ] If a size arm holds accuracy: repeat 3x on held-out, dated, typo sets; check 0 stale; then measure latency with MY_SOLUTION_PRIORITY=1
+- [ ] Otherwise: write the negative result into NOTES.md, turn priority tier back on, stop
+Not planned (low expected gain): contextual embeddings, reranking, cards, widening enrichment, shorter system message.
