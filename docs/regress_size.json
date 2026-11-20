@@ -1,0 +1,13 @@
+{
+  "repo": ".",
+  "runs": 3,
+  "workers": 3,
+  "fact_cache": "results/fact_cache.json",
+  "arms": {
+    "A_base": {"env": {}},
+    "G_k6w2": {"env": {"MY_SOLUTION_TOP_K": "6", "MY_SOLUTION_WINDOW_EXTRA_CAP": "2"}}
+  },
+  "sets": [
+    {"name": "public", "eval": "eval/public_eval.jsonl", "repeat_sample": 0}
+  ]
+}
