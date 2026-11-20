@@ -69,10 +69,29 @@ Open item: re-run baseline with the judge to find the real per-question misses (
 - Gain may be small on this corpus because the section label, synonyms and window search already cover a lot. Decision rule: if <= noise over 3 runs, ship nothing and document the negative result.
 - Cost overrun. Mitigation: pilot first, hard stop at $3.50.
 
-## Check-in (need answers before step 3)
-1. Is the target model for enrichment `gpt-6-luna`, or a cheaper one if available?
-2. Is "P95 hurts" about latency? I read it as "accuracy lifts the multiplied speed/consistency scores"; correct me if you meant something else.
-3. Is it OK to commit the enrichment cache to the repo (like `.embed_cache/`)?
+## Decisions from user (2026-11-20)
+- Model: `gpt-6-luna` for enrichment.
+- Aim: better ingest context gives better retrieval, which gives better accuracy. A/B also whether the answer prompt (system + user message) can shrink, to cut latency.
+- Enrichment cache is committed to the repo (like `.embed_cache/`).
+- HyDE is meant at INGEST: precompute hypothetical questions per chunk (doc2query / HyPE style), not a query-time call. Adopt this.
+- Priority tier in `my_solution/llm.py` is OFF while testing (`MY_SOLUTION_PRIORITY=1` turns it back on). **Re-enable and re-measure speed before final submission.**
+- Interest ranking: Chen propositions (most), Contextual Retrieval, multi-vector indexing. Test all three as A/B arms.
+
+## A/B arms (regress.py)
+- A: baseline (enrichment off)
+- B: context line only (Contextual Retrieval)
+- C: propositions as retrieval units, parent chunk returned (Chen + multi-vector)
+- D: hypothetical questions per chunk (ingest-time HyDE / doc2query)
+- E: best combination, plus a smaller answer prompt (fewer excerpts, shorter system message) to measure latency
+Measure: QA score, refusal correctness, p50/p95, prompt tokens per answer, ingest cost.
+
+## Grouping idea: stable intent "cards" (to test in arm E)
+Group chunks by intent at ingest (hours, address, contact, eligibility, how-to, recognition) and compile one short,
+code-checked card per entity (branch, program) with its source URL. At answer time send the card instead of 6-8 long excerpts,
+which shrinks the user message and stabilises answers. Same guardrails: numbers must appear in the source; original text stays available as fallback.
+
+## Check-in
+Waiting for go-ahead to start steps 1-3 (all free except the 50-chunk pilot).
 
 ## Review
 (to be filled in after implementation and measurement)

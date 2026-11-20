@@ -62,7 +62,8 @@ class AnswerLLM:
         answer-time limit (used by loading-time extraction, which is not timed)."""
         client = self.client() if timeout is None else self.client().with_options(timeout=timeout)
         extra = {}
-        if timeout is None: extra["service_tier"] = "priority"
+        # Priority tier is OFF while testing enrichment (it burns credits). Set MY_SOLUTION_PRIORITY=1 to turn it back on.
+        if timeout is None and os.environ.get("MY_SOLUTION_PRIORITY", "0") == "1": extra["service_tier"] = "priority"
         params = dict(
             model=self.model,
             instructions=instructions,
