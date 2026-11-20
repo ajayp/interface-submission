@@ -1,0 +1,17 @@
+{
+  "repo": ".",
+  "runs": 1,
+  "workers": 3,
+  "fact_cache": "results/fact_cache.json",
+  "arms": {
+    "A_base": {"env": {}},
+    "B_ctx": {"env": {"MY_SOLUTION_ENRICH": "ctx"}},
+    "C_prop": {"env": {"MY_SOLUTION_ENRICH": "prop,emb"}},
+    "D_q": {"env": {"MY_SOLUTION_ENRICH": "q,emb"}},
+    "E_all": {"env": {"MY_SOLUTION_ENRICH": "ctx,q,prop,emb"}},
+    "F_all_topk4": {"env": {"MY_SOLUTION_ENRICH": "ctx,q,prop,emb", "MY_SOLUTION_TOP_K": "4"}}
+  },
+  "sets": [
+    {"name": "public", "eval": "eval/public_eval.jsonl", "repeat_sample": 0}
+  ]
+}

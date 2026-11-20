@@ -36,6 +36,8 @@ from decisions_understanding import DecisionsUnderstanding  # noqa: E402
 from query_understanding import ANSWER_TERMS, AnswerTerms, QueryUnderstanding, qualifier_patterns, search_text  # noqa: E402
 from synonyms import expansion  # noqa: E402
 from search import BM25Index  # noqa: E402
+import enrich  # noqa: E402
+ENRICH_FLAGS = enrich.FLAGS   # MY_SOLUTION_ENRICH, see enrich.py (empty = off)
 from spellfix import SpellFix  # noqa: E402
 from tiers import SECONDARY, page_rank  # noqa: E402
 
@@ -176,6 +178,7 @@ class Knowledge:
         self.aq = (AnswerTerms(self.llm, Path(os.environ["MY_SOLUTION_AQ_CACHE"]) if os.getenv("MY_SOLUTION_AQ_CACHE") else None)
                    if (ANSWER_TERMS or SECOND_PASS) and self.qu else None)
         self.dense: dict[str, object] = {}     # snapshot_id -> DenseIndex (hybrid switch only)
+        self._enrich_idx: dict[str, object] = {}   # snapshot_id -> enrich.EnrichIndex (MY_SOLUTION_ENRICH has emb)
         self._windows: dict[str, object] = {}  # snapshot_id -> WindowIndex or None (windows mode; built lazily, only from vectors already in the file)
         self._embed_store = None
         self._cache: dict[tuple, Answer] = {}
@@ -187,10 +190,8 @@ class Knowledge:
         if os.getenv("MY_SOLUTION_USAGE"):   # measurement aid: print OpenAI token usage when the run ends
             atexit.register(lambda: print(f"[my_solution] OpenAI usage: {self.llm.usage}", file=sys.stderr))
 
-    def ingest(self, snapshot: Snapshot) -> None:
-        if self.spell:
-            for p in snapshot.pages:
-                self.spell.add_text(p.markdown)
+    def _chunks_for(self, snapshot: Snapshot) -> list:
+        """Chunks of one website copy (boilerplate paragraphs kept on one page only, categories set)."""
         pages_with: dict[str, set] = defaultdict(set)
         for p in snapshot.pages:
             for b in page_blocks(p.markdown):
@@ -210,6 +211,15 @@ class Knowledge:
         for c in chunks:
             caption = c.text.split(" | ")[0] if c.kind == "row" else ""
             c.categories = tuple(categories_for(c.url, f"{c.header_path} {c.heading} {caption}", c.text))
+        return chunks
+
+    def ingest(self, snapshot: Snapshot) -> None:
+        if self.spell:
+            for p in snapshot.pages:
+                self.spell.add_text(p.markdown)
+        chunks = self._chunks_for(snapshot)
+        if ENRICH_FLAGS:   # search-only fields from the committed cache (enrich.py); the text sent to the model is unchanged
+            enrich.apply(chunks)
         bm_index = BM25Index(chunks)
         self.snapshots.append((snapshot.taken_on, snapshot.snapshot_id, bm_index))
         _dates.REFERENCE = max(s[0] for s in self.snapshots)   # newest copy: a month named without a year is read relative to it
@@ -219,6 +229,11 @@ class Knowledge:
             self.dense[snapshot.snapshot_id] = DenseIndex(bm_index.chunks, self._embed_store)
         if HYBRID_WINDOWS and WINDOW_WARMUP:
             self._build_window_index(snapshot.snapshot_id, bm_index, embed_missing=True)
+        if "emb" in ENRICH_FLAGS:
+            try:
+                self._enrich_idx[snapshot.snapshot_id] = enrich.EnrichIndex(bm_index.chunks, embed_missing=EMBED_MISSING and self.llm.available())
+            except Exception as e:
+                print(f"[my_solution] enrichment index unavailable: {type(e).__name__}: {e}", file=sys.stderr)
         if self.facts:
             tables = [(t, published_date(p.url, p.markdown)) for p in snapshot.pages
                       for t in page_tables(p.url, p.title, p.markdown)]
@@ -313,6 +328,8 @@ class Knowledge:
             out = out + self._dense_extra(question, out, as_of, qu)
         if HYBRID_WINDOWS and k == TOP_K:
             out = out + self._window_extras(question, out, as_of, qu)
+        if "emb" in ENRICH_FLAGS and k == TOP_K:
+            out = out + self._enrich_extras(question, out, as_of, qu)
         if SECOND_PASS and k == TOP_K and (qu or {}).get("answer_terms"):
             out = out + self._second_pass(question, out, as_of, qu)
         if HOURS_SCHEDULES and k == TOP_K and (qu or {}).get("intent") == "hours" and SAMENESS_RE.search(question):
@@ -453,6 +470,34 @@ class Knowledge:
             out.append((sim, dataclasses.replace(parent, text=w), [parent.url]))
             if len(out) == n:
                 break
+        return out
+
+    def _enrich_extras(self, question: str, first, as_of, qu):
+        """Up to enrich.EXTRA_N parent chunks found by meaning search over the propositions/questions (union: nothing is removed).
+        The parent's ORIGINAL text is returned; `via` records which field found it (MY_SOLUTION_PROV=<file> logs it)."""
+        import dataclasses
+        ix = self._enrich_idx.get(self._snapshot_for(question, as_of, qu)[1])
+        if ix is None:
+            return []
+        try:
+            ranked = ix.search(question, k=30)
+        except Exception as e:
+            print(f"[my_solution] enrichment search failed: {type(e).__name__}: {e}", file=sys.stderr)
+            return []
+        seen = {" ".join(c.text.split()).lower() for _, c, _ in first}
+        out = []
+        for sim, ci, field in ranked:
+            c = ix.chunks[ci]
+            key = " ".join(c.text.split()).lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append((sim, dataclasses.replace(c, via=f"enrich:{field}"), [c.url]))
+            if len(out) == enrich.EXTRA_N:
+                break
+        if os.getenv("MY_SOLUTION_PROV"):
+            with open(os.environ["MY_SOLUTION_PROV"], "a") as f:
+                f.write(json.dumps({"q": question, "added": [[c.via, c.url, round(s, 3)] for s, c, _ in out]}) + "\n")
         return out
 
     def _second_pass(self, question: str, first, as_of, qu: dict):

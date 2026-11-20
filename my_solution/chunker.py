@@ -63,10 +63,13 @@ class Chunk:
     effective: Optional[str] = None   # ISO date from "Rates are effective as of MM/DD/YYYY"
     categories: tuple = ()            # from categories.categories_for, set at ingest
     published: Optional[str] = None   # ISO date the page says it was published (press release, dated URL)
+    enrich: Optional[dict] = None     # enrich.py: search-only context line / propositions / questions (never sent to the model)
+    enrich_text: str = ""              # the part of that which BM25 sees (set by enrich.apply per MY_SOLUTION_ENRICH)
+    via: str = ""                      # which retriever/field surfaced this piece (provenance, set on extras)
 
     def index_text(self) -> str:
         """What BM25 sees: page title + heading path + body."""
-        return f"{self.title} {self.header_path.replace('/', ' ')} {self.heading}\n{self.text}"
+        return f"{self.title} {self.header_path.replace('/', ' ')} {self.heading}\n{self.text}" + (f"\n{self.enrich_text}" if self.enrich_text else "")
 
 
 # ---------------------------------------------------------------- step 1: LlamaIndex-equivalent
