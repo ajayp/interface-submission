@@ -150,15 +150,14 @@ Real answers from the public set:
 |---|---|
 | Public set, accuracy | 0.851 to 0.867 over 5 runs |
 | Consistency, stale values, errors | 1.0, 0, 0 in every run |
-| Speed (original runs, 2026-11-18; priority tier on, hardcoded at that time) | p50 2.25 to 2.53 s, p95 3.4 to 4.1 s |
-| Speed (2026-11-20 baseline runs, priority tier **off**, public set, 40 questions) | p50 1.65 to 1.71 s, p95 2.63 to 3.32 s (four baseline sets: 2.86, 2.81, 3.32 with one 8.0 s call, 2.63 s; the p95 of 40 questions moves by several tenths between runs). Lower than the original runs. These were not a controlled on/off test of the switch: network and API load differed between the two sets of runs |
+| Speed (2026-11-20, public set, 3 runs of 40 questions) | p50 1.37 s, mean 1.46 s, p95 2.24 s, slowest 5.04 s. Accuracy 0.886 (0.890, 0.864, 0.905), within run-to-run noise: the questions that moved are the hours questions dup-064 and dup-104, which flip between runs. The p95 of 40 questions moves by several tenths between runs |
 | Held-out / dated sets | 1.0 / 0.993 |
 | `conflicts()` | 42 entries. Hand list (12): found 12, right winner 11, precision 0.29. Table key (35): found 35 |
 | Loading | about 3 minutes and $0.10 cold |
 
 ## 8. Known limits
 
-- The 2 s full-marks speed line is not met. The answer call is about 90% of the time. One run had a single 8.3 s answer (probably a timed-out call that was retried). A failed answer call (such as a timeout after the 6 s limit and one retry) is not turned into "I don't know": the answer says the model did not respond, `conflict_note` names the error, and it is not cached. In one 3-pass test, 2 of 120 answers timed out, both on hours questions, which have the longest answers.
+- The median meets the 2 s full-marks speed line (median 1.37 s; section 7), but the slower answers do not (p95 2.24 s). The answer call is about 90% of the time. One run had a single 8.3 s answer (probably a timed-out call that was retried). A failed answer call (such as a timeout after the 6 s limit and one retry) is not turned into "I don't know": the answer says the model did not respond, `conflict_note` names the error, and it is not cached. In one 3-pass test, 2 of 120 answers timed out, both on hours questions, which have the longest answers. Speed depends on OpenAI's response time, so p95 varies from run to run. A stuck call is capped by a 6 s timeout and one retry (about 12 s at most), and answers are cached within a run.
 - Accepted misses on the public set: dup-049, dup-008, dup-088 (two readings of the question), dup-104 (partly fixed by the hours switches in section 4: 10 of 10 direct test runs now list every schedule; the stand-in judge still marks it down because the reference quotes Cedar Rapids and the answer leads with Cedar Falls) and dup-005 (a range instead of every rate). dup-008 was fixed by the link rule in section 4. dup-005 has an empty `must_include`, so the harness keyword score is 0.0 for it whatever the answer says (`scoring.py` line 122); only the judge can score it.
 - Several public questions score below full marks because the benchmark's reference and the website disagree, or because of how the scorer works. Two of them (dup-005, dup-088) are also partly my own misses, and the dup-064 refusals were mine and are mostly gone (see section 9). They are listed in section 9.
 - Hours, awards and similar facts are not in the fact table, so they depend on text search.
@@ -183,7 +182,7 @@ How to read this: a source check that fails costs 15% of that question's score, 
 
 ## 10. Ingest experiments that did not help
 
-Goal: improve what is indexed at load time ("garbage in, garbage out") so the model gets better evidence, ideally in a smaller prompt. The experiment code, caches and full plan are on branch `claude/eloquent-bardeen-9r4xbs` (not merged); this repo's submitted behavior is unchanged. The OpenAI priority tier was off for these runs (on the experiment branch it is switched by `MY_SOLUTION_PRIORITY`; on main it is hardcoded on in `llm.py`); their latency (p50 1.65 to 1.71 s, p95 2.63 to 3.32 s) is lower than the original priority-on figures in section 7, and arms are compared with each other only.
+Goal: improve what is indexed at load time ("garbage in, garbage out") so the model gets better evidence, ideally in a smaller prompt. The experiment code, caches and full plan are on branch `claude/eloquent-bardeen-9r4xbs` (not merged); this repo's submitted behavior is unchanged. Latency in these experiments is only compared between arms; the speed figures are in section 7.
 
 **Enrichment (`enrich.py`, `MY_SOLUTION_ENRICH=ctx,q,prop,emb`).** One `gpt-6-luna` call per chunk writes a context line, propositions and hypothetical questions (Contextual Retrieval, Chen et al. propositions, doc2query-style questions). They are search-only: the model still receives the original chunk, and every number in a generated item must appear in the source. Cache: 1,452 chunks of the newest copy (non-blog, non-news, non-rate pages), about 0.65M input and 0.25M output tokens, committed in `.enrich_cache/` and `.embed_cache/`. Query-time HyDE was rejected (an extra LLM call per answer).
 
