@@ -1,0 +1,15 @@
+{
+  "repo": ".",
+  "runs": 3,
+  "workers": 3,
+  "fact_cache": "results/fact_cache.json",
+  "arms": {
+    "A_base": {"env": {}},
+    "S800": {"env": {"MY_SOLUTION_SPLIT_CHARS": "800", "MY_SOLUTION_WINDOW_CACHE": "/home/user/interface-submission/results/windows_split800.npz"}},
+    "S600": {"env": {"MY_SOLUTION_SPLIT_CHARS": "600", "MY_SOLUTION_WINDOW_CACHE": "/home/user/interface-submission/results/windows_split600.npz"}},
+    "S800_k10": {"env": {"MY_SOLUTION_SPLIT_CHARS": "800", "MY_SOLUTION_TOP_K": "10", "MY_SOLUTION_WINDOW_CACHE": "/home/user/interface-submission/results/windows_split800_k10.npz"}}
+  },
+  "sets": [
+    {"name": "public", "eval": "eval/public_eval.jsonl", "repeat_sample": 0}
+  ]
+}
