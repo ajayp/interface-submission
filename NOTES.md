@@ -13,6 +13,7 @@
 7. [Results](#7-results)
 8. [Known limits](#8-known-limits)
 9. [Reference mismatches and scoring quirks](#9-reference-mismatches-and-scoring-quirks)
+10. [Ingest experiments that did not help](#10-ingest-experiments-that-did-not-help)
 
 A question-answering system over five dated crawls of a credit union's website. It answers with the **current**, correctly-tiered value, a source, and an honest "I don't know" when the site does not say. It also lists where the website contradicts itself.
 
@@ -178,3 +179,22 @@ These public questions score below full marks for reasons tied to `eval/public_e
 | dup-064, dup-065, dup-066 hours (style) | "Give a typical schedule and ask which branch"; drive-up hours "at most branches" | I say general hours are not established, give the one branch schedule the excerpts hold, and ask which branch (dup-065 in 8 of 10 runs on the committed text, dup-066 in 5 of 5 runs on earlier code; dup-064 in 2 of 5 before the fix in `d08bd2e`, the other three were a plain "I don't know"). The prompt forbids inventing a typical schedule | Reference (style) | None locally (keyword check passes); the judge could mark the answers down | A typical schedule would state something the excerpts do not |
 
 How to read this: a source check that fails costs 15% of that question's score, because `score = 0.85 x correctness + 0.15 x source`. Extra sources are not penalised, but padding the list with pages the answer did not use would be gaming the check, so I cite only the pages that state the facts I give.
+
+## 10. Ingest experiments that did not help
+
+Goal: improve what is indexed at load time ("garbage in, garbage out") so the model gets better evidence, ideally in a smaller prompt. All of it is behind switches and **off by default**; the submitted behavior is unchanged. Plan and full numbers: `tasks/todo.md`. Priority tier was off for these runs (`MY_SOLUTION_PRIORITY=1` turns it on), so latency is only comparable between arms.
+
+**Enrichment (`enrich.py`, `MY_SOLUTION_ENRICH=ctx,q,prop,emb`).** One `gpt-6-luna` call per chunk writes a context line, propositions and hypothetical questions (Contextual Retrieval, Chen et al. propositions, doc2query-style questions). They are search-only: the model still receives the original chunk, and every number in a generated item must appear in the source. Cache: 1,452 chunks of the newest copy (non-blog, non-news, non-rate pages), about 0.65M input and 0.25M output tokens, committed in `.enrich_cache/` and `.embed_cache/`. Query-time HyDE was rejected (an extra LLM call per answer).
+
+| Test | Result |
+|---|---|
+| Answer level, public set, 1 run | base 0.905; context line 0.905; propositions 0.905; questions 0.840; all 0.858; all + keyword 4: 0.886 |
+| Retrieval recall, 124 questions (`retrieval_check.py`) | base 0.960; all enrichment 0.960 (fixed 0 of 5 misses, +31% characters). Only 10% of added pieces held a required value, and similarity did not separate them (median 0.66 useful vs 0.60 useless) |
+| Propositions sent instead of the chunk | 4-9% fewer characters, recall 0.952, lost one question |
+| Provenance (`MY_SOLUTION_PROV`) | Questions arm added 3 unrelated pieces to every question (no relevance floor); lobby-hours questions refused 3 of 3 even though the schedules were still in the prompt |
+
+**Fewer pieces (`MY_SOLUTION_TOP_K=6`, `MY_SOLUTION_WINDOW_EXTRA_CAP=2`).** Accuracy 0.799 vs 0.897 baseline in 3 of 3 runs, and one stale value reached an answer. Do not ship.
+
+**Chunk size (`MY_SOLUTION_SPLIT_CHARS`, no LLM at load).** Retrieval recall at 800 characters was 0.935 at 43% fewer characters (baseline 0.960 at 3,000). At answer level (3 runs each, public set): base 0.879, 800: 0.880, 600: 0.866, 800 + keyword 10: 0.872; 0 stale, 0 errors. Median latency did not move (1.65 s base, 1.69 s at 800). Accuracy is neutral and a smaller prompt did not make answers faster, so the default (3,000) stays.
+
+**Takeaways.** Baseline retrieval already finds the required text for 96% of 124 checked questions, so little is left for better indexing to win. Recall understates damage from sending fewer pieces. Run embedding-heavy checks one at a time (parallel runs hit the embedding rate limit and silently turn meaning search off). Hours/branch questions (dup-064, 065, 066, 104) flip between runs in every arm, so compare over 3 runs.
