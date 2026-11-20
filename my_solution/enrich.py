@@ -31,6 +31,7 @@ from typing import Optional
 HERE = Path(__file__).resolve().parent
 CACHE_PATH = Path(os.getenv("MY_SOLUTION_ENRICH_CACHE") or HERE / ".enrich_cache" / "enrich-v2.json")
 FLAGS = {f.strip() for f in os.getenv("MY_SOLUTION_ENRICH", "").split(",") if f.strip()}
+FLOOR = float(os.getenv("MY_SOLUTION_ENRICH_FLOOR", "0"))   # meaning-search pieces below this similarity are not added (0 = no floor)
 EXTRA_N = int(os.getenv("MY_SOLUTION_ENRICH_EXTRA", "3"))   # parents added by meaning search over the new fields
 PROMPT_VERSION = "enrich-v2"
 SKIP_URL_PARTS = ("/blog", "news", "calculator", "rates")    # first pass: not the dated posts, calculators or rate pages

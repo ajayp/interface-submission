@@ -92,6 +92,7 @@ EMBED_MISSING = os.getenv("MY_SOLUTION_EMBED_MISSING", "1") == "1"   # at ingest
 HYBRID_EXTRA = 3
 WINDOW_EXTRA_BY_INTENT = {"eligibility": 6, "list": 6, "fact_about_dupaco": 6, "rate": 0, "fee": 0}
 WINDOW_EXTRA_DEFAULT = 3
+WINDOW_EXTRA_CAP = int(os.getenv("MY_SOLUTION_WINDOW_EXTRA_CAP", "99"))   # experiment: at most this many meaning-search window pieces (default no cap)
 # "Are the hours the same at every branch?" (experiment switch MY_SOLUTION_HOURS_SCHEDULES, default on; set 0 to turn off). The keyword top 8 fill up with branch-finder
 # cards and the pages that state a second schedule rank around 30th, so the answer AI sees one schedule only. For an hours question that asks about
 # sameness or difference, up to HOURS_SCHEDULE_EXTRA more pieces that carry a lobby/drive-up schedule are appended (nothing else changes).
@@ -451,7 +452,7 @@ class Knowledge:
             self._build_window_index(sid, index)
         wi = self._windows[sid]
         intent = (qu or {}).get("intent")
-        n = WINDOW_EXTRA_BY_INTENT.get(intent, WINDOW_EXTRA_DEFAULT)
+        n = min(WINDOW_EXTRA_BY_INTENT.get(intent, WINDOW_EXTRA_DEFAULT), WINDOW_EXTRA_CAP)
         if wi is None or n == 0:
             return []
         try:
@@ -487,6 +488,8 @@ class Knowledge:
         seen = {" ".join(c.text.split()).lower() for _, c, _ in first}
         out = []
         for sim, ci, field in ranked:
+            if sim < enrich.FLOOR:
+                break   # ranked best first: everything after is weaker
             c = ix.chunks[ci]
             key = " ".join(c.text.split()).lower()
             if key in seen:
