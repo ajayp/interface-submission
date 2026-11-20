@@ -93,8 +93,9 @@ def summarize(d: Path, tag: str) -> dict:
 
 
 def run(cfg, out: Path, set_name: str, arm: str, n: int, judge: bool) -> dict:
-    tag = f"{out.name}:{set_name}_{arm}{n}"
     d = out / f"{set_name}_{arm}{n}"
+    # a retry of an INVALID run gets its own ledger tag, so its chars/tokens are not added to the failed attempt's
+    tag = f"{out.name}:{set_name}_{arm}{n}" + (f"#retry{int(time.time())}" if (d / "INVALID").exists() else "")
     log = out / f"{set_name}_{arm}{n}.log"
     env = base_env(tag)
     env.update({k: str(v) for k, v in cfg["arms"][arm].items()})

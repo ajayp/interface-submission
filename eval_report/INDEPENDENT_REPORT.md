@@ -10,12 +10,13 @@ I formed these results before reading NOTES.md section 10 or `tasks/todo.md`; se
 **No ingest change beats the baseline on accuracy, and none improves latency.**
 
 - **Accuracy.** Thirteen end-to-end arms on the public set (3 runs each, interleaved) and seven on 100 non-public questions
-  (3 runs each): every difference against the baseline is either inside the noise or a loss. {{STAGEB_BOTTOM}}
+  (3 runs each): every difference against the baseline is either inside the noise or a loss. On the 100 non-public questions the best arms are ties (TOP_K=6 +0.003, interval -0.015 to +0.022; dense rerank +0.000 / +0.001) and 800-character chunks lose (-0.031, interval -0.070 to -0.001).
 - **Latency.** The answer call's duration does not depend on how much evidence it is sent (correlation 0.015 over 1,599 calls,
   arm means 1.48 to 1.65 s for prompts of 5.4k to 9.0k characters). It depends on how much it writes (7.3 ms per output token).
   Shrinking the prompt therefore buys no measurable speed, and the input tokens it saves are worth about $0.0002 per question.
-- **The prompt can be made smaller without a measurable loss**: TOP_K=6 cuts the text-path prompt by 17% with no recall or
-  accuracy change. It earns nothing in return (previous point), so I would not change the default for it.
+- **The prompt can be made smaller without a measurable loss**: TOP_K=6 cuts the text-path prompt by 17% (12-14% per question)
+  with no recall, accuracy or latency change on either eval set, so it meets the "shrink without harm" bar. It buys no speed
+  (previous point) and saves about 250 tokens per question, so keeping the default of 8 is equally defensible.
 - **Two arms broke the zero-stale invariant**: propositions sent to the model instead of chunks (stale in 3 of 3 runs) and
   TOP_K=6 with at most 2 window pieces (1 of 3). Both remove the meaning-search window pieces that surface the newer press release.
 - **HyDE is not worth testing end to end**: the hypothetical-answer call takes 1.2 s at the median and would sit on the timed
@@ -24,7 +25,7 @@ I formed these results before reading NOTES.md section 10 or `tasks/todo.md`; se
   every required string in the evidence; every public miss in my baseline runs is a reference/scorer mismatch already listed in
   NOTES section 9, with the required strings present in the evidence. Ingest changes cannot raise public accuracy without gaming.
 
-{{SPEND_LINE}}
+OpenAI spend for the whole session: **$2.25** of the $3.50 ceiling (section 5). The priority-tier on/off check was not run (section 2d).
 
 ## 1. What I ran and how to reproduce it
 
@@ -94,18 +95,63 @@ every `must_include` string (5 eval files, 62 questions; facts-path questions ar
 answer them and text search is only their fallback). "Public acc." = harness keyword accuracy, mean of 3 runs (baseline 0.8786).
 "Diff" = paired difference against the baseline with a 95% bootstrap interval over questions. Stale = stale-trap hits over all runs.
 
-{{TECH_TABLE}}
+| # | Technique | What I ran | Result vs baseline | Verdict | Confidence |
+|---|---|---|---|---|---|
+| 1 | HyDE (query time) | gpt-6-luna writes a 2-3 sentence hypothetical answer per question; window (meaning) search uses question + answer (`hyde_concat`) or the answer alone (`hyde_replace`). Retrieval only | Generation call p50 1.20 s, p95 1.65 s, on the timed path of every text-search answer. Text recall 61/62 -> 60 (concat) / 58 (replace). It also invents values ("4.00% APY" for a 4.10% product) | **Not worth testing end to end**: slower and no better | high |
+| 2 | Ingest-time hypothetical questions (doc2query), keyword | Committed questions appended to the BM25 text (`ENRICH=q`) | Recall unchanged; covering prefix 4.79 -> 4.39 (best keyword enrichment). Public +0.013 [0.000, +0.032]; 100 non-public -0.007 [-0.033, +0.017]; 0 stale | **Tie** | medium |
+| 3 | Multi-vector (search generated text, return the ORIGINAL chunk) | Meaning search over the generated questions (`ENRICH=embq`) or propositions (`embprop`), parent chunk appended, BM25 untouched (new flags, defect D8); also the previous author's combined arms `q,emb`, `prop,emb`, `ctx,q,prop,emb` (retrieval only) | Recall unchanged in every variant; text-path prompt +20% to +24%. Public -0.007 [-0.047, +0.025], dup-065 0.67 -> 0.00 (hours answer refused with the extra pieces); 0 stale | **Tie on accuracy with a larger prompt: reject** | high |
+| 4a | Contextual Retrieval, keyword half | LLM context line added to BM25 text (`ENRICH=ctx`) | Recall unchanged. Public -0.008 [-0.024, 0.000]; 0 stale | **Tie** | medium |
+| 4b | Contextual Retrieval, embedding half (not tested before) | Window vectors computed from "context line + window" (`WINDOW_CTX=llm`); the model still gets the plain window. 2,193 new vectors | Recall unchanged. Public +0.011 [-0.016, +0.044]; 100 non-public -0.025 [-0.058, +0.002] (branch/contact 0.807 vs 0.897); 0 stale | **Tie, leaning loss** | medium |
+| 4c | Contextual Retrieval, both halves | `ENRICH=ctx` + `WINDOW_CTX=llm` | Public -0.015 [-0.061, +0.022]; 0 stale | **Tie** | medium |
+| 4d | Code-written context on windows (no LLM) | "title > headings" line embedded with each window (`WINDOW_CTX=head`) | Text recall 61 -> 57 (lost dup-031, dup-081 x3) | **Loss** | low (retrieval only) |
+| 5a | Propositions (Dense X) sent to the model instead of chunks | Best propositions by meaning, grouped under their page, in place of the window pieces (`PROP_UNIT=replace`; same character budget) | Text recall 61 -> 51. Public -0.066 [-0.173, +0.021]; **stale answer in 3 of 3 runs** (dup-087 "fourth") | **Loss; breaks the zero-stale invariant** | high |
+| 5b | Propositions added to the windows | `PROP_UNIT=union` | Recall unchanged, prompt +41% | **Reject** | high (retrieval only) |
+| 6a | Fewer pieces: `TOP_K=6` | 6 keyword pieces instead of 8; windows unchanged | Text-path prompt -17%; per question -12% (public) / -14% (non-public). Public +0.002 [-0.026, +0.030]; non-public +0.003 [-0.015, +0.022]; 0 stale; latency unchanged (2d) | **Tie with a smaller prompt: meets the "shrink without harm" bar**, but the saving is ~250 tokens per question and buys no speed | medium-high |
+| 6b | `TOP_K=5`, `TOP_K=4` | | K=5 loses dup-049's fallback; K=4 loses 6 questions (and triggers defect D6) | **Loss** | low (retrieval only) |
+| 6c | Window cap `WINDOW_EXTRA_CAP=2/1/0` | | Text recall 57 / 55 / 51 of 62 | **Loss** | high (retrieval) |
+| 6d | `TOP_K=6` + `WINDOW_EXTRA_CAP=2` (previous author's arm) | | Public -0.088 [-0.192, -0.003]; stale in 1 of 3 runs (dup-087) | **Loss** | high |
+| 7a | Chunk size 1500 | `SPLIT_CHARS=1500`, window vectors re-embedded into a copy | Text recall 61 -> 57; public -0.028 [-0.092, +0.019], dup-031 and dup-080 lost in every run | **Loss** | medium-high |
+| 7b | Chunk size 800 | `SPLIT_CHARS=800` | Text recall 61 -> 60, facts fallback 57 -> 56; prompt -26%. Public -0.009 [-0.035, +0.016]; **non-public -0.031 [-0.070, -0.001]** (held-out 0.917 vs 0.979, typo 0.905 vs 0.938) | **Loss** | high |
+| 7c | Chunk size 600 / 400 | | Text recall 59 / 56 of 62 (all paths 118 / 115 of 123) | **Loss** | medium (retrieval only) |
+| 8a | Reranking (new; no extra API call) | Keyword top 40 re-ordered by each chunk's best window similarity to the question (`RERANK=dense`), then top K | K=5: text recall 62/62 (recovers dup-034), covering prefix 4.79 -> 2.32; public +0.007 [-0.036, +0.046]; non-public +0.000 [-0.020, +0.020]; prompt about the same (the rerank favours longer chunks). K=4: public +0.010 [-0.008, +0.032]; non-public +0.001 [-0.030, +0.028]; prompt -8% / -19%; loses one facts-fallback question. 0 stale | **Tie; best ranking of all arms** | medium |
+| 8b | RRF rerank (keyword + meaning rank) | `RERANK=rrf`, K=8/6/5 | Recall unchanged at K=8/6; K=5 loses dup-040 | Not better than dense | low (retrieval only) |
 
 Confidence: **high** = the retrieval test (deterministic) and 3 end-to-end runs agree; **medium** = a tie within noise that
 could hide an effect of about +-0.02; **low** = retrieval only, not run end to end.
 
 ### 2a. End-to-end, public set (40 questions, 3 runs per arm)
 
-{{STAGEA_TABLE}}
+| arm | runs | accuracy (per run) | mean | diff vs base [95% CI] | stale | p50 | mean s | p95 | max | chars/q | questions moved >= 0.5 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| base | 3 | 0.8822, 0.8899, 0.8636 | 0.8786 | - | 0 | 1.85 | 1.90 | 3.08 | 3.40 | 7572 | - |
+| ctx_kw | 3 | 0.8403, 0.8822, 0.8899 | 0.8708 | -0.0078 [-0.024, +0.000] | 0 | 1.81 | 1.98 | 3.16 | 11.97 | 7635 | - |
+| cr_emb_llm | 3 | 0.8589, 0.9054, 0.9054 | 0.8899 | +0.0114 [-0.016, +0.044] | 0 | 1.88 | 1.93 | 3.07 | 3.55 | 7559 | - |
+| cr_full_llm | 3 | 0.8791, 0.8558, 0.8558 | 0.8636 | -0.0150 [-0.061, +0.022] | 0 | 1.86 | 2.02 | 3.73 | 4.73 | 7623 | dup-064 0.57->0.00 |
+| q_kw | 3 | 0.8899, 0.9054, 0.8791 | 0.8915 | +0.0129 [+0.000, +0.032] | 0 | 1.82 | 1.86 | 2.71 | 3.54 | 7566 | - |
+| mv_q | 3 | 0.8667, 0.8822, 0.8667 | 0.8718 | -0.0067 [-0.047, +0.025] | 0 | 1.77 | 1.84 | 2.80 | 3.94 | 9270 | dup-065 0.67->0.00 |
+| propunit_repl | 3 | 0.8124, 0.8124, 0.8124 | 0.8124 | -0.0661 [-0.173, +0.021] | 3 (dup-087 run 1, dup-087 run 2, dup-087 run 3) | 1.80 | 2.00 | 2.97 | 8.32 | 7389 | dup-087 1.00->0.00; dup-008 1.00->0.00; dup-031 1.00->0.00; dup-081 1.00->0.00 |
+| k6 | 3 | 0.8470, 0.8966, 0.8966 | 0.8801 | +0.0016 [-0.026, +0.030] | 0 | 1.77 | 1.87 | 2.73 | 3.92 | 6662 | - |
+| k6_cap2 | 3 | 0.7992, 0.7729, 0.7992 | 0.7904 | -0.0881 [-0.192, -0.003] | 1 (dup-087 run 1) | 1.78 | 1.87 | 2.96 | 5.01 | 6024 | dup-087 1.00->0.00; dup-031 1.00->0.00; dup-081 1.00->0.00; dup-082 1.00->0.00 |
+| s1500 | 3 | 0.8403, 0.8558, 0.8558 | 0.8506 | -0.0279 [-0.092, +0.019] | 0 | 1.82 | 1.89 | 2.71 | 3.70 | 6549 | dup-080 1.00->0.00; dup-031 1.00->0.00 |
+| s800 | 3 | 0.8791, 0.8636, 0.8667 | 0.8698 | -0.0088 [-0.035, +0.016] | 0 | 1.78 | 1.90 | 2.87 | 3.80 | 5584 | - |
+| rr_dense_k5 | 3 | 0.9066, 0.8833, 0.8678 | 0.8859 | +0.0074 [-0.036, +0.046] | 0 | 1.94 | 2.03 | 3.13 | 6.08 | 7676 | dup-087 1.00->0.33 |
+| rr_dense_k4 | 3 | 0.9043, 0.8624, 0.8996 | 0.8888 | +0.0102 [-0.008, +0.032] | 0 | 1.84 | 1.93 | 3.06 | 6.72 | 6953 | - |
 
 ### 2b. End-to-end, 100 non-public questions (typo 48 + held-out 22 + temporal 21 + branch/contact 9), 3 runs per arm
 
-{{STAGEB_TABLE}}
+| arm | runs | accuracy (per run) | mean | diff vs base [95% CI] | stale | p50 | mean s | p95 | max | chars/q | questions moved >= 0.5 | by subset |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| base | 3 | 0.9559, 0.9594, 0.9466 | 0.9540 | - | 0 | 1.40 | 1.56 | 2.64 | 8.12 | 7914 | - | branch 0.897, heldout 0.979, temporal 0.986, typo 0.938 |
+| k6 | 3 | 0.9594, 0.9510, 0.9594 | 0.9566 | +0.0026 [-0.015, +0.022] | 0 | 1.37 | 1.48 | 2.42 | 3.76 | 6804 | dup-087-typo1 0.33->1.00 | branch 0.885, heldout 0.958, temporal 0.993, typo 0.954 |
+| s800 | 3 | 0.9002, 0.9336, 0.9350 | 0.9229 | -0.0310 [-0.070, -0.001] | 0 | 1.37 | 1.49 | 2.57 | 8.45 | 5629 | dup-081-typo2 1.00->0.00; ho-021 0.67->0.00 | branch 0.862, heldout 0.917, temporal 0.993, typo 0.905 |
+| rr_dense_k5 | 3 | 0.9553, 0.9598, 0.9479 | 0.9543 | +0.0003 [-0.020, +0.020] | 0 | 1.37 | 1.54 | 2.70 | 8.12 | 7140 | dup-080-typo1 1.00->0.33 | branch 0.940, heldout 1.000, temporal 0.986, typo 0.919 |
+| rr_dense_k4 | 3 | 0.9512, 0.9598, 0.9537 | 0.9549 | +0.0009 [-0.030, +0.028] | 0 | 1.35 | 1.51 | 2.54 | 4.95 | 6415 | dup-080-typo1 1.00->0.00; dup-087-typo1 0.33->1.00 | branch 0.956, heldout 1.000, temporal 0.982, typo 0.919 |
+| q_kw | 3 | 0.9476, 0.9401, 0.9524 | 0.9467 | -0.0073 [-0.033, +0.017] | 0 | 1.35 | 1.48 | 2.45 | 3.72 | 7647 | dup-087-typo1 0.33->1.00; ho-022 1.00->0.33 | branch 0.874, heldout 0.917, temporal 0.995, typo 0.954 |
+| cr_emb_llm | 3 | 0.9336, 0.9406, 0.9127 | 0.9290 | -0.0250 [-0.058, +0.002] | 0 | 1.29 | 1.42 | 2.32 | 3.55 | 7852 | dup-087-typo2 1.00->0.33; ho-022 1.00->0.33; dup-064 0.57->0.00 | branch 0.807, heldout 0.917, temporal 0.993, typo 0.931 |
+
+`rr_dense_k5` run 3 was first invalidated by an answer-call timeout (`APITimeoutError`) and re-run after the other runs; its
+characters were first double-counted (both attempts shared a ledger tag) and were recomputed from the valid attempt only; `e2e.py` now
+tags a retry separately.
 
 ### 2c. Retrieval-only screening (no answer calls; all 37 arms)
 
@@ -154,7 +200,24 @@ questions. "Cover" = mean number of pieces, in the order sent, needed to hold ev
 
 ### 2d. Latency
 
-{{LATENCY}}
+Setting: **priority tier off for every run** (`MY_SOLUTION_PRIORITY` unset; the ledger records `service_tier: default` for every
+answer call). Each run's evidence was cold in the provider's prompt cache (per-run salt), as for unseen graded questions; the
+instructions prefix was cached (about 45% of input tokens).
+
+- Baseline, public set, live labels (stage A): per-run p50 1.80 / 1.80 / 1.94 s, p95 3.13 / 3.08 / 3.10 s, max 3.40 s; pooled
+  p50 1.85, mean 1.90, p95 3.08. The un-salted pilot (28 of 41 answer calls fully served from the prompt cache): p50 1.85, p95 3.79.
+- All 13 arms, pooled over 3 runs: p50 1.77 to 1.94 s, p95 2.71 to 3.73 s, with no pattern by prompt size.
+- **Prompt size does not drive answer time.** Over 1,599 stage-A answer calls: seconds = 1.13 - 0.011 x (thousand characters)
+  + 0.0073 x (output tokens); correlation with prompt size 0.015. Arm means of the answer call are 1.48 to 1.65 s for prompts of
+  5.4k to 9.0k characters.
+- **What sets p95** (baseline, slowest questions): dup-147 (3.19 s) and dup-145 (3.01 s) are rate questions the tables do not
+  answer; they make two answer calls in a row (facts, then the text fallback) and end in "I don't know". Next is dup-104 (2.51 s),
+  the longest answer (each branch's lobby hours). 5 of 1,560 stage-A answers took over 6 s: a call that hit the 6 s timeout and was
+  retried. Answer latency follows answer length only weakly across questions (correlation 0.23).
+- Labels call (Decisions API): p50 0.29 s, p95 0.62 s. HyDE call: p50 1.20 s, p95 1.65 s.
+- Stage B latency excludes the labels call for every arm (frozen labels), so it is lower in absolute terms; compare arms within it only.
+- **Priority tier on vs off: not measured.** The config is in `eval_report/configs/priority.json`; it was skipped at the end to
+  stay within the instruction not to start new paid runs. It would cost about $0.25.
 
 ## 3. Defects found in the experiment code, and what they do to earlier numbers
 
@@ -180,12 +243,64 @@ graded submission: every enrichment switch is off by default, so **none of these
 
 ## 4. Comparison with the previous author's notes
 
-{{DISCREPANCIES}}
+Read only after my results were final. "Theirs" = NOTES.md section 10 (and section 7 where noted) and `tasks/todo.md`.
+
+| # | Claim in their notes | My result | Which is right, and why |
+|---|---|---|---|
+| 1 | Baseline retrieval recall 0.960 on 124 questions, 5 misses (dup-034, ho-010, tm-007, tm-016, tm-021) | 0.984 (121 of 123; 1 count question excluded), 2 misses (dup-034 on text search, ho-010 on the facts fallback) | **Mine, for what the model receives.** `retrieval_check.py` scores "what changed" questions on `retrieve()`, but `answer()` uses `_history_hits()`; on that path tm-007, tm-016 and tm-021 have every required string. Same conclusion either way: little headroom |
+| 2 | "Fewer pieces (TOP_K=6, WINDOW_EXTRA_CAP=2): 0.799 vs 0.897 in 3 of 3 runs, one stale value. Do not ship"; "shrinking costs recall" | Same arm: 0.790 vs 0.879, stale in 1 of 3 runs (dup-087 "fourth"). But **TOP_K=6 alone** keeps recall and accuracy on both sets (3 runs each) with 12-14% fewer characters | **Both measured the arm correctly; their generalisation is wrong.** The damage comes from capping the window pieces (cap 2/1/0 lose 4/6/10 questions in retrieval), not from fewer keyword pieces. They never ran TOP_K without the cap |
+| 3 | Chunk size 800: "accuracy is neutral" (public, 3 runs, 0.880 vs 0.879) | Public: tie (-0.009). **100 non-public questions: -0.031 [-0.070, -0.001]** | **Mine.** Their test was public-only, where the baseline is at its ceiling. Both keep the 3,000 default; the reason is a loss, not neutrality |
+| 4 | Chunk size 1500 not tested at answer level (retrieval 0.927) | Public -0.028; dup-031 and dup-080 lost in every run | Mine adds this; consistent with their retrieval number |
+| 5 | Hypothetical questions hurt: arm D (`q,emb`) 0.840 vs 0.905, 1 run; follow-up blames 3 unrelated extra pieces | Keyword half alone ties (public +0.013, non-public -0.007); meaning half alone ties overall but drops dup-065 (0.67 -> 0.00) | **Partly both.** Their 1-run -0.065 is inflated by the hours questions that flip in every arm; their provenance diagnosis (extras with no floor, defect D4) matches what I see on dup-065. The questions as keyword text do no harm |
+| 6 | Enrichment cache "1,452 chunks of the newest copy (non-blog, non-news, non-rate pages)" | That is 26% of section text in the newest copy and 8-21% in older copies; every press release is excluded by the substring `news` (defect D1) | **Missing caveat on their side.** The negative enrichment result holds only for this coverage, and cannot speak to hours/closure questions, whose facts live in press releases |
+| 7 | Propositions instead of chunks: recall 0.952, -4 to -9% characters, lost dup-082; "not worth an answer-level run" | My version (propositions in place of windows): recall -10 questions, accuracy -0.066, **stale in 3 of 3 runs** | **Same verdict.** Different designs; mine adds the stale-value finding, which a recall-only check cannot see (their own takeaway: "recall understates damage") |
+| 8 | "Not planned (low expected gain): contextual embeddings, reranking" | Contextual embeddings: tie on public, -0.025 on non-public. Dense rerank: tie on accuracy, best ranking (covering prefix 4.79 -> 2.32, recovers dup-034) | **Their expectation holds for accuracy.** Reranking is the one change with a real retrieval gain, just not one that moves these scores |
+| 9 | Query-time HyDE rejected without measurement ("an extra LLM call per answer") | Call p50 1.20 s, p95 1.65 s; retrieval lost 1-3 questions | **Agree**, now measured |
+| 10 | NOTES 7/10: baseline (priority off) p50 1.65-1.71 s, p95 2.63-3.32 s | Same day, priority off: p50 1.80-1.94 s, p95 3.08-3.13 s (cold evidence); pilot with warm cache p50 1.85, p95 3.79 | **Cannot be settled across sessions**; plausibly part of the gap is prompt caching: their runs re-sent byte-identical prompts, which are served from the cache (finding P1; cached calls 0.24 s faster on average in my pilot). Unseen graded questions see cold evidence, so my figures are the realistic ones. Both agree a smaller prompt does not speed answers up |
+| 11 | NOTES 7: priority-on runs p50 2.25-2.53 s, p95 3.4-4.1 s (not a controlled test, as NOTES says) | Not measured | **Open.** `tasks/todo.md` also says to re-enable the priority tier and re-measure before submission; on this branch it is still off by default |
+| 12 | NOTES 7: public accuracy 0.851-0.867 over 5 runs | 4 baseline runs: 0.9054, 0.8822, 0.8899, 0.8636 (mean 0.885) | **Mine for the current code.** NOTES section 4 itself reports 0.8822 -> 0.9054 after the link-product rule; section 7 predates it |
+| 13 | NOTES 8: "the answer call is about 90% of the time" | Answer call mean 1.53 s of a 1.90 s mean answer (about 80%); the labels call is about 0.33 s | Minor; mine is measured per call from the ledger. Two-call fallbacks are the slowest questions |
+| 14 | Arm F (all enrichment + top-k 4) 0.886 | Defect D6 only changes "what changed" questions; the public set has none, so F's number is unaffected | No discrepancy |
+| 15 | "Run embedding-heavy checks one at a time"; "recall understates damage from sending fewer pieces"; "hours questions flip in every arm, compare over 3 runs" | Confirmed on all three | Agree |
 
 ## 5. Spend
 
-{{SPEND}}
+Prices (looked up 2026-11-20): gpt-6-luna $0.10 / 1M input, $0.01 cached, $0.50 output; Decisions API $0.10 / 1M input;
+text-embedding-3-small $0.02 / 1M. Every call is in `results/ledger.jsonl` (not committed); `ledger.py` gives these tables.
+
+| Model / API | Calls | Input tokens | of which cached | Output tokens | USD |
+|---|---|---|---|---|---|
+| gpt-6-luna, Decisions API (question labels) | 2,267 | 11,617,728 | 0 | 0 | 1.162 |
+| gpt-6-luna, Responses (answers, fact extraction, HyDE) | 4,396 | 13,756,853 | 6,422,055 | 366,004 | 0.981 |
+| text-embedding-3-small | 525 | 5,580,266 | - | - | 0.112 |
+| gpt-6.1-sol (judge) | 0 | 0 | 0 | 0 | 0.000 |
+| **Total** | 7,188 | | | | **2.254** |
+
+By stage: end-to-end stage A $1.276, stage B $0.566, retrieval screening $0.273 (window re-embedding for chunk sizes and context
+lines, plus 5 uncached label warm-ups per ingest), pilot $0.120 (of which $0.093 one-off fact extraction), HyDE generation $0.003,
+checks $0.016. The LLM judge was not used: at about $0.18 per 40-question run it would have taken a third of the budget for a
+stand-in metric, so `judged` is empty in `results.csv`.
 
 ## 6. Plain statement
 
-{{FINAL}}
+**No ingest change beats the baseline on accuracy, and none beats it on latency.** Every technique asked about (HyDE,
+hypothetical-question indexing, multi-vector indexing, Contextual Retrieval in both halves, propositions, fewer pieces, chunk
+sizes 1500 / 800 / 600 / 400) and the extra one I added (reranking) is a tie within noise or a loss; propositions sent to the model
+and capped window pieces also break the zero-stale invariant.
+
+On the second question, **a smaller prompt without loss is possible: `MY_SOLUTION_TOP_K=6`** sends 12-14% fewer characters per
+question with accuracy and latency unchanged within noise on both eval sets (3 runs each, 0 stale). The saving is about 250 input
+tokens per question and buys no speed, because answer time does not depend on prompt size here; keeping the default of 8 is
+equally defensible.
+
+### What I learned that could improve the system (not ingest; none tested end to end)
+
+1. **p95 is set by two-call fallbacks, not by evidence size.** The slowest baseline questions are rate questions the tables do not
+   answer (dup-145, dup-147): a facts call, then a text-search call, then "I don't know". Deciding earlier that the facts cannot
+   answer (or running the text search in parallel) is the latency lever; the 6 s timeout plus retry explains the rare 6-12 s answers.
+2. **Prose questions can return stale values.** dup-087 says "fourth" whenever the newer release ("fifth") is not in the evidence;
+   the newest copy still carries both releases. A rule that prefers the latest-dated release for repeated claims (like the existing
+   count rule), and never cutting the window pieces, would close it.
+3. **Dense rerank** (no extra API call) puts the needed evidence much earlier (covering prefix 4.79 -> 2.32) and recovers dup-034.
+   It did not move these scores, but it is the retrieval change most likely to help on harder, reworded questions.
+4. **Enrichment was only tested on 26% of the site.** A fair test needs press releases and blog posts enriched too (about $1 to $1.5).

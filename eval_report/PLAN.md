@@ -19,18 +19,18 @@ answer model without hurting accuracy or latency? Baseline = current branch, no 
         log scan for `RateLimit`, `meaning search is off`, `have no vector`
   - [x] committed caches protected: question, window and enrichment vector files pointed at copies under `results/`
 - [x] 4. Pilot: one baseline run cold (builds the fact cache, measures cost per run); project total spend against $3.50
-- [ ] 5. Retrieval-only screening (no answer calls) on public, held-out, typo, branch/contact, temporal sets; split by the path a
+- [x] 5. Retrieval-only screening (no answer calls) on public, held-out, typo, branch/contact, temporal sets; split by the path a
         question really takes (facts / text / history) so rate questions are not miscounted
 - [x] 6. New code needed for techniques the branch does not cover:
   - [x] Contextual Retrieval, embedding half: context line + window embedded together
   - [x] Propositions sent to the model instead of the full chunk
   - [x] HyDE (retrieval-only test; it costs an answer-sized call per question at query time)
   - [x] Reranking (embedding rerank of the keyword candidates, no extra API call)
-- [ ] 7. End-to-end: public set, 3 runs per arm, baseline interleaved; priority tier off for every arm (the branch default)
-- [ ] 8. Chunk size 1500 / 800 / 600 / 400 (window caches built one at a time, on copies)
-- [ ] 9. Write `eval_report/INDEPENDENT_REPORT.md` and `eval_report/results.csv`
-- [ ] 10. Only then read NOTES.md section 10 and `tasks/todo.md`; list every discrepancy; check NOTES.md section 7 latency
-- [ ] 11. Commit code and report only (no snapshots, zips or `results/`); push to `claude/independent-eval`
+- [x] 7. End-to-end: public set, 3 runs per arm, baseline interleaved; priority tier off for every arm (the branch default)
+- [x] 8. Chunk size 1500 / 800 / 600 / 400 (window caches built one at a time, on copies)
+- [x] 9. Write `eval_report/INDEPENDENT_REPORT.md` and `eval_report/results.csv`
+- [x] 10. Only then read NOTES.md section 10 and `tasks/todo.md`; list every discrepancy; check NOTES.md section 7 latency
+- [x] 11. Commit code and report only (no snapshots, zips or `results/`); push to `claude/independent-eval`
 
 ## Budget
 
@@ -49,3 +49,12 @@ Decisions API $0.10 / 1M input; text-embedding-3-small $0.02 / 1M; judge gpt-6.1
   MY_SOLUTION_NONCE_SALT (default off) and set a per-run salt in e2e.py so every arm runs with cold evidence, as graded questions do.
 - HyDE call latency p50 1.20 s, p95 1.65 s (would sit on the timed path of every text-search answer).
 - Labels from the Decisions API were identical across repeated calls (12/12); screening still freezes them (saves money).
+
+## Review (2026-11-20, end of session)
+
+- Done: code review (12 defects + 1 confound, D7 and D8 fixed), 37 retrieval-only arms, 13 arms x 3 runs end to end on the public
+  set, 7 arms x 3 runs on 100 non-public questions, comparison with NOTES section 10 and `tasks/todo.md` (15 rows), report and CSV.
+- Skipped: priority-tier on/off check (config written, not run); LLM judge (cost). Spend $2.25 of $3.50.
+- Result: no ingest change beats the baseline on accuracy or latency; TOP_K=6 is the only "smaller prompt, no harm" arm.
+- Correction from the user mid-session: I first answered only the accuracy half of the objective and dismissed the prompt-shrink
+  half; the report now states both halves separately (see `tasks/lessons.md`).

@@ -1,0 +1,120 @@
+kind,set,arm,runs,accuracy,judged,stale,p50,mean,p95,max,recall,chars_sent,note
+e2e,public,base,1,0.9054,,0,1.85,1.98,3.79,4.02,0.9714,7572,pilot
+e2e_mean,public,base,1,0.9054,,0,1.85,1.98,3.79,4.02,0.9714,7572,pilot
+e2e,public,base,1,0.8822,,0,1.8,1.86,3.13,3.4,0.9714,7572,stageA
+e2e,public,base,2,0.8899,,0,1.8,1.89,3.08,3.24,0.9714,7572,stageA
+e2e,public,base,3,0.8636,,0,1.94,1.96,3.1,3.19,0.9714,7572,stageA
+e2e_mean,public,base,3,0.8786,,0,1.8467,1.9033,3.1033,3.2767,0.9714,7572,stageA
+e2e,public,ctx_kw,1,0.8403,,0,1.78,2.07,3.3,11.97,0.9714,7635,stageA
+e2e,public,ctx_kw,2,0.8822,,0,1.85,1.91,2.68,3.33,0.9714,7635,stageA
+e2e,public,ctx_kw,3,0.8899,,0,1.81,1.98,3.16,3.67,0.9714,7635,stageA
+e2e_mean,public,ctx_kw,3,0.8708,,0,1.8133,1.9867,3.0467,6.3233,0.9714,7635,stageA
+e2e,public,cr_emb_llm,1,0.8589,,0,1.85,1.94,3.07,3.55,0.9714,7559,stageA
+e2e,public,cr_emb_llm,2,0.9054,,0,1.98,1.95,2.71,2.84,0.9714,7559,stageA
+e2e,public,cr_emb_llm,3,0.9054,,0,1.8,1.9,3.37,3.38,0.9714,7559,stageA
+e2e_mean,public,cr_emb_llm,3,0.8899,,0,1.8767,1.93,3.05,3.2567,0.9714,7559,stageA
+e2e,public,cr_full_llm,1,0.8791,,0,2.0,2.11,3.73,4.25,0.9714,7623,stageA
+e2e,public,cr_full_llm,2,0.8558,,0,1.84,2.04,4.54,4.73,0.9714,7623,stageA
+e2e,public,cr_full_llm,3,0.8558,,0,1.83,1.92,3.5,3.87,0.9714,7623,stageA
+e2e_mean,public,cr_full_llm,3,0.8636,,0,1.89,2.0233,3.9233,4.2833,0.9714,7623,stageA
+e2e,public,q_kw,1,0.8899,,0,1.82,1.85,2.71,2.73,0.9714,7566,stageA
+e2e,public,q_kw,2,0.9054,,0,1.76,1.78,2.63,2.74,0.9714,7566,stageA
+e2e,public,q_kw,3,0.8791,,0,1.84,1.95,3.14,3.54,0.9714,7566,stageA
+e2e_mean,public,q_kw,3,0.8915,,0,1.8067,1.86,2.8267,3.0033,0.9714,7566,stageA
+e2e,public,mv_q,1,0.8667,,0,1.75,1.83,3.17,3.94,0.9714,9270,stageA
+e2e,public,mv_q,2,0.8822,,0,1.73,1.82,2.8,3.49,0.9714,9270,stageA
+e2e,public,mv_q,3,0.8667,,0,1.84,1.88,3.08,3.46,0.9714,9270,stageA
+e2e_mean,public,mv_q,3,0.8719,,0,1.7733,1.8433,3.0167,3.63,0.9714,9270,stageA
+e2e,public,propunit_repl,1,0.8124,,1,1.71,1.77,2.84,2.84,0.8857,7389,stageA
+e2e,public,propunit_repl,2,0.8124,,1,1.94,2.29,8.12,8.32,0.8857,7389,stageA
+e2e,public,propunit_repl,3,0.8124,,1,1.84,1.93,3.15,3.41,0.8857,7389,stageA
+e2e_mean,public,propunit_repl,3,0.8124,,3,1.83,1.9967,4.7033,4.8567,0.8857,7389,stageA
+e2e,public,k6,1,0.847,,0,1.81,1.94,3.3,3.92,0.9714,6662,stageA
+e2e,public,k6,2,0.8966,,0,1.71,1.78,2.73,2.76,0.9714,6662,stageA
+e2e,public,k6,3,0.8966,,0,1.83,1.9,2.73,3.09,0.9714,6662,stageA
+e2e_mean,public,k6,3,0.8801,,0,1.7833,1.8733,2.92,3.2567,0.9714,6662,stageA
+e2e,public,k6_cap2,1,0.7992,,1,1.83,1.81,3.01,3.2,0.8571,6024,stageA
+e2e,public,k6_cap2,2,0.7729,,0,1.78,1.94,3.25,5.01,0.8571,6024,stageA
+e2e,public,k6_cap2,3,0.7992,,0,1.78,1.86,2.71,2.94,0.8571,6024,stageA
+e2e_mean,public,k6_cap2,3,0.7904,,1,1.7967,1.87,2.99,3.7167,0.8571,6024,stageA
+e2e,public,s1500,1,0.8403,,0,1.74,1.81,2.64,3.4,0.9143,6549,stageA
+e2e,public,s1500,2,0.8558,,0,1.8,1.86,2.7,3.1,0.9143,6549,stageA
+e2e,public,s1500,3,0.8558,,0,1.98,2.02,2.95,3.7,0.9143,6549,stageA
+e2e_mean,public,s1500,3,0.8506,,0,1.84,1.8967,2.7633,3.4,0.9143,6549,stageA
+e2e,public,s800,1,0.8791,,0,1.75,1.82,2.54,2.97,0.9429,5584,stageA
+e2e,public,s800,2,0.8636,,0,1.76,1.79,2.72,2.87,0.9429,5584,stageA
+e2e,public,s800,3,0.8667,,0,2.03,2.09,3.75,3.8,0.9429,5584,stageA
+e2e_mean,public,s800,3,0.8698,,0,1.8467,1.9,3.0033,3.2133,0.9429,5584,stageA
+e2e,public,rr_dense_k5,1,0.9066,,0,1.98,1.98,2.98,3.13,1.0,7676,stageA
+e2e,public,rr_dense_k5,2,0.8833,,0,1.94,2.08,4.63,6.08,1.0,7676,stageA
+e2e,public,rr_dense_k5,3,0.8678,,0,1.96,2.03,3.19,3.98,1.0,7676,stageA
+e2e_mean,public,rr_dense_k5,3,0.8859,,0,1.96,2.03,3.6,4.3967,1.0,7676,stageA
+e2e,public,rr_dense_k4,1,0.9043,,0,1.74,1.93,2.81,6.72,1.0,6953,stageA
+e2e,public,rr_dense_k4,2,0.8624,,0,1.81,1.87,3.06,3.91,1.0,6953,stageA
+e2e,public,rr_dense_k4,3,0.8996,,0,1.94,1.99,3.14,3.58,1.0,6953,stageA
+e2e_mean,public,rr_dense_k4,3,0.8888,,0,1.83,1.93,3.0033,4.7367,1.0,6953,stageA
+e2e,b4,base,1,0.9559,,0,1.44,1.71,3.1,8.12,,7935,stageB
+e2e,b4,base,2,0.9594,,0,1.3,1.46,2.36,3.75,,7935,stageB
+e2e,b4,base,3,0.9466,,0,1.46,1.5,2.48,3.25,,7871,stageB
+e2e_mean,b4,base,3,0.954,,0,1.4,1.5567,2.6467,5.04,,7914,stageB
+e2e,b4,k6,1,0.9594,,0,1.32,1.5,2.54,3.52,,6819,stageB
+e2e,b4,k6,2,0.951,,0,1.39,1.44,2.47,2.66,,6796,stageB
+e2e,b4,k6,3,0.9594,,0,1.39,1.49,2.37,3.76,,6796,stageB
+e2e_mean,b4,k6,3,0.9566,,0,1.3667,1.4767,2.46,3.3133,,6804,stageB
+e2e,b4,s800,1,0.9002,,0,1.39,1.47,2.55,3.57,,5660,stageB
+e2e,b4,s800,2,0.9336,,0,1.34,1.45,2.35,2.86,,5613,stageB
+e2e,b4,s800,3,0.935,,0,1.41,1.56,2.77,8.45,,5613,stageB
+e2e_mean,b4,s800,3,0.9229,,0,1.38,1.4933,2.5567,4.96,,5629,stageB
+e2e,b4,rr_dense_k5,1,0.9553,,0,1.39,1.46,2.57,3.0,,7133,stageB
+e2e,b4,rr_dense_k5,2,0.9598,,0,1.34,1.53,2.78,3.52,,7133,stageB
+e2e,b4,rr_dense_k5,3,0.9479,,0,1.38,1.64,3.54,8.12,,7155,stageB
+e2e_mean,b4,rr_dense_k5,3,0.9543,,0,1.37,1.5433,2.9633,4.88,,7140,stageB
+e2e,b4,rr_dense_k4,1,0.9512,,0,1.4,1.53,2.45,3.33,,6421,stageB
+e2e,b4,rr_dense_k4,2,0.9598,,0,1.24,1.37,2.32,2.73,,6402,stageB
+e2e,b4,rr_dense_k4,3,0.9537,,0,1.41,1.61,2.9,4.95,,6421,stageB
+e2e_mean,b4,rr_dense_k4,3,0.9549,,0,1.35,1.5033,2.5567,3.67,,6415,stageB
+e2e,b4,q_kw,1,0.9476,,0,1.38,1.51,2.47,3.22,,7662,stageB
+e2e,b4,q_kw,2,0.9401,,0,1.28,1.41,2.32,3.19,,7684,stageB
+e2e,b4,q_kw,3,0.9524,,0,1.36,1.53,2.6,3.72,,7595,stageB
+e2e_mean,b4,q_kw,3,0.9467,,0,1.34,1.4833,2.4633,3.3767,,7647,stageB
+e2e,b4,cr_emb_llm,1,0.9336,,0,1.29,1.4,2.29,2.75,,7852,stageB
+e2e,b4,cr_emb_llm,2,0.9406,,0,1.34,1.45,2.46,3.55,,7852,stageB
+e2e,b4,cr_emb_llm,3,0.9127,,0,1.31,1.4,2.29,3.23,,7852,stageB
+e2e_mean,b4,cr_emb_llm,3,0.929,,0,1.3133,1.4167,2.3467,3.1767,,7852,stageB
+retrieval,"5 sets, text path",all_enrich,1,,,,,,,,0.9839,13941,n=62 questions
+retrieval,"5 sets, text path",base,1,,,,,,,,0.9839,11300,n=62 questions
+retrieval,"5 sets, text path",cap0,1,,,,,,,,0.8226,8951,n=62 questions
+retrieval,"5 sets, text path",cap1,1,,,,,,,,0.8871,9559,n=62 questions
+retrieval,"5 sets, text path",cap2,1,,,,,,,,0.9194,10185,n=62 questions
+retrieval,"5 sets, text path",cr_emb_head,1,,,,,,,,0.9194,11157,n=62 questions
+retrieval,"5 sets, text path",cr_emb_llm,1,,,,,,,,0.9839,11268,n=62 questions
+retrieval,"5 sets, text path",cr_full_llm,1,,,,,,,,0.9839,11225,n=62 questions
+retrieval,"5 sets, text path",ctx_kw,1,,,,,,,,0.9839,11264,n=62 questions
+retrieval,"5 sets, text path",hyde_concat,1,,,,,,,,0.9677,11332,n=62 questions
+retrieval,"5 sets, text path",hyde_replace,1,,,,,,,,0.9355,11243,n=62 questions
+retrieval,"5 sets, text path",k4,1,,,,,,,,0.9516,7665,n=62 questions
+retrieval,"5 sets, text path",k5,1,,,,,,,,0.9839,8547,n=62 questions
+retrieval,"5 sets, text path",k6,1,,,,,,,,0.9839,9415,n=62 questions
+retrieval,"5 sets, text path",k6_cap2,1,,,,,,,,0.871,8273,n=62 questions
+retrieval,"5 sets, text path",mv_prop,1,,,,,,,,0.9839,13965,n=62 questions
+retrieval,"5 sets, text path",mv_q,1,,,,,,,,0.9839,13968,n=62 questions
+retrieval,"5 sets, text path",prop_kw,1,,,,,,,,0.9839,11345,n=62 questions
+retrieval,"5 sets, text path",prop_kw_emb,1,,,,,,,,0.9839,14031,n=62 questions
+retrieval,"5 sets, text path",propunit_repl,1,,,,,,,,0.8226,11010,n=62 questions
+retrieval,"5 sets, text path",propunit_union,1,,,,,,,,0.9839,15958,n=62 questions
+retrieval,"5 sets, text path",q_kw,1,,,,,,,,0.9839,10903,n=62 questions
+retrieval,"5 sets, text path",q_kw_emb,1,,,,,,,,0.9839,13610,n=62 questions
+retrieval,"5 sets, text path",rr_dense,1,,,,,,,,1.0,14065,n=62 questions
+retrieval,"5 sets, text path",rr_dense_k3,1,,,,,,,,0.9677,7652,n=62 questions
+retrieval,"5 sets, text path",rr_dense_k4,1,,,,,,,,1.0,8924,n=62 questions
+retrieval,"5 sets, text path",rr_dense_k5,1,,,,,,,,1.0,9993,n=62 questions
+retrieval,"5 sets, text path",rr_dense_k5_cap2,1,,,,,,,,0.9355,8895,n=62 questions
+retrieval,"5 sets, text path",rr_dense_k5_pool20,1,,,,,,,,0.9839,9999,n=62 questions
+retrieval,"5 sets, text path",rr_dense_k6,1,,,,,,,,1.0,11397,n=62 questions
+retrieval,"5 sets, text path",rr_rrf,1,,,,,,,,0.9839,13161,n=62 questions
+retrieval,"5 sets, text path",rr_rrf_k5,1,,,,,,,,0.9839,9387,n=62 questions
+retrieval,"5 sets, text path",rr_rrf_k6,1,,,,,,,,0.9839,10599,n=62 questions
+retrieval,"5 sets, text path",s1500,1,,,,,,,,0.9194,9217,n=62 questions
+retrieval,"5 sets, text path",s400,1,,,,,,,,0.9032,5785,n=62 questions
+retrieval,"5 sets, text path",s600,1,,,,,,,,0.9516,7114,n=62 questions
+retrieval,"5 sets, text path",s800,1,,,,,,,,0.9677,7702,n=62 questions

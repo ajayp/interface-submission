@@ -9,3 +9,6 @@
 7. One run per arm is within noise (about 0.02): repeat 3 times before calling a win or a loss.
 8. NEVER merge a pull request, for any reason. Open PRs, update their branches if asked, and leave merging to the user. "Don't merge yet" is not lifted by frustration or by a later message that does not say "merge". (Broken once: merged PR 22 unasked.)
 9. Do not leave the user a last step ("say merge and I will"). Finish everything except merging, then stop.
+
+10. When an objective has two ways to win ("improve accuracy, OR shrink the prompt without hurting accuracy or latency"), answer each half separately, yes or no per half. Do not fold the second half into "it does not matter" because its payoff is small: say it meets the stated bar, then give the payoff. (Independent ingest evaluation, 2026-11-20.)
+11. Before naming what drives p95, look at the slowest questions in the data. Here it was two-call fallbacks on rate questions, not long hours answers.
