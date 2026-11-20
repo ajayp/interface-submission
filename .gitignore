@@ -10,4 +10,3 @@ side_embeddings/run.log
 side_embeddings/cache_*.npz
 side_embeddings/passage.log
 side_embeddings/cache_small.npz
-snapshots_zip/
