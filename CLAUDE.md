@@ -55,8 +55,3 @@ The harness calls `build()`, then `ingest(Snapshot)` per crawl (oldest to newest
 - Embedding windows use the vectors in `my_solution/.embed_cache/` (committed; keep them committed so a run embeds nothing). At `ingest` only, windows with no vector (file missing or site changed) are embedded and saved; never while answering. Without a key or if that fails, the snapshot falls back to keyword search with a warning.
 - `my_solution/` imports `contract` from the nearest parent `harness/` (see top of `solution.py`); keep it runnable when copied elsewhere.
 - Prompt variants (`prompt_*.md`, `prompt_*_edits.json`) and `docs/prompt_tuning/` come from the prompt-tuning loop (`prompt_tune.py`); no tried change helped reliably, so the current prompt stayed.
-
-## Global memory (standing rules from the owner)
-
-- **Never merge a pull request** (or enable auto-merge) without the owner's explicit permission or instruction in that same conversation. A hold such as "don't merge yet" stays in force until the owner says to merge. Open PRs and update their branches only when asked, and leave merging to the owner.
-- Do not push or commit to `main`. Work on the feature branch only.
