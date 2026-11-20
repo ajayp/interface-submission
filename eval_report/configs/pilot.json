@@ -1,0 +1,3 @@
+{"runs": 1, "repeat_sample": 0,
+ "sets": {"public": "eval/public_eval.jsonl"},
+ "arms": {"base": {}}}

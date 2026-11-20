@@ -1,0 +1,10 @@
+{"runs": 3, "repeat_sample": 0,
+ "note": "accuracy on the four non-public sets in one file; labels frozen (MY_SOLUTION_QU_DEC_CACHE) for every arm alike",
+ "sets": {"b4": "eval_report/configs/stageB_eval.jsonl"},
+ "arms": {
+  "base":        {"MY_SOLUTION_QU_DEC_CACHE": "/home/user/interface-submission/results/qu_labels.json"},
+  "k6":          {"MY_SOLUTION_QU_DEC_CACHE": "/home/user/interface-submission/results/qu_labels.json", "MY_SOLUTION_TOP_K": "6"},
+  "s800":        {"MY_SOLUTION_QU_DEC_CACHE": "/home/user/interface-submission/results/qu_labels.json", "MY_SOLUTION_SPLIT_CHARS": "800", "MY_SOLUTION_WINDOW_CACHE": "/home/user/interface-submission/results/win_s800.npz"},
+  "rr_dense_k5": {"MY_SOLUTION_QU_DEC_CACHE": "/home/user/interface-submission/results/qu_labels.json", "MY_SOLUTION_RERANK": "dense", "MY_SOLUTION_TOP_K": "5"},
+  "rr_dense_k4": {"MY_SOLUTION_QU_DEC_CACHE": "/home/user/interface-submission/results/qu_labels.json", "MY_SOLUTION_RERANK": "dense", "MY_SOLUTION_TOP_K": "4"}
+ }}

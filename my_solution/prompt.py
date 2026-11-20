@@ -340,7 +340,10 @@ def developer_message_for(question: str, intent: Optional[str], state_date: bool
 def build_user_message(question: str, excerpts: list[dict], date: Optional[str], asked: Optional[str] = None) -> str:
     # Derived from the request so identical input gives an identical prompt (consistency), and still
     # unguessable to text inside the excerpts, which cannot know the hash of the whole request.
-    nonce = hashlib.sha256(repr((question, date, excerpts) if not asked else (question, date, excerpts, asked)).encode()).hexdigest()[:12]
+    # MY_SOLUTION_NONCE_SALT (experiments only, default empty = unchanged): a per-run salt, so a repeated evaluation run does not
+    # reuse the provider's prompt cache for the evidence (graded questions are unseen, so their evidence is never cached).
+    salt = os.getenv("MY_SOLUTION_NONCE_SALT", "")
+    nonce = hashlib.sha256((repr((question, date, excerpts) if not asked else (question, date, excerpts, asked)) + salt).encode()).hexdigest()[:12]
     lines = [f"Input id: {nonce}"]
     if date:
         lines.append(f"Website as of: {date}")

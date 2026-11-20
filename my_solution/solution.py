@@ -105,6 +105,38 @@ _SCHED_DAY_RE = re.compile(r"\b(mon|tue|wed|thu|fri|sat|sun)", re.I)
 HOURS_EFFORT = os.getenv("MY_SOLUTION_HOURS_EFFORT") or None
 
 
+# Experiment switches added by the independent evaluation (all default off, so the baseline is unchanged):
+# MY_SOLUTION_WINDOW_CTX = llm | head: embed each window with a context line in front (Contextual Retrieval, embedding half).
+#   llm  = the context line gpt-6-luna wrote for the window's chunk (enrich.py cache; chunks without one keep the plain window)
+#   head = a code-written line: page title > parent headings > heading (no model call)
+#   Needs MY_SOLUTION_WINDOW_CACHE pointed at a copy: the new vectors are embedded at ingest and saved there.
+WINDOW_CTX = os.getenv("MY_SOLUTION_WINDOW_CTX", "")
+# MY_SOLUTION_RERANK = rrf | dense: re-order the best RERANK_POOL keyword candidates by meaning (each candidate's best window
+#   similarity to the question; no extra API call: the question vector is already fetched) before the top-k are kept.
+#   rrf = reciprocal-rank fusion of the keyword and meaning ranks; dense = meaning rank only.
+RERANK = os.getenv("MY_SOLUTION_RERANK", "")
+RERANK_POOL = int(os.getenv("MY_SOLUTION_RERANK_POOL", "40"))
+
+
+def _heading_line(c) -> str:
+    parts = [c.title] + [h for h in c.header_path.strip("/").split("/") if h] + [c.heading]
+    out = []
+    for p in (" ".join(x.replace("#", " ").split()) for x in parts):
+        if p and (not out or out[-1].lower() != p.lower()):
+            out.append(p)
+    return " > ".join(out)
+
+
+def _window_embed_text(w: str, c) -> str:
+    if WINDOW_CTX == "llm":
+        ctx = enrich.context_line(c)
+    elif WINDOW_CTX == "head":
+        ctx = _heading_line(c)
+    else:
+        return w
+    return f"{ctx}\n{w}" if ctx else w
+
+
 def _is_teaser(c) -> bool:
     return "Keep reading (" in c.text and len(c.text) < 600
 
@@ -230,7 +262,7 @@ class Knowledge:
             self.dense[snapshot.snapshot_id] = DenseIndex(bm_index.chunks, self._embed_store)
         if HYBRID_WINDOWS and WINDOW_WARMUP:
             self._build_window_index(snapshot.snapshot_id, bm_index, embed_missing=True)
-        if "emb" in ENRICH_FLAGS:
+        if enrich.EMB:
             try:
                 self._enrich_idx[snapshot.snapshot_id] = enrich.EnrichIndex(bm_index.chunks, embed_missing=EMBED_MISSING and self.llm.available())
             except Exception as e:
@@ -309,6 +341,8 @@ class Knowledge:
             hits = _clean_hits(hits)
         if HYBRID and not HYBRID_APPEND:
             hits = self._hybrid(question, as_of, qu, hits)
+        if RERANK and HYBRID_WINDOWS:
+            hits = self._rerank(question, as_of, qu, hits)
         by_key: dict[str, list] = {}
         unique = []
         for score, c in hits:
@@ -327,9 +361,11 @@ class Knowledge:
             out = out[:k - len(extra)] + extra
         if HYBRID_APPEND and k == TOP_K:
             out = out + self._dense_extra(question, out, as_of, qu)
-        if HYBRID_WINDOWS and k == TOP_K:
+        if HYBRID_WINDOWS and k == TOP_K and enrich.PROP_UNIT != "replace":
             out = out + self._window_extras(question, out, as_of, qu)
-        if "emb" in ENRICH_FLAGS and k == TOP_K:
+        if enrich.PROP_UNIT and k == TOP_K:   # experiment: propositions sent to the model (Dense X), see enrich.py
+            out = out + self._prop_units(question, out, as_of, qu)
+        if enrich.EMB and k == TOP_K and enrich.PROP_UNIT != "replace":
             out = out + self._enrich_extras(question, out, as_of, qu)
         if SECOND_PASS and k == TOP_K and (qu or {}).get("answer_terms"):
             out = out + self._second_pass(question, out, as_of, qu)
@@ -363,6 +399,40 @@ class Knowledge:
             if len(out) == HOURS_SCHEDULE_EXTRA:
                 break
         return out
+
+    def _rerank(self, question: str, as_of, qu, hits):
+        """Experiment MY_SOLUTION_RERANK: re-order the first RERANK_POOL keyword candidates by their best window's similarity to the
+        question (rrf: fused with the keyword rank; dense: meaning only). Candidates without a window keep their keyword rank in rrf
+        and go last in dense. Everything after the pool keeps its order. On any failure the keyword order is returned."""
+        sid, index = self._snapshot_for(question, as_of, qu)[1], self.index_for(question, as_of, qu)
+        if sid not in self._windows:
+            self._build_window_index(sid, index)
+        wi = self._windows.get(sid)
+        if wi is None or not hits:
+            return hits
+        try:
+            if not hasattr(wi, "by_chunk"):
+                pos = {id(c): ci for ci, c in enumerate(wi.chunks)}
+                wi.pos, wi.by_chunk = pos, {}
+                for wi_i, (_, ci) in enumerate(wi.windows):
+                    wi.by_chunk.setdefault(ci, []).append(wi_i)
+            sims = wi.matrix @ wi.store.embed_query(question)
+            pool, rest = hits[:RERANK_POOL], hits[RERANK_POOL:]
+            dense = []
+            for r, (s, c) in enumerate(pool):
+                idx = wi.by_chunk.get(wi.pos.get(id(c), -1), [])
+                dense.append(max((float(sims[i]) for i in idx), default=None))
+            order = sorted(range(len(pool)), key=lambda r: -(dense[r] if dense[r] is not None else -9))
+            drank = {r: i for i, r in enumerate(order)}
+            if RERANK == "dense":
+                new = [pool[r] for r in order]
+            else:
+                score = {r: 1 / (60 + r + 1) + (1 / (60 + drank[r] + 1) if dense[r] is not None else 0) for r in range(len(pool))}
+                new = [pool[r] for r in sorted(range(len(pool)), key=lambda r: -score[r])]
+            return new + rest
+        except Exception as e:
+            print(f"[my_solution] rerank failed: {type(e).__name__}: {e}", file=sys.stderr)
+            return hits
 
     def _hybrid(self, question: str, as_of, qu, hits):
         """Merge the keyword ranking `hits` with the meaning ranking (reciprocal-rank fusion); returns (score, chunk) in fused order."""
@@ -424,7 +494,10 @@ class Knowledge:
                     if len(w) >= 40 and kk not in seen:
                         seen.add(kk); wi.windows.append((w, ci))
             import numpy as np
-            missing = [w for w, _ in wi.windows if text_key(w) not in store.vecs]
+            # What is EMBEDDED for each window: the window itself (default), or a context line + the window (experiment
+            # MY_SOLUTION_WINDOW_CTX, the embedding half of Contextual Retrieval). The model is always sent the plain window.
+            emb_texts = [_window_embed_text(w, index.chunks[ci]) for w, ci in wi.windows]
+            missing = [t for t in emb_texts if text_key(t) not in store.vecs]
             if missing and embed_missing and EMBED_MISSING and self.llm.available():
                 print(f"[my_solution] {sid}: {len(missing)} of {len(wi.windows)} windows have no vector (site changed or vector file "
                       f"incomplete); embedding them now", file=sys.stderr)
@@ -432,9 +505,9 @@ class Knowledge:
                     store.ensure(missing)   # sets the vectors in memory, then saves the file; a failed save (read-only folder) keeps them
                 except Exception as e:
                     print(f"[my_solution] embedding the missing windows failed: {type(e).__name__}: {e}", file=sys.stderr)
-                missing = [w for w, _ in wi.windows if text_key(w) not in store.vecs]
+                missing = [t for t in emb_texts if text_key(t) not in store.vecs]
             if not missing:
-                wi.matrix = np.stack([store.vecs[text_key(w)] for w, _ in wi.windows]).astype(np.float32)
+                wi.matrix = np.stack([store.vecs[text_key(t)] for t in emb_texts]).astype(np.float32)
                 self._windows[sid] = wi
             else:
                 print(f"[my_solution] {sid}: {len(missing)} windows have no vector, so meaning search is off for this copy "
@@ -501,6 +574,33 @@ class Knowledge:
         if os.getenv("MY_SOLUTION_PROV"):
             with open(os.environ["MY_SOLUTION_PROV"], "a") as f:
                 f.write(json.dumps({"q": question, "added": [[c.via, c.url, round(s, 3)] for s, c, _ in out]}) + "\n")
+        return out
+
+    def _prop_units(self, question: str, first, as_of, qu):
+        """Experiment MY_SOLUTION_PROP_UNIT: the best PROPOSITIONS by meaning, grouped under their parent's page and dates, as pieces
+        whose text is the propositions themselves (generated text reaches the model; every number in it occurs in its source chunk).
+        Budget: PROP_UNIT_PER_WINDOW propositions per window slot the question's intent would get (none for rate/fee questions)."""
+        import dataclasses
+        ix = self._enrich_idx.get(self._snapshot_for(question, as_of, qu)[1])
+        intent = (qu or {}).get("intent")
+        slots = min(WINDOW_EXTRA_BY_INTENT.get(intent, WINDOW_EXTRA_DEFAULT), WINDOW_EXTRA_CAP)
+        if ix is None or slots == 0:
+            return []
+        try:
+            found = ix.search_props(question, slots * enrich.PROP_UNIT_PER_WINDOW)
+        except Exception as e:
+            print(f"[my_solution] enrichment search failed: {type(e).__name__}: {e}", file=sys.stderr)
+            return []
+        seen = " ".join(" ".join(c.text.split()).lower() for _, c, _ in first)
+        groups: dict[int, list] = {}
+        for sim, ci, p in found:
+            groups.setdefault(ci, [sim, []])[1].append(p)
+        out = []
+        for ci, (sim, props) in sorted(groups.items(), key=lambda kv: -kv[1][0]):
+            c = ix.chunks[ci]
+            if " ".join(c.text.split()).lower() in seen:   # its whole parent is already a keyword piece
+                continue
+            out.append((sim, dataclasses.replace(c, text="\n".join(props), via="enrich:prop-unit"), [c.url]))
         return out
 
     def _second_pass(self, question: str, first, as_of, qu: dict):

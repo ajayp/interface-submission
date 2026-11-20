@@ -1,0 +1,147 @@
+{
+ "sets": [
+  "eval/public_eval.jsonl",
+  "eval/subsets/heldout.jsonl",
+  "eval/subsets/typo_robustness.jsonl",
+  "eval/subsets/slice2_branch_contact.jsonl",
+  "eval/subsets/heldout_temporal.jsonl"
+ ],
+ "hyde": {
+  "hyde_concat": [
+   "results/hyde.json",
+   "concat"
+  ],
+  "hyde_replace": [
+   "results/hyde.json",
+   "replace"
+  ]
+ },
+ "arms": {
+  "base": {},
+  "ctx_kw": {
+   "MY_SOLUTION_ENRICH": "ctx"
+  },
+  "q_kw": {
+   "MY_SOLUTION_ENRICH": "q"
+  },
+  "prop_kw": {
+   "MY_SOLUTION_ENRICH": "prop"
+  },
+  "mv_q": {
+   "MY_SOLUTION_ENRICH": "embq"
+  },
+  "mv_prop": {
+   "MY_SOLUTION_ENRICH": "embprop"
+  },
+  "q_kw_emb": {
+   "MY_SOLUTION_ENRICH": "q,emb"
+  },
+  "prop_kw_emb": {
+   "MY_SOLUTION_ENRICH": "prop,emb"
+  },
+  "all_enrich": {
+   "MY_SOLUTION_ENRICH": "ctx,q,prop,emb"
+  },
+  "cr_emb_llm": {
+   "MY_SOLUTION_WINDOW_CTX": "llm",
+   "MY_SOLUTION_WINDOW_CACHE": "results/win_ctx_llm.npz"
+  },
+  "cr_full_llm": {
+   "MY_SOLUTION_ENRICH": "ctx",
+   "MY_SOLUTION_WINDOW_CTX": "llm",
+   "MY_SOLUTION_WINDOW_CACHE": "results/win_ctx_llm.npz"
+  },
+  "cr_emb_head": {
+   "MY_SOLUTION_WINDOW_CTX": "head",
+   "MY_SOLUTION_WINDOW_CACHE": "results/win_ctx_head.npz"
+  },
+  "propunit_repl": {
+   "MY_SOLUTION_ENRICH": "embprop",
+   "MY_SOLUTION_PROP_UNIT": "replace"
+  },
+  "propunit_union": {
+   "MY_SOLUTION_ENRICH": "embprop",
+   "MY_SOLUTION_PROP_UNIT": "union"
+  },
+  "k6": {
+   "MY_SOLUTION_TOP_K": "6"
+  },
+  "k5": {
+   "MY_SOLUTION_TOP_K": "5"
+  },
+  "k4": {
+   "MY_SOLUTION_TOP_K": "4"
+  },
+  "cap2": {
+   "MY_SOLUTION_WINDOW_EXTRA_CAP": "2"
+  },
+  "cap1": {
+   "MY_SOLUTION_WINDOW_EXTRA_CAP": "1"
+  },
+  "cap0": {
+   "MY_SOLUTION_WINDOW_EXTRA_CAP": "0"
+  },
+  "k6_cap2": {
+   "MY_SOLUTION_TOP_K": "6",
+   "MY_SOLUTION_WINDOW_EXTRA_CAP": "2"
+  },
+  "rr_rrf": {
+   "MY_SOLUTION_RERANK": "rrf"
+  },
+  "rr_rrf_k6": {
+   "MY_SOLUTION_RERANK": "rrf",
+   "MY_SOLUTION_TOP_K": "6"
+  },
+  "rr_rrf_k5": {
+   "MY_SOLUTION_RERANK": "rrf",
+   "MY_SOLUTION_TOP_K": "5"
+  },
+  "rr_dense_k5": {
+   "MY_SOLUTION_RERANK": "dense",
+   "MY_SOLUTION_TOP_K": "5"
+  },
+  "s1500": {
+   "MY_SOLUTION_SPLIT_CHARS": "1500",
+   "MY_SOLUTION_WINDOW_CACHE": "results/win_s1500.npz"
+  },
+  "s800": {
+   "MY_SOLUTION_SPLIT_CHARS": "800",
+   "MY_SOLUTION_WINDOW_CACHE": "results/win_s800.npz"
+  },
+  "s600": {
+   "MY_SOLUTION_SPLIT_CHARS": "600",
+   "MY_SOLUTION_WINDOW_CACHE": "results/win_s600.npz"
+  },
+  "s400": {
+   "MY_SOLUTION_SPLIT_CHARS": "400",
+   "MY_SOLUTION_WINDOW_CACHE": "results/win_s400.npz"
+  },
+  "hyde_concat": {},
+  "hyde_replace": {},
+  "rr_dense": {
+   "MY_SOLUTION_RERANK": "dense"
+  },
+  "rr_dense_k6": {
+   "MY_SOLUTION_RERANK": "dense",
+   "MY_SOLUTION_TOP_K": "6"
+  },
+  "rr_dense_k4": {
+   "MY_SOLUTION_RERANK": "dense",
+   "MY_SOLUTION_TOP_K": "4"
+  },
+  "rr_dense_k3": {
+   "MY_SOLUTION_RERANK": "dense",
+   "MY_SOLUTION_TOP_K": "3"
+  },
+  "rr_dense_k5_cap2": {
+   "MY_SOLUTION_RERANK": "dense",
+   "MY_SOLUTION_TOP_K": "5",
+   "MY_SOLUTION_WINDOW_EXTRA_CAP": "2"
+  },
+  "rr_dense_k5_pool20": {
+   "MY_SOLUTION_RERANK": "dense",
+   "MY_SOLUTION_TOP_K": "5",
+   "MY_SOLUTION_RERANK_POOL": "20"
+  }
+ }
+}

@@ -14,6 +14,12 @@ never calls the model. Switch (experiments): MY_SOLUTION_ENRICH = comma list of
   ctx   add the context line to the keyword (BM25) text      q     add the questions to the keyword text
   prop  add the propositions to the keyword text              emb   also search the questions/propositions by meaning
 Unset or empty = off. Build the cache:  python my_solution/enrich.py --snapshot snapshots/05_2026-09-28_latest
+
+Independent-evaluation additions (default off; they let one half be tested without the other):
+  embq     search the questions by meaning ONLY (keyword text unchanged): multi-vector over hypothetical questions
+  embprop  search the propositions by meaning ONLY (keyword text unchanged): multi-vector over propositions
+MY_SOLUTION_PROP_UNIT = union | replace: send the matched PROPOSITIONS to the model instead of the parent chunk (Dense X).
+  union: appended after the window pieces; replace: they take the place of the window pieces (same meaning-search slot).
 """
 from __future__ import annotations
 
@@ -31,6 +37,11 @@ from typing import Optional
 HERE = Path(__file__).resolve().parent
 CACHE_PATH = Path(os.getenv("MY_SOLUTION_ENRICH_CACHE") or HERE / ".enrich_cache" / "enrich-v2.json")
 FLAGS = {f.strip() for f in os.getenv("MY_SOLUTION_ENRICH", "").split(",") if f.strip()}
+EMB = bool(FLAGS & {"emb", "embq", "embprop"})               # build the meaning-search index over the generated fields
+EMB_PROP = ("emb" in FLAGS and "prop" in FLAGS) or "embprop" in FLAGS
+EMB_Q = ("emb" in FLAGS and "q" in FLAGS) or "embq" in FLAGS
+PROP_UNIT = os.getenv("MY_SOLUTION_PROP_UNIT", "")             # "" | union | replace (see the module docstring)
+PROP_UNIT_PER_WINDOW = 4                                        # propositions per window slot (about the same characters)
 FLOOR = float(os.getenv("MY_SOLUTION_ENRICH_FLOOR", "0"))   # meaning-search pieces below this similarity are not added (0 = no floor)
 EXTRA_N = int(os.getenv("MY_SOLUTION_ENRICH_EXTRA", "3"))   # parents added by meaning search over the new fields
 PROMPT_VERSION = "enrich-v2"
@@ -148,8 +159,17 @@ def apply(chunks) -> int:
         if "q" in FLAGS:
             parts += e["q"]
         c.enrich_text = " ".join(parts)
-        n += bool(c.enrich_text) or ("emb" in FLAGS)
+        n += bool(c.enrich_text) or EMB
     return n
+
+
+def context_line(c) -> str:
+    """The LLM-written context line of a section chunk from the cache ('' if none). Used by the windows' contextual embedding
+    (MY_SOLUTION_WINDOW_CTX=llm), which needs it even when no keyword flag is set."""
+    if c.kind != "section":
+        return ""
+    e = load().get(key(c))
+    return e["c"] if e else ""
 
 
 class EnrichIndex:
@@ -160,22 +180,26 @@ class EnrichIndex:
         from embed_index import EmbeddingStore, MODEL, text_key
         import numpy as np
         self.chunks, self.units = chunks, []
+        self.raw = []   # per unit: the proposition or question WITHOUT the context-line prefix (what PROP_UNIT sends to the model)
         for ci, c in enumerate(chunks):
             e = getattr(c, "enrich", None)
             if not e:
                 continue
-            if "prop" in FLAGS:
+            if EMB_PROP:
                 self.units += [(f"{e['c']} {p}".strip(), ci, "prop") for p in e["p"]]
-            if "q" in FLAGS:
+                self.raw += list(e["p"])
+            if EMB_Q:
                 self.units += [(q, ci, "q") for q in e["q"]]
-        self.store = EmbeddingStore(path=HERE / ".embed_cache" / f"enrich-{MODEL}.npz")
+                self.raw += list(e["q"])
+        # MY_SOLUTION_ENRICH_VEC_CACHE: experiments point this at a copy, so units embedded during a run never rewrite the committed file
+        self.store = EmbeddingStore(path=Path(os.getenv("MY_SOLUTION_ENRICH_VEC_CACHE") or HERE / ".embed_cache" / f"enrich-{MODEL}.npz"))
         missing = [t for t, _, _ in self.units if text_key(t) not in self.store.vecs]
         if missing and embed_missing:
             self.store.ensure(missing)
             missing = [t for t, _, _ in self.units if text_key(t) not in self.store.vecs]
         if missing:
             print(f"[my_solution] enrichment: {len(missing)} units have no vector; meaning search over them is off", file=sys.stderr)
-            self.units, self.matrix = [], None
+            self.units, self.raw, self.matrix = [], [], None
         else:
             self.matrix = np.stack([self.store.vecs[text_key(t)] for t, _, _ in self.units]).astype(np.float32) if self.units else None
 
@@ -190,6 +214,23 @@ class EnrichIndex:
             if ci not in best:
                 best[ci] = (float(sims[i]), field)
         return [(s, ci, f) for ci, (s, f) in sorted(best.items(), key=lambda x: -x[1][0])[:k]]
+
+    def search_props(self, question: str, n: int):
+        """The n best PROPOSITIONS as [(similarity, chunk id, proposition text)], best first (Dense X retrieval unit)."""
+        if self.matrix is None or n <= 0:
+            return []
+        import numpy as np
+        sims = self.matrix @ self.store.embed_query(question)
+        out, seen = [], set()
+        for i in np.argsort(-sims):
+            _, ci, field = self.units[i]
+            if field != "prop" or self.raw[i] in seen:
+                continue
+            seen.add(self.raw[i])
+            out.append((float(sims[i]), ci, self.raw[i]))
+            if len(out) == n:
+                break
+        return out
 
 
 def main() -> None:

@@ -1,0 +1,17 @@
+{"runs": 3, "repeat_sample": 0,
+ "sets": {"public": "eval/public_eval.jsonl"},
+ "arms": {
+  "base": {},
+  "ctx_kw":        {"MY_SOLUTION_ENRICH": "ctx"},
+  "cr_emb_llm":    {"MY_SOLUTION_WINDOW_CTX": "llm", "MY_SOLUTION_WINDOW_CACHE": "/home/user/interface-submission/results/win_ctx_llm.npz"},
+  "cr_full_llm":   {"MY_SOLUTION_ENRICH": "ctx", "MY_SOLUTION_WINDOW_CTX": "llm", "MY_SOLUTION_WINDOW_CACHE": "/home/user/interface-submission/results/win_ctx_llm.npz"},
+  "q_kw":          {"MY_SOLUTION_ENRICH": "q"},
+  "mv_q":          {"MY_SOLUTION_ENRICH": "embq"},
+  "propunit_repl": {"MY_SOLUTION_ENRICH": "embprop", "MY_SOLUTION_PROP_UNIT": "replace"},
+  "k6":            {"MY_SOLUTION_TOP_K": "6"},
+  "k6_cap2":       {"MY_SOLUTION_TOP_K": "6", "MY_SOLUTION_WINDOW_EXTRA_CAP": "2"},
+  "s1500":         {"MY_SOLUTION_SPLIT_CHARS": "1500", "MY_SOLUTION_WINDOW_CACHE": "/home/user/interface-submission/results/win_s1500.npz"},
+  "s800":          {"MY_SOLUTION_SPLIT_CHARS": "800", "MY_SOLUTION_WINDOW_CACHE": "/home/user/interface-submission/results/win_s800.npz"},
+  "rr_dense_k5":   {"MY_SOLUTION_RERANK": "dense", "MY_SOLUTION_TOP_K": "5"},
+  "rr_dense_k4":   {"MY_SOLUTION_RERANK": "dense", "MY_SOLUTION_TOP_K": "4"}
+ }}
