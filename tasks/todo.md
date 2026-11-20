@@ -55,7 +55,10 @@ Open item: re-run baseline with the judge to find the real per-question misses (
   - Result: 15,465 distinct chunks (12,867 sections + 2,598 table rows). Sections by URL type: blog 5,428, other 4,143, news 2,595, calculator 389, rates 272, contact 40. About 1.99M tokens of section text (1.92M tokens in the 10,641 sections of 200+ chars). Per-snapshot chunk counts are 7,078-7,931.
   - Implication: enriching everything is too broad for the budget. Start with the newest snapshot (the default for answers) and the 'other' + contact pages (hours, branches, eligibility, how-to), then widen only if it helps.
 - [ ] 2. Free: read `chunker.py`, `search.py`, `embed_index.py`, `solution.py` to find the insertion point for extra index fields
-- [ ] 3. Measure cost on a 50-chunk pilot, and extrapolate; stop if projected total > $3.50
+- [x] 3. Measure cost on a 50-chunk pilot, and extrapolate; stop if projected total > $3.50
+  - Pilot (50 newest-snapshot 'other' section chunks, one combined call each, gpt-6-luna, effort none): 18,817 input and 9,592 output tokens total, i.e. about 376 in / 192 out per chunk, 2.6 s per call, 0 errors, 0 chunks with a number missing from the source. About 3.8 propositions and 4.0 questions per chunk.
+  - Projection: per 1,000 chunks about 0.38M input + 0.19M output tokens. 5,000 chunks is about 1.9M in + 0.96M out. Dollar figure needs the gpt-6-luna price (not available to me); check the OpenAI usage page for the pilot's 50 calls.
+  - Quality finding: the context line asserts 'current' without evidence, and says 'does not say whether current' when it has nothing. Fix in the prompt: state status only when the excerpt or page info says so (dates, 'ended', 'expired'); otherwise omit it. Tiny chunks give thin propositions; skip chunks under about 200 chars (already done).
 - [ ] 4. Run baseline (3 runs via regress.py) and record per-question misses
 - [ ] 5. Implement `enrich.py` (prompts per page type, numeric guard, disk cache)
 - [ ] 6. Wire into BM25 text and embedding windows (index text = enrichment + chunk; returned text = chunk)
