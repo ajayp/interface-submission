@@ -147,3 +147,12 @@ Findings:
 - Shrinking costs recall: -25% chars gives -5.7 points; -44% chars gives -8.9 points.
 - Enrichment does not beat simply raising k: C at k4 (0.903, 6,798 chars) equals A at k6 (0.903, 6,551 chars). Context line (B) = baseline at equal size.
 - Conclusion: on this corpus the retrieval hypothesis is not supported. Keep enrichment OFF. Recall is a text-presence proxy; the model may still answer correctly from smaller prompts, which only an answer-level run can show (not yet run).
+
+## Compact-evidence check (retrieval only), 124 questions, 2026-11-20
+Baseline pieces; any retrieved piece with enrichment and over 300 chars is replaced by its context line + the M propositions most similar to the question.
+| M | Recall (full 0.960) | Chars (full 8,689) | Pieces replaced per question |
+|---|---|---|---|
+| 2 | 0.952 | 7,920 (-9%) | 1.72 |
+| 3 | 0.952 | 8,083 (-7%) | 1.72 |
+| 5 | 0.952 | 8,304 (-4%) | 1.72 |
+Lost by compacting: dup-082 (all M). The saving is small because only about 1.7 of about 10 pieces per question have enrichment (cache covers only the newest copy's non-blog/news/rate section chunks); the rest of the prompt (tables, news, contact, windows) is untouched. Qualifiers (tier, branch, dates) can also be lost in a short proposition. Not worth an answer-level run as is. Wider coverage (news, blog, older copies) would cost another LLM pass and has no evidence yet that it would help.
