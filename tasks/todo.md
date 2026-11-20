@@ -126,3 +126,24 @@ Decision for now: ship nothing; keep enrichment off. Possible follow-up: 3 runs 
 - Of the answers that did cite sources, 2 of 6 cited one enrichment-added page (dup-034, dup-008), both answers unchanged from baseline (1.0). dup-034/087/008/104 flips seen in E/F were not reproduced in the rerun (noise).
 - Prompt size was never reduced in any arm: arm F cut only keyword top-k 8 to 4; window and enrichment extras and the system message were unchanged. The smaller-message hypothesis is untested.
 - Next: (1) similarity floor + add enrichment extras only when they beat the weakest kept piece; (2) a real size arm: keyword k 4, window extras 2, enrichment extras 2, shorter intent-specific system message; (3) re-run A/B/C/new arms 3x on public + held-out + dated + typo sets.
+
+## Retrieval-only check (no answer calls), 124 questions with must_include (public, held-out, typo, branch/contact, temporal), 2026-11-20
+Recall = every required string appears in the pieces sent to the model. Chars = average size of the pieces (user message).
+
+| Config | Recall | Pieces | Chars |
+|---|---|---|---|
+| A base (keyword 8, windows up to 3) | 0.960 | 10.1 | 8,689 |
+| E all enrichment, extras 3, no floor | 0.960 | 13.1 | 11,436 |
+| A keyword 6, windows 2 | 0.903 | 7.2 | 6,551 |
+| A keyword 4, windows 2 | 0.871 | 5.1 | 4,905 |
+| B ctx, keyword 6, windows 2 | 0.903 | 7.1 | 6,575 |
+| B ctx, keyword 4, windows 2 | 0.871 | 5.1 | 4,928 |
+| C prop+emb, keyword 4, windows 2, extras 2 | 0.903 | 7.1 | 6,798 |
+| E all, keyword 4, windows 2, extras 2 | 0.895 | 7.1 | 6,729 |
+
+Findings:
+- Baseline recall is already 0.960. Enrichment (E) fixed 0 and broke 0 of the 5 misses (dup-034, ho-010, tm-007, tm-016, tm-021) and added 3 pieces (+31% chars).
+- Enrichment extras: 372 added, only 37 (10%) held a required value. Similarity does not separate them (median 0.66 useful vs 0.60 useless), so a floor cannot clean them up.
+- Shrinking costs recall: -25% chars gives -5.7 points; -44% chars gives -8.9 points.
+- Enrichment does not beat simply raising k: C at k4 (0.903, 6,798 chars) equals A at k6 (0.903, 6,551 chars). Context line (B) = baseline at equal size.
+- Conclusion: on this corpus the retrieval hypothesis is not supported. Keep enrichment OFF. Recall is a text-presence proxy; the model may still answer correctly from smaller prompts, which only an answer-level run can show (not yet run).
