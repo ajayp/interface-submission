@@ -1,6 +1,6 @@
 # TypeScript port (`ts_solution/`) — plan
 
-Status: M0 in progress (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
+Status: M0, M1 done; M2 next. (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
 
 ## Decisions (user, 2026-11-24)
 - Full port of `my_solution/` (ingest, facts, BM25 + embedding windows, Decisions query understanding, dates, history path, spellfix, conflicts()).
@@ -29,12 +29,11 @@ Status: M0 in progress (budget cap $2 OpenAI; zod for structured outputs, the on
 - [x] `types.ts` + `openai.ts` (fetch client, zod->strict JSON schema, $ budget guard) (Page, Snapshot, Answer, Source, Conflict, KnowledgeSystem) mirroring `harness/contract.py`.
 - [ ] Parity-fixture script (Python side, kept in `ts_solution/parity/`): dumps chunks, BM25 rankings, dates, facts, prompts to JSON for TS to compare against.
 
-### M1 Data + search (no LLM) — parity tested against Python dumps
-- [ ] Snapshot loader (manifest + `pages/*.md`, optional zip unpack).
-- [ ] `chunker.ts` (heading split identical to the library, table-row pieces).
-- [ ] `stemmer.ts` (Snowball English) + `search.ts` (BM25 per snapshot, stop words, trust-tier slots).
-- [ ] `dates.ts`, `synonyms.ts`, `spellfix.ts`, `tiers.ts`, `categories.ts`, `category_words.ts`.
-- [ ] Gate: chunk count, BM25 top-8 ids and date parsing match Python on all 40 public questions + the `eval/subsets/*` files.
+### M1 Data + search (no LLM) — DONE, parity-tested against Python
+- [x] Snapshot loader + zip reader (`zip.ts`, `snapshots.ts`), `chunker.ts`, `stemmer.ts` (Snowball, current english.sbl), `search.ts` (BM25), `tiers.ts`, `categories.ts`, `category_words.ts`, `dates.ts`, `synonyms.ts`, `spellfix.ts`, `corpus.ts`.
+- [x] Gate (`parity/`): stemmer 16,069/16,069 words equal PyStemmer; chunks identical on all 5 snapshots (7,124 / 7,124 / 7,105 / 7,078 / 7,931), BM25 top-8 ids and scores identical for the 40 public questions per snapshot; dates, synonyms and spellfix identical on 199 questions (all eval files).
+- Found on the way: JS `.` does not match U+2028 (Python's does), so the heading regex needs the `s` flag. PyStemmer 3.x is newer than the Porter2 spec (inter/past prefixes, ogist, double-letter and -ing exceptions).
+- Not ported (off by default in Python): boilerplate removal; `MY_SOLUTION_SPLIT_CHARS` is ported.
 
 ### M2 Embeddings
 - [ ] `npz.ts` reader, `embed_index.ts` (lookup only; no vectors built while answering; missing vectors embedded at ingest only), RRF fusion.
