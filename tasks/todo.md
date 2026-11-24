@@ -1,6 +1,6 @@
 # TypeScript port (`ts_solution/`) — plan
 
-Status: PLAN, waiting for approval. Nothing below is built yet.
+Status: M0 in progress (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
 
 ## Decisions (user, 2026-11-24)
 - Full port of `my_solution/` (ingest, facts, BM25 + embedding windows, Decisions query understanding, dates, history path, spellfix, conflicts()).
@@ -25,8 +25,8 @@ Status: PLAN, waiting for approval. Nothing below is built yet.
 ## Milestones (each ends with a check-in; mark `[x]` as done)
 
 ### M0 Setup
-- [ ] `ts_solution/package.json` (`"type": "module"`, no deps, `typescript` in devDependencies), `tsconfig.json` (`noEmit`, `strict`, `allowImportingTsExtensions`), `README.md`.
-- [ ] `types.ts` (Page, Snapshot, Answer, Source, Conflict, KnowledgeSystem) mirroring `harness/contract.py`.
+- [x] `ts_solution/package.json` (`"type": "module"`, no deps, `typescript` in devDependencies), `tsconfig.json` (`noEmit`, `strict`, `allowImportingTsExtensions`), `README.md`.
+- [x] `types.ts` + `openai.ts` (fetch client, zod->strict JSON schema, $ budget guard) (Page, Snapshot, Answer, Source, Conflict, KnowledgeSystem) mirroring `harness/contract.py`.
 - [ ] Parity-fixture script (Python side, kept in `ts_solution/parity/`): dumps chunks, BM25 rankings, dates, facts, prompts to JSON for TS to compare against.
 
 ### M1 Data + search (no LLM) — parity tested against Python dumps
