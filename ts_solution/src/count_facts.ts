@@ -71,12 +71,12 @@ export function label(measure: Measure, value: string): string {
 
 // ---- answering count questions
 const ASK: Record<string, RegExp> = {
-  branches: /\bhow many\b[^?]*\b(branch(es)?|branch (office )?locations|locations|offices)\b|\bnumber of (branch(es)?|branch (office )?locations|locations|offices)\b/i,
-  employees: /\bhow many\b[^?]*\b(employees|people work|staff|team members|workers)\b|\bnumber of (employees|staff)\b/i,
-  members: /\bhow many\b[^?]*\bmembers\b|\bnumber of members\b|\bmembership (size|count)\b/i,
+  branches: /\bhow many\b[^?]*\b(branch(es)?|branch (office )?locations|locations|offices)\b|\bnumber of (?:\w+\s+){0,2}(branch(es)?|branch (office )?locations|locations|offices)\b/i,
+  employees: /\bhow many\b[^?]*\b(employees|people work|staff|team members|workers)\b|\bnumber of (?:\w+\s+){0,2}(employees|staff)\b/i,
+  members: /\bhow many\b[^?]*\bmembers\b|\bnumber of (?:\w+\s+){0,2}members\b|\bmembership (size|count)\b/i,
   assets: /\b(total |in )?assets\b|\basset size\b/i,
 };
-const SCOPE_RE = /\b(in|near|around|within|across)\s+(?!total\b)(?!(january|february|march|april|may|june|july|august|september|october|november|december)\b)[A-Za-z]|\blast year\b|\bATMs?\b|\bboard\b|\bvolunteer|\bpromoted\b|\bused\b|\bopen(ed)?\b|\bnew\b|\bclos/i;
+const SCOPE_RE = /\b(in|near|around|within|across)\s+(?!(?:total|person|store|branch(?:es)?|general|all)\b)(?!(january|february|march|april|may|june|july|august|september|october|november|december)\b)[A-Za-z]|\blast year\b|\bATMs?\b|\bboard\b|\bvolunteer|\bpromoted\b|\bused\b|\bopen(ed)?\b|\bnew\b|\bclos/i;
 const QUANT_RE = /\b(over|more than|nearly|almost|about|approximately|exceeding)\s+\$?\s?[\d,.]+\s*(billion)?\s*(employees|branch|$|with|members)?/i;
 const YEAR_RE = /\b(19|20)\d\d\b/;
 

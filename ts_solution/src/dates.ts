@@ -6,7 +6,7 @@ FULL.forEach((m, i) => { MONTHS[m] = i + 1; MONTHS[m.slice(0, 3)] = i + 1; });
 MONTHS["sept"] = 9;
 const byLen = (a: string[]) => [...a].sort((x, y) => y.length - x.length);
 const MONTH = "(" + byLen(Object.keys(MONTHS)).join("|") + ")";
-export const MONTH_YEAR_RE = new RegExp("\\b" + MONTH + "\\.?\\s+(\\d{1,2}(?:st|nd|rd|th)?,?\\s*)?(20\\d\\d)\\b", "id");
+export const MONTH_YEAR_RE = new RegExp("\\b" + MONTH + "\\.?\\s+(?:of\\s+)?(\\d{1,2}(?:st|nd|rd|th)?,?\\s*)?(20\\d\\d)\\b", "id");
 export const ISO_RE = /\b(20\d\d)-(\d\d)-(\d\d)\b/d;
 export const NUMERIC_RE = /\b(\d{1,2})\/(\d{1,2})\/(20\d\d|\d\d)\b/d;
 const BEFORE_RE = /\b(before|prior to|until|up to)\s+(the\s+)?(start of\s+|beginning of\s+)?$/i;
@@ -19,7 +19,7 @@ export const setReference = (d: string | null): void => { REFERENCE = d; };
 const FULL_MONTHS = "(" + byLen([...FULL, "sept"]).join("|") + ")";
 const YEARLESS_RE = new RegExp(
   "\\b(?:as of|back in|in|during|on|for|from|before|prior to|until|early|mid|late|end of)[\\s-]+(?:the\\s+)?(?:(?:early|mid|middle of|late|end of)[\\s-]+)?" +
-  FULL_MONTHS + "\\b(?!\\s*,?\\s*(?:\\d{1,2}(?:st|nd|rd|th)?,?\\s*)?(?:20)?\\d\\d\\b)", "id");
+  FULL_MONTHS + "\\b(?!\\s*,?\\s*(?:of\\s+)?(?:\\d{1,2}(?:st|nd|rd|th)?,?\\s*)?(?:20)?\\d\\d\\b)", "id");
 
 const monthLen = (y: number, m: number): number => new Date(Date.UTC(y, m, 0)).getUTCDate();
 const pad = (n: number, w = 2): string => String(n).padStart(w, "0");

@@ -57,6 +57,9 @@ const METRIC_FIRST = env("METRIC_FIRST", "1") === "1";
 const STRIP_NOT_LISTED = env("STRIP_NOT_LISTED", "1") === "1";
 const COUNT_ANSWERS = env("COUNT_ANSWERS", "1") === "1";
 const METRIC_FOR_ASKED: Record<string, string[]> = { "interest rate": ["rate", "interest rate"], rate: ["rate", "interest rate"], apr: ["APR"], apy: ["APY"] };
+// A rate/fee answer that says the value isn't listed and states no rate or dollar amount of its own is a refusal in substance. In Python this is the
+// experiment switch MY_SOLUTION_SOFT_REFUSAL (default off); the TS port has it on by default (MY_SOLUTION_SOFT_REFUSAL=0 rolls back).
+const SOFT_REFUSAL = env("SOFT_REFUSAL", "1") === "1";
 const NOT_LISTED_RE = /\b(isn['’]t|is not|aren['’]t|are not|wasn['’]t|was not|not)\s+(listed|provided|included|shown|stated|available|specified|given|published)\b|\bdo(es)?(n['’]t| not)\s+(list|provide|include|state|show|specify|publish)\b|\bI don['’]t know\b/i;
 
 export const REFUSAL = "I don't know. That isn't listed on Dupaco's website, so please contact Dupaco directly.";
@@ -72,6 +75,13 @@ interface Copy { takenOn: string; snapshotId: string; index: BM25Index<Chunk> }
 const words = (s: string): string[] => s.split(/\s+/).filter(Boolean);
 const normText = (s: string): string => words(s).join(" ").toLowerCase();
 const isFact = (p: Piece): p is Fact => "product" in p;
+
+export function softRefusal(text: string, question: string): boolean {
+  const g = new RegExp(VALUE_NUM_RE.source, "g");
+  const inQuestion = new Set(question.match(g) ?? []);
+  const own = (text.match(g) ?? []).filter((v) => !inQuestion.has(v));
+  return NOT_LISTED_RE.test(text) && own.length === 0;
+}
 
 export function stripNotListed(text: string): string {
   const parts = text.trim().split(/(?<=[.!?])\s+/);
@@ -366,6 +376,7 @@ export class Knowledge implements KnowledgeSystem {
     if (!out.confident) return { text: REFUSAL, sources: [], confident: false };
     const asksValue = this.asksValue(question, qu);
     if (asksValue && !/\d/.test(out.answer)) return { text: REFUSAL, sources: [], confident: false };
+    if (SOFT_REFUSAL && asksValue && softRefusal(out.answer, question)) return { text: REFUSAL, sources: [], confident: false };
     if (STRIP_NOT_LISTED && asksValue) out = { ...out, answer: stripNotListed(out.answer) };
     const used = out.used_excerpts.filter((n) => n >= 1 && n <= hits.length);
     if (!used.length) used.push(1);

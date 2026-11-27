@@ -130,3 +130,15 @@ Why: the public set has 20 paraphrase groups of size 1 (consistency untested), 1
   4. dv-g14-s "Do you have mortgage for 40 years? What is the rate?" -> honest answer ("terms go up to 30 years; a 40-year mortgage and its rate aren't listed...") scored 0: the harness refusal regex has "isn't listed" but not "aren't listed", and the answer also states "30" (scorer strictness plus answer style; the other three voices refused cleanly).
 - Not run: Python on this set (user decision).
 - Possible general fixes if wanted (not done, they would change behaviour away from the Python system): allow filler words in the count patterns and ignore "in person"/"in store"-style phrases in the scope rule; accept "Month of YYYY"; answer refusals with the standard phrase and no extra numbers.
+
+---
+
+# TS-only fixes from the diverse_voices misses (user, 2026-11-27: "proceed with TS only; Python later")
+General rules, no question-shaped patches. Python is NOT changed (it will be done later), so TS now deliberately differs from Python in these four places.
+- [ ] 1. Count shortcut: allow filler words in "number of <...> branches/employees/members" (e.g. "number of dupaco branches").
+- [ ] 2. Count shortcut: "in person / in store / in branch / in general / in all" is not a place scope.
+- [ ] 3. Dates: accept "Month of YYYY" ("May of 2026") in the month-year reader and in the year-less check.
+- [ ] 4. Refusals: switch on the existing soft-refusal check (rate/fee question, answer says it is not listed, states no rate or dollar amount -> standard refusal). It exists in Python as `MY_SOLUTION_SOFT_REFUSAL` (default off there); TS default on, switch `MY_SOLUTION_SOFT_REFUSAL=0` rolls back.
+- [ ] 5. Unit tests; parity scripts re-run (differences only where intended).
+- [ ] 6. Regression run on TS: diverse_voices (now a dev set, no longer independent), public, heldout, heldout_temporal, rates_reworded_refusals, refusals, standin_dates, yearless_dates, history_slice (about $0.25). Compare with the numbers recorded above; any drop gets investigated, not hidden.
+- [ ] 7. Record results, commit, push.
