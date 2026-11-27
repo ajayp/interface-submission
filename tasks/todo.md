@@ -1,6 +1,6 @@
 # TypeScript port (`ts_solution/`) — plan
 
-Status: M0-M6 done; M7 (3-run verification, README/NOTES) next. Spend so far ~ $0.21 of $2 (estimate). OpenAI spend so far ~ $0.11 of $2 (estimate: Python fact extraction ~$0.10 + TS smoke tests $0.004). (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
+Status: ALL MILESTONES DONE (M0-M7). OpenAI spend ~ $0.32 of $2 (estimate; ~$0.10 of it is the one-off Python fact extraction). OpenAI spend so far ~ $0.11 of $2 (estimate: Python fact extraction ~$0.10 + TS smoke tests $0.004). (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
 
 ## Decisions (user, 2026-11-24)
 - Full port of `my_solution/` (ingest, facts, BM25 + embedding windows, Decisions query understanding, dates, history path, spellfix, conflicts()).
@@ -61,9 +61,11 @@ Status: M0-M6 done; M7 (3-run verification, README/NOTES) next. Spend so far ~ $
 - [x] Scorer parity: the 40 TS answers re-scored with the original `harness/scoring.py` give identical item scores, categories, stale hits and speed; conflicts scoring identical on both gold lists (hand 0.586, table key 0.919, as in the Python notes).
 - [x] First full public run (run 1, live Decisions, no label cache): accuracy 0.879, consistency 1.0 (paraphrase 20/20, repeat 20/20), p95 2.29 s (p50 1.63 s), 0 stale values, 0 errors, final 0.833 with the hand-list conflicts pillar (0.877 without a conflicts pillar). Misses = the known accepted ones (dup-049, 088, 005, 064, 066). Cost ~$0.06. Ingest 18.9 s.
 
-### M7 Verification
-- [ ] 3 runs on the public set (judge optional): accuracy within noise of Python (0.85 +/- 0.02), consistency 1.0, 0 stale values, p95 <= Python.
-- [ ] `tsc --noEmit` clean; `node --test` passes.
+### M7 Verification — DONE
+- [x] Three public-set runs (same code, live Decisions, no label cache): accuracy 0.879 / 0.905 / 0.905, consistency 1.0 each, 0 stale values, 0 errors, p95 2.29 / 2.19 / 2.25 s. Final score 0.833 (run 1, with the hand-list conflicts pillar 0.586) and 0.904 / 0.903 (runs 2-3, no conflicts pillar, so not comparable with run 1).
+- [x] Extra sets (1 run each): `standin_dates` 17/17 (1.0), `history_slice` 14/14 (1.0, exercises the history path), `yearless_dates` 1.0 (p95 4.76 s on that set).
+- [x] `tsc --noEmit` clean, 19 unit tests pass; clean `git clone` + `npm install` + typecheck + tests + live 6-question run (6/6, 0 stale, 18 s loading, no warnings) all work from the pushed branch.
+- [x] `ts_solution/README.md`.
 
 ## Risks / open points
 - Stemmer parity: BM25 ranking changes if the stemmer differs, so the Snowball port is tested against PyStemmer output before anything else.
@@ -73,4 +75,8 @@ Status: M0-M6 done; M7 (3-run verification, README/NOTES) next. Spend so far ~ $
 - Cost: loading ~$0.10 cold if the facts cache is not reused; the parity tests need the Python side with its key only for LLM-derived dumps.
 
 ## Review
-(added when done)
+- Result: a full TypeScript port that runs on Node 22 with native type stripping and one runtime dependency (`zod`, for OpenAI structured-output schemas); everything else is built-in (`fetch`, `node:zlib`, `node:crypto`, `util.parseArgs`, `node:test`). No axios, no OpenAI SDK, no "fast"/priority tier.
+- Fidelity: every stage was parity-tested against the Python code on the real data (stemmer 16,069 words, chunks, BM25, dates/synonyms/spellfix, window search, tables/facts/groups, count facts, the exact model inputs for the 40 public questions, `conflicts()` 42 entries, scorer). Differences are listed in `ts_solution/README.md`.
+- Measured: public accuracy 0.879-0.905 over 3 runs vs 0.851-0.867 documented for Python. Same design, so I would not read this as an improvement: the runs differ by 0.026 among themselves, the Python figures were measured on another day, and the TS runs used no fast tier. Treat the two as equal within noise. p95 2.2-2.3 s vs 3.3-4.5 s documented for Python (not investigated; the 2 s target would give full speed marks).
+- Not official: the Python harness cannot load TS, so scores come from the ported scorer (identical item scores on the same answers). The stand-in LLM judge was not ported or run (Python measures ~0.81 with it).
+- Open: boilerplate removal and non-default prompt variants are not ported; the price table behind the spend guard is a rough estimate.
