@@ -17,6 +17,8 @@ import { expansion } from "./synonyms.ts";
 import { SECONDARY, pageRank } from "./tiers.ts";
 import type { Answer, Conflict, KnowledgeSystem, Snapshot, Source } from "./types.ts";
 import { publishedDate } from "./chunker.ts";
+import { buildConflicts } from "./conflicts_v2.ts";
+import { loadSentenceCache, saveSentenceCache, type SentenceCache } from "./sentence_facts.ts";
 
 void chunkPage; void normBlock;
 const env = (name: string, dflt: string): string => process.env[`MY_SOLUTION_${name}`] ?? dflt;
@@ -448,8 +450,24 @@ export class Knowledge implements KnowledgeSystem {
     return { text, sources, confident: true, conflictNote: out.conflict_note };
   }
 
-  // ------------------------------------------------------------------ conflicts (M5)
-  async conflicts(): Promise<Conflict[]> { return []; }
+  // ------------------------------------------------------------------ conflicts
+  private sentenceCache: SentenceCache | null = null;
+
+  /** Contradictions in the newest website copy (conflicts_v2). Rate sentences cost one small model call each; results are cached on disk. */
+  async conflicts(): Promise<Conflict[]> {
+    if (!this.newest) return [];
+    const seed = join(HERE, "..", "data", "sentence_cache.json");
+    const own = resolve(process.env.MY_SOLUTION_SENTENCE_CACHE ?? join(HERE, "..", ".cache", "sentences.json"));
+    this.sentenceCache ??= loadSentenceCache(seed, own);
+    try {
+      const out = await buildConflicts(this.newest, this.llm.available() ? this.llm.model : null, this.sentenceCache);
+      saveSentenceCache(own, this.sentenceCache);
+      return out;
+    } catch (e) {
+      console.error(`[ts_solution] conflicts failed: ${(e as Error).name}: ${(e as Error).message}`);
+      return [];
+    }
+  }
 }
 
 function topChunk(hits: Hit[]): Answer {

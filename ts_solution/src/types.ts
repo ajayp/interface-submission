@@ -12,7 +12,7 @@ export interface Conflict {
   topic: string;
   values: string[];
   sources: Source[];
-  winner?: string | null;
+  resolution?: string | null;
   reason?: string | null;
 }
 export interface KnowledgeSystem {

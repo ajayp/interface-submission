@@ -1,6 +1,6 @@
 # TypeScript port (`ts_solution/`) — plan
 
-Status: M0-M4 done; M5 (conflicts) next. OpenAI spend so far ~ $0.11 of $2 (estimate: Python fact extraction ~$0.10 + TS smoke tests $0.004). (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
+Status: M0-M5 done; M6 (CLI + eval runner) next. Spend so far ~ $0.14 of $2 (estimate). OpenAI spend so far ~ $0.11 of $2 (estimate: Python fact extraction ~$0.10 + TS smoke tests $0.004). (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
 
 ## Decisions (user, 2026-11-24)
 - Full port of `my_solution/` (ingest, facts, BM25 + embedding windows, Decisions query understanding, dates, history path, spellfix, conflicts()).
@@ -51,8 +51,10 @@ Status: M0-M4 done; M5 (conflicts) next. OpenAI spend so far ~ $0.11 of $2 (esti
 - [x] Live end-to-end on 6 public questions: 6/6 expected values present, 0 traps, 1.3-2.4 s per answer, ingest 15.5 s (Python ~3 min cold, since TS reuses the committed fact cache).
 - Spend so far ~ $0.12 of $2 (estimated: Python fact extraction ~$0.10, TS Decisions labels $0.012, answers/smoke ~$0.01).
 
-### M5 conflicts()
-- [ ] `sentence_facts.ts`, `conflicts_v2.ts`; score with a TS port of `score_conflict_lists` against `docs/gold/*.json`.
+### M5 conflicts() — DONE
+- [x] `table_parse.ts`, `fact_match.ts`, `sentence_facts.ts` (prompt text from `data/prompts.json`, zod schema), `conflicts_v2.ts` (incl. counties), wired into `Knowledge.conflicts()`; sentence results cached in `data/sentence_cache.json` (seed, same format as Python's) + `.cache/sentences.json`.
+- [x] Gate: with the same sentence cache, TS `conflicts()` = 42 entries identical to Python's (topic, values, sources, winner, reason), 0.7 s. Live: 18/20 sentences re-extracted identically (the 2 differences are `other`-kind sentences that are never compared), cost ~$0.01. Python reference run: 93 calls, ~$0.02.
+- Scoring against `docs/gold/` comes with the M6 scorer port.
 
 ### M6 CLI + eval runner
 - [ ] `cli.ts` (`ask`, `eval`, `conflicts`, `trace`), `scoring.ts` ported from `harness/scoring.py` (numeric match, traps, refusal, sources, consistency, speed p95), single worker, 60 s timeout, repeat sample.
