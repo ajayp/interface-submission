@@ -1,6 +1,6 @@
 # TypeScript port (`ts_solution/`) — plan
 
-Status: ALL MILESTONES DONE (M0-M7). OpenAI spend ~ $0.32 of $2 (estimate; ~$0.10 of it is the one-off Python fact extraction). OpenAI spend so far ~ $0.11 of $2 (estimate: Python fact extraction ~$0.10 + TS smoke tests $0.004). (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
+Status: ALL MILESTONES DONE (M0-M7) + extra validation done. OpenAI spend ~ $0.57 of $2 (estimate; ~$0.10 of it is the one-off Python fact extraction). OpenAI spend so far ~ $0.11 of $2 (estimate: Python fact extraction ~$0.10 + TS smoke tests $0.004). (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
 
 ## Decisions (user, 2026-11-24)
 - Full port of `my_solution/` (ingest, facts, BM25 + embedding windows, Decisions query understanding, dates, history path, spellfix, conflicts()).
@@ -74,9 +74,17 @@ Status: ALL MILESTONES DONE (M0-M7). OpenAI spend ~ $0.32 of $2 (estimate; ~$0.1
 - Model noise: single runs are inside run-to-run noise, so compare over 3 runs.
 - Cost: loading ~$0.10 cold if the facts cache is not reused; the parity tests need the Python side with its key only for LLM-derived dumps.
 
+## Extra validation (2026-11-27, after M7)
+- Other eval sets on TS (1 run each, est. cost $0.18 total): heldout 22/22 = 1.000, heldout_temporal 21/21 = 1.000, refusals 3/3, rates_reworded_refusals 23/23, slice1_reworded 10/10, casual_date_wording_grid 0.985, slice2_branch_contact 0.959, typo_robustness 0.954 (48 questions; the only misses are two typo variants of dup-088, the known accepted miss). 0 stale values, 0 errors on every set.
+- Same-day Python run on the public set (harness, fast tier as the Python system uses it): accuracy 0.882, consistency 1.0, 0 stale, p50 1.43 s, p95 2.02 s, loading 33.7 s. TS today: accuracy 0.879 / 0.905 / 0.905, p50 1.63 s, p95 2.19-2.29 s. So accuracy is equal within noise (the earlier gap to the 0.851-0.867 in the Python notes was day-to-day variation, not a TS advantage), and TS is ~0.2 s slower at p95, consistent with it not using the fast tier.
+- Client micro-benchmark (10 calls, noisy): connection setup is small in TS (first Decisions call 350 ms vs 278 ms later); Decisions ~280 ms (TS) vs ~310 ms (Python) once warm; answer calls ~760 ms Python fast tier, ~1,060 ms Python default tier, ~1,330 ms TS (default tier; the 270 ms gap to Python's default tier may be noise). Connection reuse does not explain a speed difference; the fast tier saves ~300 ms per answer.
+- Failure paths (`test/failure.test.ts`, local mock of the OpenAI API, no cost): timeout + one retry, 5xx retried / 4xx not, no `service_tier` ever sent and strict schema, spend guard stops requests after the cap, windows missing a vector are embedded at ingest then found again after a reload (question vectors too), a failing model gives a visible error answer (never a fake refusal), no API key falls back to keyword search. 26 tests pass.
+- "What changed" path: evidence lists (pieces, urls, copy dates) identical to Python for all 13 change questions of history_slice, standin_dates and heldout_temporal.
+- Not done: Node versions other than 22.23 (README says >= 22.6), the stand-in LLM judge, the hidden set.
+
 ## Review
 - Result: a full TypeScript port that runs on Node 22 with native type stripping and one runtime dependency (`zod`, for OpenAI structured-output schemas); everything else is built-in (`fetch`, `node:zlib`, `node:crypto`, `util.parseArgs`, `node:test`). No axios, no OpenAI SDK, no "fast"/priority tier.
 - Fidelity: every stage was parity-tested against the Python code on the real data (stemmer 16,069 words, chunks, BM25, dates/synonyms/spellfix, window search, tables/facts/groups, count facts, the exact model inputs for the 40 public questions, `conflicts()` 42 entries, scorer). Differences are listed in `ts_solution/README.md`.
-- Measured: public accuracy 0.879-0.905 over 3 runs vs 0.851-0.867 documented for Python. Same design, so I would not read this as an improvement: the runs differ by 0.026 among themselves, the Python figures were measured on another day, and the TS runs used no fast tier. Treat the two as equal within noise. p95 2.2-2.3 s vs 3.3-4.5 s documented for Python (not investigated; the 2 s target would give full speed marks).
+- Measured: public accuracy 0.879-0.905 over 3 runs vs 0.851-0.867 documented for Python. Same design, so I would not read this as an improvement: the runs differ by 0.026 among themselves, the Python figures were measured on another day, and the TS runs used no fast tier. Treat the two as equal within noise. p95 2.2-2.3 s (see the extra validation below for the same-day Python comparison).
 - Not official: the Python harness cannot load TS, so scores come from the ported scorer (identical item scores on the same answers). The stand-in LLM judge was not ported or run (Python measures ~0.81 with it).
 - Open: boilerplate removal and non-default prompt variants are not ported; the price table behind the spend guard is a rough estimate.
