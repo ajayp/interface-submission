@@ -377,7 +377,7 @@ export class Knowledge implements KnowledgeSystem {
   }
 
   // ------------------------------------------------------------------ "what changed" questions
-  private async historyHits(question: string, asOf: string | null | undefined, qu: QU): Promise<Array<[number, Piece, string[], string[]]>> {
+  async historyHits(question: string, asOf: string | null | undefined, qu: QU): Promise<Array<[number, Piece, string[], string[]]>> {
     const snaps = this.copies.filter((c) => !asOf || c.takenOn <= asOf.slice(0, 10));
     if (snaps.length < 2) return [];
     type Entry = [number, Piece, string[], string[]];
