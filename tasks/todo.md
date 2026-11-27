@@ -1,6 +1,6 @@
 # TypeScript port (`ts_solution/`) — plan
 
-Status: M0, M1 done; M2 next. (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
+Status: M0, M1, M2 done; M3 next. (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
 
 ## Decisions (user, 2026-11-24)
 - Full port of `my_solution/` (ingest, facts, BM25 + embedding windows, Decisions query understanding, dates, history path, spellfix, conflicts()).
@@ -35,9 +35,9 @@ Status: M0, M1 done; M2 next. (M0 was) (budget cap $2 OpenAI; zod for structured
 - Found on the way: JS `.` does not match U+2028 (Python's does), so the heading regex needs the `s` flag. PyStemmer 3.x is newer than the Porter2 spec (inter/past prefixes, ogist, double-letter and -ing exceptions).
 - Not ported (off by default in Python): boilerplate removal; `MY_SOLUTION_SPLIT_CHARS` is ported.
 
-### M2 Embeddings
-- [ ] `npz.ts` reader, `embed_index.ts` (lookup only; no vectors built while answering; missing vectors embedded at ingest only), RRF fusion.
-- [ ] Gate: window-search results match `retrieval_diff` output from Python.
+### M2 Embeddings — DONE, parity-tested against Python
+- [x] `npz.ts` (reads the Python `.embed_cache/*.npz`: float16 decode, `<U40` keys), `embed_index.ts` (store keyed by sha1 of normalised text, shared question-vector lookup + prefetch, `WindowIndex` over 600/400 windows cut by code points, `fuse`). Vectors the cache lacks are embedded at ingest only and kept in `ts_solution/.cache/*.json` (the Python npz files are never rewritten).
+- [x] Gate: window counts equal Python on all 5 snapshots (9,863 / 9,845 / 8,958 / 9,345 / 9,974), 0 windows without a vector, top-10 window search identical (ids, window text, similarity within 2e-4) for the 40 public questions per snapshot. Cost: $0.
 
 ### M3 LLM layer + facts
 - [ ] `llm.ts` (Responses API, strict JSON schema, cache per (question, snapshot)), `decisions_understanding.ts`, `query_understanding.ts` fallback.
