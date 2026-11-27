@@ -25,20 +25,23 @@ export interface SearchOptions {
   qualifiers?: RegExp[]; qualBoost?: number; expansionTokens?: Iterable<string>; expansionWeight?: number;
 }
 
-export class BM25Index {
+/** Anything BM25 can index: chunks and facts. */
+export interface Searchable { url: string; categories: string[]; text: string }
+
+export class BM25Index<T extends Searchable = Chunk> {
   readonly postings = new Map<string, Array<[number, number]>>();
   readonly lengths: number[] = [];
   readonly avgdl: number;
   readonly idf = new Map<string, number>();
   readonly rank: Rank[];
-  readonly chunks: Chunk[];
+  readonly chunks: T[];
   readonly k1: number;
   readonly b: number;
-  constructor(chunks: Chunk[], k1 = 1.2, b = 0.75) {
+  constructor(chunks: T[], textOf: (c: T) => string = (c) => indexText(c as unknown as Chunk), k1 = 1.2, b = 0.75) {
     this.chunks = chunks; this.k1 = k1; this.b = b;
     chunks.forEach((c, i) => {
       const tf = new Map<string, number>();
-      const toks = tokenize(indexText(c));
+      const toks = tokenize(textOf(c));
       for (const t of toks) tf.set(t, (tf.get(t) ?? 0) + 1);
       this.lengths.push(toks.length);
       for (const [t, n] of tf) { let p = this.postings.get(t); if (!p) this.postings.set(t, (p = [])); p.push([i, n]); }
@@ -50,7 +53,7 @@ export class BM25Index {
   }
 
   /** BM25 x page trust, plus fixed bonuses for pieces in a chosen category / containing a parsed qualifier. */
-  search(query: string, o: SearchOptions = {}): Array<[number, Chunk]> {
+  search(query: string, o: SearchOptions = {}): Array<[number, T]> {
     const { k = 10, boost = "tiers", catBoost = 0, qualBoost = 0, expansionWeight = 0.5 } = o;
     const cats = new Set(o.categories ?? []);
     const qualifiers = o.qualifiers ?? [];

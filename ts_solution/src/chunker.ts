@@ -20,7 +20,7 @@ export function indexText(c: Chunk): string {
 const HEADER_RE = /^(#+)\s(.*)/s;   // s flag: Python "." matches U+2028, JS "." does not
 const IMAGE_RE = /!\[[^\]]*\]\([^)]*\)/g;
 const LINK_RE = /\[([^\]]*)\]\(([^)\s]*)[^)]*\)/g;
-const EFFECTIVE_RE = /effective\s+(?:as\s+of\s+)?(\d{1,2})\/(\d{1,2})\/(\d{2,4})/i;
+export const EFFECTIVE_RE = /effective\s+(?:as\s+of\s+)?(\d{1,2})\/(\d{1,2})\/(\d{2,4})/i;
 const NOISE_LINES = new Set(["✕", "* * *", "---", "***"]);
 const NOISE_LINE_RE = new RegExp(
   "^\\d+\\s+min\\s+read$" +
@@ -87,7 +87,7 @@ export function cleanText(text: string, form = false): string {
   return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
-function splitHeading(section: string): [string, string] {
+export function splitHeading(section: string): [string, string] {
   const i = section.indexOf("\n");
   const first = i < 0 ? section : section.slice(0, i), rest = i < 0 ? "" : section.slice(i + 1);
   const m = HEADER_RE.exec(first);
@@ -103,7 +103,7 @@ function effectiveOf(text: string): string | null {
   const p = (n: number, w: number) => String(n).padStart(w, "0");
   return mo >= 1 && mo <= 12 && d >= 1 && d <= 31 ? `${p(y, 4)}-${p(mo, 2)}-${p(d, 2)}` : null;
 }
-export { effectiveOf as _effective };
+export { effectiveOf };
 
 export function blocksOf(body: string): string[] {
   const blocks: string[] = [];
@@ -119,7 +119,7 @@ export function blocksOf(body: string): string[] {
   return blocks.filter((b) => b.trim());
 }
 
-const cellsOf = (line: string): string[] => line.trim().replace(/^\|+/, "").replace(/\|+$/, "").split("|").map((c) => c.trim());
+export const cellsOf = (line: string): string[] => line.trim().replace(/^\|+/, "").replace(/\|+$/, "").split("|").map((c) => c.trim());
 
 function rowChunks(blocks: string[], heading: string): Array<[string, string | null]> {
   const out: Array<[string, string | null]> = [];

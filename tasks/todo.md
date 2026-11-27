@@ -1,6 +1,6 @@
 # TypeScript port (`ts_solution/`) — plan
 
-Status: M0, M1, M2 done; M3 next. (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
+Status: M0-M3 done; M4 (answer path, solution.ts) next. OpenAI spend so far ~ $0.11 of $2 (estimate: Python fact extraction ~$0.10 + TS smoke tests $0.004). (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
 
 ## Decisions (user, 2026-11-24)
 - Full port of `my_solution/` (ingest, facts, BM25 + embedding windows, Decisions query understanding, dates, history path, spellfix, conflicts()).
@@ -39,10 +39,11 @@ Status: M0, M1, M2 done; M3 next. (M0 was) (budget cap $2 OpenAI; zod for struct
 - [x] `npz.ts` (reads the Python `.embed_cache/*.npz`: float16 decode, `<U40` keys), `embed_index.ts` (store keyed by sha1 of normalised text, shared question-vector lookup + prefetch, `WindowIndex` over 600/400 windows cut by code points, `fuse`). Vectors the cache lacks are embedded at ingest only and kept in `ts_solution/.cache/*.json` (the Python npz files are never rewritten).
 - [x] Gate: window counts equal Python on all 5 snapshots (9,863 / 9,845 / 8,958 / 9,345 / 9,974), 0 windows without a vector, top-10 window search identical (ids, window text, similarity within 2e-4) for the 40 public questions per snapshot. Cost: $0.
 
-### M3 LLM layer + facts
-- [ ] `llm.ts` (Responses API, strict JSON schema, cache per (question, snapshot)), `decisions_understanding.ts`, `query_understanding.ts` fallback.
-- [ ] `facts.ts`, `table_parse.ts`, `fact_match.ts`, `count_facts.ts` (facts cache on disk as JSON, reuse the Python one if the format allows).
-- [ ] `prompt.ts` (variant G2 default; port the prompt text verbatim, other variants behind the same env switches).
+### M3 LLM layer + facts — DONE
+- [x] `openai.ts` (fetch; zod -> strict JSON schema; budget guard; **never sends `service_tier`**, no fast/priority mode), `llm.ts`, `decisions.ts` (raw `/v1/decisions`, shape confirmed live), `prompt.ts` + `data/prompts.json` (Python's resolved default prompts exported by `parity/export_prompts.py`, variant G2), `facts.ts`, `count_facts.ts`.
+- [x] Facts cache: Python has no persistent one by default, so I ran its extraction once (302 calls, ~$0.10) into `data/facts_cache.json` (same `{table_key: facts}` format; the TS extractor reads it first, so a clean run pays $0).
+- [x] Gate: tables (180 / 190 / 198 / 197 / 266), facts (1,269 ... 1,962), fact groups + winners, fact BM25 search (40 questions), count facts (546) and count-question detection all identical to Python on every snapshot. Live smoke test: Decisions, structured answer and fact extraction each worked first try ($0.004).
+- Not ported: prompt variants other than G2 (all off by default / not adopted), `MY_SOLUTION_QU_ENGINE=luna`, answer-terms and second-pass switches (default off).
 
 ### M4 Answer path
 - [ ] `solution.ts`: ingest, snapshot choice, history path, fact path, text fallback, post-check refusal, all `MY_SOLUTION_*` switches kept with the same names and defaults.

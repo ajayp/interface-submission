@@ -47,7 +47,7 @@ export async function post<T = any>(path: string, body: unknown, timeoutMs: numb
 
 export interface JsonCallOptions<S extends z.ZodType> {
   model: string; instructions: string; input: string; schema: S; name: string;
-  cacheKey?: string; maxTokens?: number; timeoutMs?: number; effort?: string; priority?: boolean;
+  cacheKey?: string; maxTokens?: number; timeoutMs?: number; effort?: string;
 }
 
 /** One structured Responses call. Returns the parsed, zod-validated object. */
@@ -62,15 +62,8 @@ export async function askJson<S extends z.ZodType>(o: JsonCallOptions<S>): Promi
   };
   if (effort === "none") body.temperature = 0;
   if (o.cacheKey) body.prompt_cache_key = o.cacheKey;
-  if (o.priority) body.service_tier = "priority";
-  let r: any;
-  try {
-    r = await post("/responses", body, o.timeoutMs ?? 6000);
-  } catch (e) {
-    if (!o.priority || ![400, 403, 404, 422].includes((e as any)?.status)) throw e;
-    delete body.service_tier; // option refused: retry once with defaults
-    r = await post("/responses", body, o.timeoutMs ?? 6000);
-  }
+  // No service_tier option is ever sent: the default tier only (no "priority"/fast mode).
+  const r: any = await post("/responses", body, o.timeoutMs ?? 6000);
   const u = r.usage ?? {};
   const cached = u.input_tokens_details?.cached_tokens ?? 0;
   const [pin, pcache, pout] = PRICES[o.model] ?? DEFAULT_PRICE;
