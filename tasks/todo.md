@@ -90,3 +90,32 @@ Status: ALL MILESTONES DONE (M0-M7) + extra validation done. OpenAI spend ~ $0.5
 - Measured: public accuracy 0.879-0.905 over 3 runs vs 0.851-0.867 documented for Python. Same design, so I would not read this as an improvement: the runs differ by 0.026 among themselves, the Python figures were measured on another day, and the TS runs used no fast tier. Treat the two as equal within noise. p95 2.2-2.3 s (see the extra validation below for the same-day Python comparison).
 - Not official: the Python harness cannot load TS, so scores come from the ported scorer (identical item scores on the same answers). The stand-in LLM judge was not ported or run (Python measures ~0.81 with it).
 - Open: boilerplate removal and non-default prompt variants are not ported; the price table behind the spend guard is a rough estimate.
+
+---
+
+# Plan: "diverse voices" eval set (PLAN, waiting for approval)
+
+Decisions (user, 2026-11-27): paraphrase groups; mix of known and new facts; voices = typos/texting/voice-to-text, second-language / limited English, terse keywords, rambling/anxious + a fluent baseline; about 60 questions.
+
+Why: the public set has 20 paraphrase groups of size 1 (consistency untested), 1 dated item, few refusals, and the tuning overlap makes it optimistic. This set tests the same system with wording it was never tuned on, and exercises the consistency pillar for real.
+
+## Design
+- File: `eval/subsets/diverse_voices.jsonl` (same format as `public_eval.jsonl`, same scorer), notes in `tasks/diverse_voices_notes.md`.
+- About 15 facts x 4 voices = about 60 questions; one `group` per fact, so "same fact, every voice gets the same values" is scored.
+- Voices (each group uses four of these; every voice appears in about 10-12 groups):
+  1. typos / texting / voice-to-text (slips, swapped letters, no caps or punctuation, abbreviations, homophones);
+  2. second-language / limited English (simple words, odd word order, missing articles, a few Spanish words; realistic, no caricature);
+  3. terse keywords (search-box style);
+  4. rambling or anxious (backstory, several asks in one message);
+  5. fluent and precise (baseline).
+- Facts: about 8 re-voiced from verified public/held-out items (gold already known); about 7 new, read by me directly from the snapshot pages. Spread over current_value, tier_disambiguation (rates by term or balance), stale_trap, branch_info (hours, address), list_completeness, 2 should_refuse groups (the site does not say), 2 dated groups (as_of or a date in the words, including a year-less month).
+- Gold rules: every new `must_include` value, `expected_answer` and `expected_sources` comes from the page text (line quoted in the notes file); `must_not_include` only for values I saw in an older copy; never from the system's output; weight 1.0; no digits in refusals' expected text.
+- No tuning to this set: general rules only. A failure is classified as (a) system weakness, (b) gold or wording problem (fix the gold), (c) known accepted miss.
+
+## Steps
+- [ ] 1. Pick facts and write gold from the snapshots (notes file with page, line, value).
+- [ ] 2. Write the 4 voices per fact; read them back for realism (no mocking, no stereotypes).
+- [ ] 3. Check the file: valid JSONL, every group has 3-4 members, gold values appear in the cited page, unique ids.
+- [ ] 4. Run TS (1 run, about $0.10) and Python on the same set (about $0.05) for comparison.
+- [ ] 5. Report accuracy by voice and by category, group consistency, each failure classified as above; add results to this file.
+- [ ] 6. Commit and push; update `tasks/lessons.md` if anything surprising.
