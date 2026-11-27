@@ -1,6 +1,6 @@
 # TypeScript port (`ts_solution/`) — plan
 
-Status: M0-M5 done; M6 (CLI + eval runner) next. Spend so far ~ $0.14 of $2 (estimate). OpenAI spend so far ~ $0.11 of $2 (estimate: Python fact extraction ~$0.10 + TS smoke tests $0.004). (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
+Status: M0-M6 done; M7 (3-run verification, README/NOTES) next. Spend so far ~ $0.21 of $2 (estimate). OpenAI spend so far ~ $0.11 of $2 (estimate: Python fact extraction ~$0.10 + TS smoke tests $0.004). (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
 
 ## Decisions (user, 2026-11-24)
 - Full port of `my_solution/` (ingest, facts, BM25 + embedding windows, Decisions query understanding, dates, history path, spellfix, conflicts()).
@@ -56,9 +56,10 @@ Status: M0-M5 done; M6 (CLI + eval runner) next. Spend so far ~ $0.14 of $2 (est
 - [x] Gate: with the same sentence cache, TS `conflicts()` = 42 entries identical to Python's (topic, values, sources, winner, reason), 0.7 s. Live: 18/20 sentences re-extracted identically (the 2 differences are `other`-kind sentences that are never compared), cost ~$0.01. Python reference run: 93 calls, ~$0.02.
 - Scoring against `docs/gold/` comes with the M6 scorer port.
 
-### M6 CLI + eval runner
-- [ ] `cli.ts` (`ask`, `eval`, `conflicts`, `trace`), `scoring.ts` ported from `harness/scoring.py` (numeric match, traps, refusal, sources, consistency, speed p95), single worker, 60 s timeout, repeat sample.
-- [ ] `NOTES.md` section for the TS version: keys needed (`OPENAI_API_KEY`), how to run.
+### M6 CLI + eval runner — DONE
+- [x] `scoring.ts` (port of harness/scoring.py: numeric match, traps, refusal, sources, conflicts F1 + winner, consistency, p95 speed, pillars; the optional Anthropic judge is not ported) and `cli.ts` (`eval`, `ask`, `conflicts`, `score-conflicts`; single worker, 60 s timeout, repeat sample, `--ids/--limit` for cheap subsets). npm scripts: `eval`, `ask`, `conflicts`.
+- [x] Scorer parity: the 40 TS answers re-scored with the original `harness/scoring.py` give identical item scores, categories, stale hits and speed; conflicts scoring identical on both gold lists (hand 0.586, table key 0.919, as in the Python notes).
+- [x] First full public run (run 1, live Decisions, no label cache): accuracy 0.879, consistency 1.0 (paraphrase 20/20, repeat 20/20), p95 2.29 s (p50 1.63 s), 0 stale values, 0 errors, final 0.833 with the hand-list conflicts pillar (0.877 without a conflicts pillar). Misses = the known accepted ones (dup-049, 088, 005, 064, 066). Cost ~$0.06. Ingest 18.9 s.
 
 ### M7 Verification
 - [ ] 3 runs on the public set (judge optional): accuracy within noise of Python (0.85 +/- 0.02), consistency 1.0, 0 stale values, p95 <= Python.
