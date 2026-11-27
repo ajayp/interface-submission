@@ -135,19 +135,26 @@ Why: the public set has 20 paraphrase groups of size 1 (consistency untested), 1
 
 # TS-only fixes from the diverse_voices misses (user, 2026-11-27: "proceed with TS only; Python later")
 General rules, no question-shaped patches. Python is NOT changed (it will be done later), so TS now deliberately differs from Python in these four places.
-- [ ] 1. Count shortcut: allow filler words in "number of <...> branches/employees/members" (e.g. "number of dupaco branches").
-- [ ] 2. Count shortcut: "in person / in store / in branch / in general / in all" is not a place scope.
-- [ ] 3. Dates: accept "Month of YYYY" ("May of 2026") in the month-year reader and in the year-less check.
-- [ ] 4. Refusals: switch on the existing soft-refusal check (rate/fee question, answer says it is not listed, states no rate or dollar amount -> standard refusal). It exists in Python as `MY_SOLUTION_SOFT_REFUSAL` (default off there); TS default on, switch `MY_SOLUTION_SOFT_REFUSAL=0` rolls back.
-- [ ] 5. Unit tests; parity scripts re-run (differences only where intended).
-- [ ] 6. Regression run on TS: diverse_voices (now a dev set, no longer independent), public, heldout, heldout_temporal, rates_reworded_refusals, refusals, standin_dates, yearless_dates, history_slice (about $0.25). Compare with the numbers recorded above; any drop gets investigated, not hidden.
-- [ ] 7. Record results, commit, push.
+- [x] 1. Count shortcut: allow filler words in "number of <...> branches/employees/members" (e.g. "number of dupaco branches").
+- [x] 2. Count shortcut: "in person / in store / in branch / in general / in all" is not a place scope.
+- [x] 3. Dates: accept "Month of YYYY" ("May of 2026") in the month-year reader and in the year-less check.
+- [x] 4. Refusals: switch on the existing soft-refusal check (rate/fee question, answer says it is not listed, states no rate or dollar amount -> standard refusal). It exists in Python as `MY_SOLUTION_SOFT_REFUSAL` (default off there); TS default on, switch `MY_SOLUTION_SOFT_REFUSAL=0` rolls back.
+- [x] 5. Unit tests; parity scripts re-run (differences only where intended).
+- [x] 6. Regression run on TS: diverse_voices (now a dev set, no longer independent), public, heldout, heldout_temporal, rates_reworded_refusals, refusals, standin_dates, yearless_dates, history_slice (about $0.25). Compare with the numbers recorded above; any drop gets investigated, not hidden.
+- [x] 7. Record results, commit, push.
 
 ---
 
 # Plan: fresh independent set "diverse_voices_2" (user, 2026-11-27, while away: after the regression runs, write and run it, then stop)
 Decisions: on a regression drop, revert only the culprit fix and report; keep the $2 total OpenAI limit (about $0.9 spent so far, estimated).
 - 15 NEW facts (none in the public, held-out or diverse_voices sets), 4 voices each (T, S, K, R, F rotating), about 60 questions; gold from the snapshot pages only; written WITHOUT looking at the four fixed failure forms, so it is an independent test of the fixes: 2 dated groups (one a product that vanished from later copies), 1 refusal group, 1 fee-schedule fact, tiers, stale traps.
-- [ ] a. facts + gold verified in the snapshots, notes file `tasks/diverse_voices_2_notes.md`
-- [ ] b. `eval/subsets/diverse_voices_2.jsonl`, checks as for set 1
-- [ ] c. one TS run (about $0.10), classify misses (system / gold / accepted), record here, commit and push
+- [x] a. facts + gold verified in the snapshots, notes file `tasks/diverse_voices_2_notes.md`
+- [x] b. `eval/subsets/diverse_voices_2.jsonl`, checks as for set 1
+- [x] c. one TS run (about $0.10), classify misses (system / gold / accepted), record here, commit and push
+
+## Results of the four TS-only fixes and of set 2 (2026-11-27, TS)
+- Regression after the fixes (1 run each; before -> after): diverse_voices 0.933 -> **1.000** (all four misses fixed, 15/15 groups consistent), public 0.879 (same known misses dup-064, 049, 005, 088; runs before the fixes were 0.879 / 0.905 / 0.905, so no change beyond noise), heldout 1.000 -> 1.000, heldout_temporal 1.000 -> 1.000, rates_reworded_refusals 1.000 -> 1.000, refusals 1.000 -> 1.000, standin_dates 1.000 -> 1.000, yearless_dates 1.000 -> 1.000, history_slice 1.000 -> 1.000. 0 stale values, 0 errors on every set. No drop anywhere, so nothing was reverted. Batch cost est. $0.24.
+- Fresh independent set `diverse_voices_2` (15 new facts x 4 voices, 0 question overlap with earlier sets, gold from the snapshots, notes in `tasks/diverse_voices_2_notes.md`): accuracy **1.000** (60/60), paraphrase consistency 1.00 (15/15 groups), 0 stale, 0 errors, p95 2.49 s, est. cost $0.07; every voice 1.00 (T, S, K, R, F: 12 each), every category 1.00 (tier_disambiguation 32, current_value 8, temporal_as_of 8, should_refuse 4, branch_info 4, stale_trap 4), including the dated group about a product that vanished from later copies and the refusal group.
+- Reading: the fixes did not break anything and this set found no new weakness. It is a ceiling result: both voice sets are mostly rate-table lookups, which the system is strong at, so a 1.000 here says little about the harder categories (counts, lists, hours, eligibility, how-to, conflict questions). A next set should target those categories in the same voices.
+- TS now differs from Python in four places (count wording, "in person" scope, "Month of YYYY", soft refusal on by default); the Python port of those changes is still to do (user: later).
+- OpenAI spend so far ~ $1.12 of the $2 (estimate).
