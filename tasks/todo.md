@@ -163,6 +163,13 @@ Decisions: on a regression drop, revert only the culprit fix and report; keep th
 
 # Plan: set 3 "diverse_voices_3", harder categories (user, 2026-11-27: "do it")
 Same voices (T, S, K, R, F), about 15 NEW facts x 4 voices = about 60 questions, but aimed at what sets 1 and 2 barely tested: counts and conflicting statements, lists, branch hours, eligibility/conditions, how-to, minimums, plus 2 refusals. Gold from snapshot pages only (sentence quoted in the notes); no overlap with earlier sets; one run on TS (about $0.10, within the $2 limit, about $1.12 spent); misses classified (system / gold / accepted), no tuning; results in this file.
-- [ ] a. find and verify facts, notes in `tasks/diverse_voices_3_notes.md`
-- [ ] b. write `eval/subsets/diverse_voices_3.jsonl`, run the same checks as before
-- [ ] c. one TS run, classify misses, record, commit and push
+- [x] a. find and verify facts, notes in `tasks/diverse_voices_3_notes.md`
+- [x] b. write `eval/subsets/diverse_voices_3.jsonl`, run the same checks as before
+- [x] c. one TS run, classify misses, record, commit and push
+
+## Results of set 3 "diverse_voices_3" (harder categories; TS, 1 run, 2026-11-27, est. cost $0.12)
+- 15 new facts x 4 voices = 60 questions (counts/conflicts 8, branch hours 8, lists 12, eligibility/conditions/minimums 24, refusals 8); 0 overlap with earlier sets; gold from the page text, counts checked by reading release dates myself (notes: `tasks/diverse_voices_3_notes.md`).
+- Accuracy **1.000** (60/60), paraphrase consistency 1.00 (15/15 groups), 0 stale, 0 errors; every voice 1.00 (T, S, K, R, F: 12 each); every category 1.00 (current_value 20, list_completeness 12, branch_info 8, conflict_resolution 8, should_refuse 8, tier_disambiguation 4). No misses to classify.
+- Speed was worse than on the earlier sets: p50 1.72 s but p95 **3.84 s** (set 2: 2.49 s; public 2.3 s), final 0.982 (speed pillar 0.90). 5 of 60 answers took over 3 s; the slowest (7.39 s) was the mobile-deposit-limit refusal, a rate/fee-type question the site does not answer (facts path not confident, then a second model call for text search: a known weak point in the Python notes). List and fee-like questions averaged about 2.1-2.2 s, conflict/count questions 1.2 s. One run, so API latency noise cannot be excluded.
+- Reading: the three voice sets (180 questions) found four real weaknesses, all in set 1 and fixed; sets 2 and 3, written without the failure forms in mind, found none, across rate lookups, dated and vanished-product questions, counts, hours, lists, eligibility and refusals. What they do not cover: very long or multi-question messages, other languages than English with Spanish words, conversational follow-ups, questions about pages that conflict in ways the code rules do not handle, and the hidden set's own wording. A tail-latency check (repeat the slow refusal-type questions several times) would tell whether the 3.8 s p95 is the system or API noise.
+- OpenAI spend so far ~ $1.25 of the $2 (estimate).
