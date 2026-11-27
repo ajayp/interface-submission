@@ -93,7 +93,7 @@ Status: ALL MILESTONES DONE (M0-M7) + extra validation done. OpenAI spend ~ $0.5
 
 ---
 
-# Plan: "diverse voices" eval set (PLAN, waiting for approval)
+# Plan: "diverse voices" eval set (DONE: built and run once on TS)
 
 Decisions (user, 2026-11-27): paraphrase groups; mix of known and new facts; voices = typos/texting/voice-to-text, second-language / limited English, terse keywords, rambling/anxious + a fluent baseline; about 60 questions.
 
@@ -113,9 +113,20 @@ Why: the public set has 20 paraphrase groups of size 1 (consistency untested), 1
 - No tuning to this set: general rules only. A failure is classified as (a) system weakness, (b) gold or wording problem (fix the gold), (c) known accepted miss.
 
 ## Steps
-- [ ] 1. Pick facts and write gold from the snapshots (notes file with page, line, value).
-- [ ] 2. Write the 4 voices per fact; read them back for realism (no mocking, no stereotypes).
-- [ ] 3. Check the file: valid JSONL, every group has 3-4 members, gold values appear in the cited page, unique ids.
-- [ ] 4. Run TS only (1 run, about $0.10). (User, 2026-11-27: no Python comparison.)
-- [ ] 5. Report accuracy by voice and by category, group consistency, each failure classified as above; add results to this file.
-- [ ] 6. Commit and push; update `tasks/lessons.md` if anything surprising.
+- [x] 1. Pick facts and write gold from the snapshots (notes file with page, line, value).
+- [x] 2. Write the 4 voices per fact; read them back for realism (no mocking, no stereotypes).
+- [x] 3. Check the file: valid JSONL, every group has 3-4 members, gold values appear in the cited page, unique ids.
+- [x] 4. Run TS only (1 run, about $0.10). (User, 2026-11-27: no Python comparison.)
+- [x] 5. Report accuracy by voice and by category, group consistency, each failure classified as above; add results to this file.
+- [x] 6. Commit and push; update `tasks/lessons.md` if anything surprising.
+
+## Results (TS, 1 run, 2026-11-27, est. cost $0.085)
+- 60 questions (15 facts x 4 voices): accuracy **0.933**, 0 stale values, 0 errors, p95 2.39 s, paraphrase consistency **0.80** (12 of 15 groups consistent); final 0.897 (no conflicts pillar).
+- By voice: fluent 1.00 (12), typos/texting 1.00 (13), terse keywords 0.91 (11), second-language 0.91 (11), rambling/anxious 0.85 (13). By category: tier_disambiguation 1.00 (20), stale_trap 1.00, current_value 1.00, entity_attribution 1.00, branch_info 1.00, temporal_as_of 0.88, should_refuse 0.88, conflict_resolution 0.50 (the branch-count group). n is small: one miss moves a voice by 0.08-0.09.
+- Four misses, three groups, all classed as general weaknesses of the ported system (same code as Python), not gold errors; none tuned:
+  1. dv-g05-k "number of dupaco branches" -> 23: the count shortcut's wording rule (`number of (branches...)`) does not allow a word like "dupaco" in between, so the question goes to text search and picks a stale count (system weakness).
+  2. dv-g05-r "...I really like banking in person. How many branches does Dupaco have altogether?" -> "33 branches": the scope rule reads "in person" as a place ("in <word>"), turns the count shortcut off, and text search then reads "33 Results" (branch + ATM cards) on /contact as a branch count (system weakness).
+  3. dv-g13-r "...around May of 2026..." -> refusal: the date reader does not accept "May of 2026" (only "May 2026"), so no date is found; the same words with "in May of 2026" are read as a year-less month (system weakness).
+  4. dv-g14-s "Do you have mortgage for 40 years? What is the rate?" -> honest answer ("terms go up to 30 years; a 40-year mortgage and its rate aren't listed...") scored 0: the harness refusal regex has "isn't listed" but not "aren't listed", and the answer also states "30" (scorer strictness plus answer style; the other three voices refused cleanly).
+- Not run: Python on this set (user decision).
+- Possible general fixes if wanted (not done, they would change behaviour away from the Python system): allow filler words in the count patterns and ignore "in person"/"in store"-style phrases in the scope rule; accept "Month of YYYY"; answer refusals with the standard phrase and no extra numbers.
