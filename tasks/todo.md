@@ -1,6 +1,6 @@
 # TypeScript port (`ts_solution/`) — plan
 
-Status: M0-M3 done; M4 (answer path, solution.ts) next. OpenAI spend so far ~ $0.11 of $2 (estimate: Python fact extraction ~$0.10 + TS smoke tests $0.004). (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
+Status: M0-M4 done; M5 (conflicts) next. OpenAI spend so far ~ $0.11 of $2 (estimate: Python fact extraction ~$0.10 + TS smoke tests $0.004). (M0 was) (budget cap $2 OpenAI; zod for structured outputs, the one runtime dependency).
 
 ## Decisions (user, 2026-11-24)
 - Full port of `my_solution/` (ingest, facts, BM25 + embedding windows, Decisions query understanding, dates, history path, spellfix, conflicts()).
@@ -45,8 +45,11 @@ Status: M0-M3 done; M4 (answer path, solution.ts) next. OpenAI spend so far ~ $0
 - [x] Gate: tables (180 / 190 / 198 / 197 / 266), facts (1,269 ... 1,962), fact groups + winners, fact BM25 search (40 questions), count facts (546) and count-question detection all identical to Python on every snapshot. Live smoke test: Decisions, structured answer and fact extraction each worked first try ($0.004).
 - Not ported: prompt variants other than G2 (all off by default / not adopted), `MY_SOLUTION_QU_ENGINE=luna`, answer-terms and second-pass switches (default off).
 
-### M4 Answer path
-- [ ] `solution.ts`: ingest, snapshot choice, history path, fact path, text fallback, post-check refusal, all `MY_SOLUTION_*` switches kept with the same names and defaults.
+### M4 Answer path — DONE (`src/solution.ts`)
+- [x] ingest, snapshot choice by date, before-first-snapshot refusal, count answers, fact path with text fallback, text retrieval (tier slots + embedding windows + hours schedule extras), history path, post-checks (no number on a value question -> refusal, strip "not listed" sentences), citations incl. same-value pages. `conflicts()` is a stub until M5.
+- [x] Gate (`parity/check_answer_inputs.ts` vs `dump_py5.py`): for all 40 public questions the snapshot, date note, intent/labels, text pieces (+urls), fact hits and the exact user messages sent to the model are identical to Python (given the same Decisions labels).
+- [x] Live end-to-end on 6 public questions: 6/6 expected values present, 0 traps, 1.3-2.4 s per answer, ingest 15.5 s (Python ~3 min cold, since TS reuses the committed fact cache).
+- Spend so far ~ $0.12 of $2 (estimated: Python fact extraction ~$0.10, TS Decisions labels $0.012, answers/smoke ~$0.01).
 
 ### M5 conflicts()
 - [ ] `sentence_facts.ts`, `conflicts_v2.ts`; score with a TS port of `score_conflict_lists` against `docs/gold/*.json`.
