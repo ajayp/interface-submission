@@ -116,6 +116,6 @@ Why: the public set has 20 paraphrase groups of size 1 (consistency untested), 1
 - [ ] 1. Pick facts and write gold from the snapshots (notes file with page, line, value).
 - [ ] 2. Write the 4 voices per fact; read them back for realism (no mocking, no stereotypes).
 - [ ] 3. Check the file: valid JSONL, every group has 3-4 members, gold values appear in the cited page, unique ids.
-- [ ] 4. Run TS (1 run, about $0.10) and Python on the same set (about $0.05) for comparison.
+- [ ] 4. Run TS only (1 run, about $0.10). (User, 2026-11-27: no Python comparison.)
 - [ ] 5. Report accuracy by voice and by category, group consistency, each failure classified as above; add results to this file.
 - [ ] 6. Commit and push; update `tasks/lessons.md` if anything surprising.
