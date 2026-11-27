@@ -142,3 +142,12 @@ General rules, no question-shaped patches. Python is NOT changed (it will be don
 - [ ] 5. Unit tests; parity scripts re-run (differences only where intended).
 - [ ] 6. Regression run on TS: diverse_voices (now a dev set, no longer independent), public, heldout, heldout_temporal, rates_reworded_refusals, refusals, standin_dates, yearless_dates, history_slice (about $0.25). Compare with the numbers recorded above; any drop gets investigated, not hidden.
 - [ ] 7. Record results, commit, push.
+
+---
+
+# Plan: fresh independent set "diverse_voices_2" (user, 2026-11-27, while away: after the regression runs, write and run it, then stop)
+Decisions: on a regression drop, revert only the culprit fix and report; keep the $2 total OpenAI limit (about $0.9 spent so far, estimated).
+- 15 NEW facts (none in the public, held-out or diverse_voices sets), 4 voices each (T, S, K, R, F rotating), about 60 questions; gold from the snapshot pages only; written WITHOUT looking at the four fixed failure forms, so it is an independent test of the fixes: 2 dated groups (one a product that vanished from later copies), 1 refusal group, 1 fee-schedule fact, tiers, stale traps.
+- [ ] a. facts + gold verified in the snapshots, notes file `tasks/diverse_voices_2_notes.md`
+- [ ] b. `eval/subsets/diverse_voices_2.jsonl`, checks as for set 1
+- [ ] c. one TS run (about $0.10), classify misses (system / gold / accepted), record here, commit and push
