@@ -158,3 +158,11 @@ Decisions: on a regression drop, revert only the culprit fix and report; keep th
 - Reading: the fixes did not break anything and this set found no new weakness. It is a ceiling result: both voice sets are mostly rate-table lookups, which the system is strong at, so a 1.000 here says little about the harder categories (counts, lists, hours, eligibility, how-to, conflict questions). A next set should target those categories in the same voices.
 - TS now differs from Python in four places (count wording, "in person" scope, "Month of YYYY", soft refusal on by default); the Python port of those changes is still to do (user: later).
 - OpenAI spend so far ~ $1.12 of the $2 (estimate).
+
+---
+
+# Plan: set 3 "diverse_voices_3", harder categories (user, 2026-11-27: "do it")
+Same voices (T, S, K, R, F), about 15 NEW facts x 4 voices = about 60 questions, but aimed at what sets 1 and 2 barely tested: counts and conflicting statements, lists, branch hours, eligibility/conditions, how-to, minimums, plus 2 refusals. Gold from snapshot pages only (sentence quoted in the notes); no overlap with earlier sets; one run on TS (about $0.10, within the $2 limit, about $1.12 spent); misses classified (system / gold / accepted), no tuning; results in this file.
+- [ ] a. find and verify facts, notes in `tasks/diverse_voices_3_notes.md`
+- [ ] b. write `eval/subsets/diverse_voices_3.jsonl`, run the same checks as before
+- [ ] c. one TS run, classify misses, record, commit and push
